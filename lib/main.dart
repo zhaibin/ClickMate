@@ -66,6 +66,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
   bool _isRunning = false;
   String _currentPosition = '未获取';
   Timer? _uiUpdateTimer;
+  bool _autoCapture = true; // 默认开启自动获取
 
   @override
   void initState() {
@@ -129,12 +130,47 @@ class _MouseControlPageState extends State<MouseControlPage> {
           setState(() {
             _currentPosition = '(${pos.x}, ${pos.y})';
             _isRunning = _service.isRunning;
+            
+            // 如果开启自动捕获且未运行，更新坐标
+            if (_autoCapture && !_isRunning) {
+              _xController.text = pos.x.toString();
+              _yController.text = pos.y.toString();
+            }
           });
+          
+          // 实时同步参数到服务
+          _syncParametersToService();
         } catch (e) {
           // 忽略错误
         }
       }
     });
+  }
+  
+  void _syncParametersToService() {
+    try {
+      final x = int.tryParse(_xController.text);
+      final y = int.tryParse(_yController.text);
+      final interval = int.tryParse(_intervalController.text);
+      final intervalRandom = int.tryParse(_intervalRandomController.text);
+      final offset = int.tryParse(_offsetController.text);
+
+      if (x != null && y != null) {
+        _service.setTargetPosition(x, y);
+      }
+      if (interval != null && interval >= 10) {
+        _service.setClickInterval(interval);
+      }
+      if (intervalRandom != null && intervalRandom >= 0) {
+        _service.setRandomInterval(intervalRandom);
+      }
+      if (offset != null && offset >= 0) {
+        _service.setRandomOffset(offset);
+      }
+      _service.setMouseButton(_selectedButton);
+    } catch (e) {
+      // 忽略错误
+    }
   }
 
   void _showError(String message) {
@@ -281,6 +317,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
         style: const TextStyle(fontSize: 13),
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onTap: () {
+          // 点击输入框自动切换到手动模式
+          if (_autoCapture) {
+            setState(() {
+              _autoCapture = false;
+            });
+            print('切换到手动输入模式');
+          }
+        },
       ),
     );
   }
@@ -425,23 +470,69 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('目标位置', 
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        const Text('目标位置', 
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: _autoCapture ? Colors.green.shade50 : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _autoCapture ? Colors.green.shade300 : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _autoCapture ? Icons.gps_fixed : Icons.gps_off,
+                                size: 12,
+                                color: _autoCapture ? Colors.green.shade700 : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _autoCapture ? '自动' : '手动',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: _autoCapture ? Colors.green.shade700 : Colors.grey.shade600,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _autoCapture = !_autoCapture;
+                            });
+                            print('切换模式: ${_autoCapture ? "自动跟随" : "手动输入"}');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Icon(
+                              Icons.swap_horiz,
+                              size: 16,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(child: _buildCompactField('X坐标', _xController, width: double.infinity)),
                         const SizedBox(width: 8),
                         Expanded(child: _buildCompactField('Y坐标', _yController, width: double.infinity)),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: _captureCurrentPosition,
-                          icon: const Icon(Icons.my_location, size: 16),
-                          label: const Text('捕获', style: TextStyle(fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          ),
-                        ),
                       ],
                     ),
                   ],
@@ -848,7 +939,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '设置[$tabTitle]快捷键',
+                      '设置[$tabTitle]快捷键 (Ctrl+Shift+按键)',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),

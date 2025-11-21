@@ -61,8 +61,8 @@ class MouseControllerService {
   // 热键ID和虚拟键码
   static const int hotkeyIdToggle = 1;    // 开始/停止快捷键ID
   static const int hotkeyIdCapture = 2;   // 捕获位置快捷键ID
-  int currentToggleHotkeyCode = 0x53;     // 默认S键 (开始/停止)
-  int currentCaptureHotkeyCode = 0x43;    // 默认C键 (捕获)
+  int currentToggleHotkeyCode = 0x31;     // 默认1键 (Ctrl+Shift+1)
+  int currentCaptureHotkeyCode = 0x32;    // 默认2键 (Ctrl+Shift+2)
   
   // 捕获回调函数
   Function(int, int)? onPositionCaptured;
@@ -78,13 +78,13 @@ class MouseControllerService {
       print('✓ 热键系统初始化: ${initSuccess ? "成功" : "失败"}');
       
       if (initSuccess) {
-        // 注册快捷键1: 开始/停止 (Ctrl+Shift+S)
+        // 注册快捷键1: 开始/停止 (Ctrl+Shift+1)
         bool regToggle = _bindings.registerHotkey(hotkeyIdToggle, currentToggleHotkeyCode);
-        print('${regToggle ? "✓" : "×"} 快捷键1 [开始/停止] Ctrl+Shift+S (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "成功" : "失败"}');
+        print('${regToggle ? "✓" : "×"} 快捷键1 [开始/停止] Ctrl+Shift+1 (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "成功" : "失败"}');
         
-        // 注册快捷键2: 捕获位置 (Ctrl+Shift+C)
+        // 注册快捷键2: 捕获位置 (Ctrl+Shift+2)
         bool regCapture = _bindings.registerHotkey(hotkeyIdCapture, currentCaptureHotkeyCode);
-        print('${regCapture ? "✓" : "×"} 快捷键2 [捕获位置] Ctrl+Shift+C (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "成功" : "失败"}');
+        print('${regCapture ? "✓" : "×"} 快捷键2 [捕获位置] Ctrl+Shift+2 (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "成功" : "失败"}');
         
         if (regToggle || regCapture) {
           // 启动热键检查定时器
