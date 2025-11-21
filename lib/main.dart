@@ -34,7 +34,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
-    title: 'Mouse Auto Controller',
+    title: 'ClickMate',
   );
   
   windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mouse Auto Controller',
+      title: 'ClickMate',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -259,6 +259,173 @@ class _MouseControlPageState extends State<MouseControlPage> {
     );
   }
 
+  void _showHelp() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.help_outline, size: 20, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(l10n.helpTitle, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: SizedBox(
+          width: 400,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Quick Start
+                _buildHelpSection(
+                  Icons.rocket_launch,
+                  l10n.helpQuickStart,
+                  l10n.helpQuickStartContent,
+                  Colors.green,
+                ),
+                const SizedBox(height: 16),
+                
+                // Auto Mode
+                _buildHelpSection(
+                  Icons.gps_fixed,
+                  l10n.helpAutoMode,
+                  l10n.helpAutoModeContent,
+                  Colors.blue,
+                ),
+                const SizedBox(height: 16),
+                
+                // Manual Mode
+                _buildHelpSection(
+                  Icons.edit_location,
+                  l10n.helpManualMode,
+                  l10n.helpManualModeContent,
+                  Colors.orange,
+                ),
+                const SizedBox(height: 16),
+                
+                // Hotkeys
+                _buildHelpSection(
+                  Icons.keyboard,
+                  l10n.helpHotkeys,
+                  l10n.helpHotkeysContent,
+                  Colors.purple,
+                ),
+                const SizedBox(height: 20),
+                
+                // FAQ Title
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey.shade300, width: 2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.quiz, size: 18, color: Colors.red.shade700),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.faqTitle,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // FAQ Items
+                _buildFaqItem(l10n.faqHotkeyNotWork, l10n.faqHotkeyNotWorkAnswer),
+                const SizedBox(height: 12),
+                _buildFaqItem(l10n.faqDllMissing, l10n.faqDllMissingAnswer),
+                const SizedBox(height: 12),
+                _buildFaqItem(l10n.faqAdminRequired, l10n.faqAdminRequiredAnswer),
+                const SizedBox(height: 12),
+                _buildFaqItem(l10n.faqSwitchMode, l10n.faqSwitchModeAnswer),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.btnOk),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpSection(IconData icon, String title, String content, MaterialColor color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color.shade700),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: color.shade700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 12, height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFaqItem(String question, String answer) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            answer,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showLanguageSettings() {
     final l10n = AppLocalizations.of(context);
     showDialog(
@@ -426,6 +593,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline, size: 20),
+            onPressed: _showHelp,
+            tooltip: l10n.helpTitle,
+          ),
           IconButton(
             icon: const Icon(Icons.language, size: 20),
             onPressed: _showLanguageSettings,

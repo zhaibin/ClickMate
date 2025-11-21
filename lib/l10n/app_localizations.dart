@@ -147,6 +147,26 @@ class AppLocalizations {
   String get langJapanese => get('lang_japanese');
   String get langKorean => get('lang_korean');
 
+  // Help & FAQ
+  String get helpTitle => get('help_title');
+  String get helpQuickStart => get('help_quick_start');
+  String get helpQuickStartContent => get('help_quick_start_content');
+  String get helpAutoMode => get('help_auto_mode');
+  String get helpAutoModeContent => get('help_auto_mode_content');
+  String get helpManualMode => get('help_manual_mode');
+  String get helpManualModeContent => get('help_manual_mode_content');
+  String get helpHotkeys => get('help_hotkeys');
+  String get helpHotkeysContent => get('help_hotkeys_content');
+  String get faqTitle => get('faq_title');
+  String get faqHotkeyNotWork => get('faq_hotkey_not_work');
+  String get faqHotkeyNotWorkAnswer => get('faq_hotkey_not_work_answer');
+  String get faqDllMissing => get('faq_dll_missing');
+  String get faqDllMissingAnswer => get('faq_dll_missing_answer');
+  String get faqAdminRequired => get('faq_admin_required');
+  String get faqAdminRequiredAnswer => get('faq_admin_required_answer');
+  String get faqSwitchMode => get('faq_switch_mode');
+  String get faqSwitchModeAnswer => get('faq_switch_mode_answer');
+
   Map<String, String> _getLocalizedStrings(String languageCode) {
     switch (languageCode) {
       case 'en':
@@ -176,8 +196,8 @@ class AppLocalizations {
 
   // English (Default)
   static const Map<String, String> _english = {
-    'app_title': 'Mouse Auto Controller',
-    'app_title_with_version': 'Mouse Auto Controller',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Not Captured',
     'status_click_count': 'times',
     'status_running': 'Running',
@@ -254,12 +274,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Help',
+    'help_quick_start': 'Quick Start',
+    'help_quick_start_content': '1. Launch the app\n2. Press Ctrl+Shift+1 to start clicking\n3. Press again to stop',
+    'help_auto_mode': 'Auto-Tracking Mode',
+    'help_auto_mode_content': 'The app automatically tracks your mouse position in real-time. Simply press Ctrl+Shift+1 to start clicking at the current position.',
+    'help_manual_mode': 'Manual Input Mode',
+    'help_manual_mode_content': 'Click on X or Y input field to switch to manual mode. Enter fixed coordinates or use Ctrl+Shift+2 to capture position.',
+    'help_hotkeys': 'Global Hotkeys',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Start/Stop clicking\nCtrl+Shift+2: Capture mouse position\n\nNote: Requires administrator privileges',
+    'faq_title': 'FAQ',
+    'faq_hotkey_not_work': 'Q: Hotkeys not working?',
+    'faq_hotkey_not_work_answer': 'A: Right-click and run as administrator. Hotkeys require elevated privileges to work globally.',
+    'faq_dll_missing': 'Q: DLL file missing?',
+    'faq_dll_missing_answer': 'A: Ensure mouse_controller.dll exists in the native/src/ directory. Run diagnose.bat to check.',
+    'faq_admin_required': 'Q: Why administrator required?',
+    'faq_admin_required_answer': 'A: Global hotkeys (Ctrl+Shift+Keys) require administrator privileges to register system-wide hooks.',
+    'faq_switch_mode': 'Q: How to switch modes?',
+    'faq_switch_mode_answer': 'A: Click the swap icon (⇄) or click any coordinate input field to switch between auto-tracking and manual input mode.',
   };
 
   // Simplified Chinese
   static const Map<String, String> _simplifiedChinese = {
-    'app_title': '鼠标自动控制器',
-    'app_title_with_version': '鼠标自动控制器',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': '未获取',
     'status_click_count': '次',
     'status_running': '运行中',
@@ -336,12 +375,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': '帮助',
+    'help_quick_start': '快速开始',
+    'help_quick_start_content': '1. 启动应用\n2. 按 Ctrl+Shift+1 开始点击\n3. 再按一次停止',
+    'help_auto_mode': '自动跟踪模式',
+    'help_auto_mode_content': '应用自动实时跟踪您的鼠标位置。只需按 Ctrl+Shift+1 即可开始在当前位置点击。',
+    'help_manual_mode': '手动输入模式',
+    'help_manual_mode_content': '点击 X 或 Y 输入框即可切换到手动模式。输入固定坐标或使用 Ctrl+Shift+2 捕获位置。',
+    'help_hotkeys': '全局快捷键',
+    'help_hotkeys_content': 'Ctrl+Shift+1: 开始/停止点击\nCtrl+Shift+2: 捕获鼠标位置\n\n注意：需要管理员权限',
+    'faq_title': '常见问题',
+    'faq_hotkey_not_work': '问：快捷键不工作？',
+    'faq_hotkey_not_work_answer': '答：右键点击以管理员身份运行。快捷键需要提升权限才能全局工作。',
+    'faq_dll_missing': '问：DLL 文件缺失？',
+    'faq_dll_missing_answer': '答：确保 mouse_controller.dll 存在于 native/src/ 目录中。运行 diagnose.bat 进行检查。',
+    'faq_admin_required': '问：为什么需要管理员权限？',
+    'faq_admin_required_answer': '答：全局快捷键（Ctrl+Shift+按键）需要管理员权限来注册系统级挂钩。',
+    'faq_switch_mode': '问：如何切换模式？',
+    'faq_switch_mode_answer': '答：点击交换图标（⇄）或点击任何坐标输入框，即可在自动跟踪和手动输入模式之间切换。',
   };
 
   // Traditional Chinese
   static const Map<String, String> _traditionalChinese = {
-    'app_title': '滑鼠自動控制器',
-    'app_title_with_version': '滑鼠自動控制器',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': '未獲取',
     'status_click_count': '次',
     'status_running': '運行中',
@@ -418,12 +476,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': '幫助',
+    'help_quick_start': '快速開始',
+    'help_quick_start_content': '1. 啟動應用\n2. 按 Ctrl+Shift+1 開始點擊\n3. 再按一次停止',
+    'help_auto_mode': '自動跟隨模式',
+    'help_auto_mode_content': '應用自動實時跟隨您的滑鼠位置。只需按 Ctrl+Shift+1 即可開始在當前位置點擊。',
+    'help_manual_mode': '手動輸入模式',
+    'help_manual_mode_content': '點擊 X 或 Y 輸入框即可切換到手動模式。輸入固定坐標或使用 Ctrl+Shift+2 捕獲位置。',
+    'help_hotkeys': '全局快捷鍵',
+    'help_hotkeys_content': 'Ctrl+Shift+1: 開始/停止點擊\nCtrl+Shift+2: 捕獲滑鼠位置\n\n注意：需要管理員權限',
+    'faq_title': '常見問題',
+    'faq_hotkey_not_work': '問：快捷鍵不工作？',
+    'faq_hotkey_not_work_answer': '答：右鍵點擊以管理員身份運行。快捷鍵需要提升權限才能全局工作。',
+    'faq_dll_missing': '問：DLL 檔案缺失？',
+    'faq_dll_missing_answer': '答：確保 mouse_controller.dll 存在於 native/src/ 目錄中。運行 diagnose.bat 進行檢查。',
+    'faq_admin_required': '問：為什麼需要管理員權限？',
+    'faq_admin_required_answer': '答：全局快捷鍵（Ctrl+Shift+按鍵）需要管理員權限來註冊系統級掛鉤。',
+    'faq_switch_mode': '問：如何切換模式？',
+    'faq_switch_mode_answer': '答：點擊交換圖標（⇄）或點擊任何坐標輸入框，即可在自動跟隨和手動輸入模式之間切換。',
   };
 
   // French
   static const Map<String, String> _french = {
-    'app_title': 'Contrôleur Auto de Souris',
-    'app_title_with_version': 'Contrôleur Auto de Souris',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Non Capturé',
     'status_click_count': 'fois',
     'status_running': 'En cours',
@@ -500,12 +577,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Aide',
+    'help_quick_start': 'Démarrage Rapide',
+    'help_quick_start_content': '1. Lancez l\'application\n2. Appuyez sur Ctrl+Shift+1 pour commencer à cliquer\n3. Appuyez à nouveau pour arrêter',
+    'help_auto_mode': 'Mode de Suivi Automatique',
+    'help_auto_mode_content': 'L\'application suit automatiquement la position de votre souris en temps réel. Appuyez simplement sur Ctrl+Shift+1 pour commencer à cliquer à la position actuelle.',
+    'help_manual_mode': 'Mode de Saisie Manuelle',
+    'help_manual_mode_content': 'Cliquez sur le champ de saisie X ou Y pour passer en mode manuel. Entrez des coordonnées fixes ou utilisez Ctrl+Shift+2 pour capturer la position.',
+    'help_hotkeys': 'Raccourcis Globaux',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Démarrer/Arrêter les clics\nCtrl+Shift+2: Capturer la position de la souris\n\nNote: Nécessite des privilèges administrateur',
+    'faq_title': 'FAQ',
+    'faq_hotkey_not_work': 'Q: Les raccourcis ne fonctionnent pas?',
+    'faq_hotkey_not_work_answer': 'R: Cliquez avec le bouton droit et exécutez en tant qu\'administrateur. Les raccourcis nécessitent des privilèges élevés pour fonctionner globalement.',
+    'faq_dll_missing': 'Q: Fichier DLL manquant?',
+    'faq_dll_missing_answer': 'R: Assurez-vous que mouse_controller.dll existe dans le répertoire native/src/. Exécutez diagnose.bat pour vérifier.',
+    'faq_admin_required': 'Q: Pourquoi l\'administrateur est-il requis?',
+    'faq_admin_required_answer': 'R: Les raccourcis globaux (Ctrl+Shift+Touches) nécessitent des privilèges administrateur pour enregistrer des hooks système.',
+    'faq_switch_mode': 'Q: Comment changer de mode?',
+    'faq_switch_mode_answer': 'R: Cliquez sur l\'icône d\'échange (⇄) ou cliquez sur n\'importe quel champ de saisie de coordonnées pour basculer entre le mode de suivi automatique et le mode de saisie manuelle.',
   };
 
   // Spanish
   static const Map<String, String> _spanish = {
-    'app_title': 'Controlador Auto de Ratón',
-    'app_title_with_version': 'Controlador Auto de Ratón',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'No Capturado',
     'status_click_count': 'veces',
     'status_running': 'Ejecutando',
@@ -582,12 +678,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Ayuda',
+    'help_quick_start': 'Inicio Rápido',
+    'help_quick_start_content': '1. Inicie la aplicación\n2. Presione Ctrl+Shift+1 para comenzar a hacer clic\n3. Presione nuevamente para detener',
+    'help_auto_mode': 'Modo de Seguimiento Automático',
+    'help_auto_mode_content': 'La aplicación rastrea automáticamente la posición de su ratón en tiempo real. Simplemente presione Ctrl+Shift+1 para comenzar a hacer clic en la posición actual.',
+    'help_manual_mode': 'Modo de Entrada Manual',
+    'help_manual_mode_content': 'Haga clic en el campo de entrada X o Y para cambiar al modo manual. Ingrese coordenadas fijas o use Ctrl+Shift+2 para capturar la posición.',
+    'help_hotkeys': 'Atajos Globales',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Iniciar/Detener clics\nCtrl+Shift+2: Capturar posición del ratón\n\nNota: Requiere privilegios de administrador',
+    'faq_title': 'Preguntas Frecuentes',
+    'faq_hotkey_not_work': 'P: ¿Los atajos no funcionan?',
+    'faq_hotkey_not_work_answer': 'R: Haga clic derecho y ejecute como administrador. Los atajos requieren privilegios elevados para funcionar globalmente.',
+    'faq_dll_missing': 'P: ¿Falta el archivo DLL?',
+    'faq_dll_missing_answer': 'R: Asegúrese de que mouse_controller.dll exista en el directorio native/src/. Ejecute diagnose.bat para verificar.',
+    'faq_admin_required': 'P: ¿Por qué se requiere administrador?',
+    'faq_admin_required_answer': 'R: Los atajos globales (Ctrl+Shift+Teclas) requieren privilegios de administrador para registrar hooks del sistema.',
+    'faq_switch_mode': 'P: ¿Cómo cambiar de modo?',
+    'faq_switch_mode_answer': 'R: Haga clic en el icono de intercambio (⇄) o haga clic en cualquier campo de entrada de coordenadas para cambiar entre el modo de seguimiento automático y el modo de entrada manual.',
   };
 
   // Portuguese
   static const Map<String, String> _portuguese = {
-    'app_title': 'Controlador Auto de Mouse',
-    'app_title_with_version': 'Controlador Auto de Mouse',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Não Capturado',
     'status_click_count': 'vezes',
     'status_running': 'Executando',
@@ -664,12 +779,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Ajuda',
+    'help_quick_start': 'Início Rápido',
+    'help_quick_start_content': '1. Inicie o aplicativo\n2. Pressione Ctrl+Shift+1 para começar a clicar\n3. Pressione novamente para parar',
+    'help_auto_mode': 'Modo de Rastreamento Automático',
+    'help_auto_mode_content': 'O aplicativo rastreia automaticamente a posição do seu mouse em tempo real. Simplesmente pressione Ctrl+Shift+1 para começar a clicar na posição atual.',
+    'help_manual_mode': 'Modo de Entrada Manual',
+    'help_manual_mode_content': 'Clique no campo de entrada X ou Y para mudar para o modo manual. Insira coordenadas fixas ou use Ctrl+Shift+2 para capturar a posição.',
+    'help_hotkeys': 'Atalhos Globais',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Iniciar/Parar cliques\nCtrl+Shift+2: Capturar posição do mouse\n\nNota: Requer privilégios de administrador',
+    'faq_title': 'Perguntas Frequentes',
+    'faq_hotkey_not_work': 'P: Os atalhos não funcionam?',
+    'faq_hotkey_not_work_answer': 'R: Clique com o botão direito e execute como administrador. Os atalhos requerem privilégios elevados para funcionar globalmente.',
+    'faq_dll_missing': 'P: Arquivo DLL ausente?',
+    'faq_dll_missing_answer': 'R: Certifique-se de que mouse_controller.dll existe no diretório native/src/. Execute diagnose.bat para verificar.',
+    'faq_admin_required': 'P: Por que o administrador é necessário?',
+    'faq_admin_required_answer': 'R: Atalhos globais (Ctrl+Shift+Teclas) requerem privilégios de administrador para registrar hooks do sistema.',
+    'faq_switch_mode': 'P: Como mudar de modo?',
+    'faq_switch_mode_answer': 'R: Clique no ícone de troca (⇄) ou clique em qualquer campo de entrada de coordenadas para alternar entre o modo de rastreamento automático e o modo de entrada manual.',
   };
 
   // German
   static const Map<String, String> _german = {
-    'app_title': 'Maus Auto-Controller',
-    'app_title_with_version': 'Maus Auto-Controller',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Nicht Erfasst',
     'status_click_count': 'Mal',
     'status_running': 'Läuft',
@@ -746,12 +880,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Hilfe',
+    'help_quick_start': 'Schnellstart',
+    'help_quick_start_content': '1. Starten Sie die Anwendung\n2. Drücken Sie Ctrl+Shift+1, um mit dem Klicken zu beginnen\n3. Drücken Sie erneut, um zu stoppen',
+    'help_auto_mode': 'Automatischer Tracking-Modus',
+    'help_auto_mode_content': 'Die Anwendung verfolgt automatisch Ihre Mausposition in Echtzeit. Drücken Sie einfach Ctrl+Shift+1, um mit dem Klicken an der aktuellen Position zu beginnen.',
+    'help_manual_mode': 'Manueller Eingabemodus',
+    'help_manual_mode_content': 'Klicken Sie auf das Eingabefeld X oder Y, um in den manuellen Modus zu wechseln. Geben Sie feste Koordinaten ein oder verwenden Sie Ctrl+Shift+2, um die Position zu erfassen.',
+    'help_hotkeys': 'Globale Tastenkürzel',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Klicken starten/stoppen\nCtrl+Shift+2: Mausposition erfassen\n\nHinweis: Erfordert Administratorrechte',
+    'faq_title': 'Häufig Gestellte Fragen',
+    'faq_hotkey_not_work': 'F: Tastenkürzel funktionieren nicht?',
+    'faq_hotkey_not_work_answer': 'A: Klicken Sie mit der rechten Maustaste und führen Sie als Administrator aus. Tastenkürzel benötigen erhöhte Berechtigungen, um global zu funktionieren.',
+    'faq_dll_missing': 'F: DLL-Datei fehlt?',
+    'faq_dll_missing_answer': 'A: Stellen Sie sicher, dass mouse_controller.dll im Verzeichnis native/src/ vorhanden ist. Führen Sie diagnose.bat aus, um zu prüfen.',
+    'faq_admin_required': 'F: Warum ist Administrator erforderlich?',
+    'faq_admin_required_answer': 'A: Globale Tastenkürzel (Ctrl+Shift+Tasten) benötigen Administratorrechte, um systemweite Hooks zu registrieren.',
+    'faq_switch_mode': 'F: Wie wechselt man den Modus?',
+    'faq_switch_mode_answer': 'A: Klicken Sie auf das Tausch-Symbol (⇄) oder klicken Sie auf ein beliebiges Koordinaten-Eingabefeld, um zwischen automatischem Tracking-Modus und manuellem Eingabemodus zu wechseln.',
   };
 
   // Russian
   static const Map<String, String> _russian = {
-    'app_title': 'Авто-Контроллер Мыши',
-    'app_title_with_version': 'Авто-Контроллер Мыши',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Не Захвачено',
     'status_click_count': 'раз',
     'status_running': 'Работает',
@@ -828,12 +981,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Справка',
+    'help_quick_start': 'Быстрый Старт',
+    'help_quick_start_content': '1. Запустите приложение\n2. Нажмите Ctrl+Shift+1, чтобы начать клики\n3. Нажмите снова, чтобы остановить',
+    'help_auto_mode': 'Режим Автоотслеживания',
+    'help_auto_mode_content': 'Приложение автоматически отслеживает положение вашей мыши в реальном времени. Просто нажмите Ctrl+Shift+1, чтобы начать клики в текущей позиции.',
+    'help_manual_mode': 'Режим Ручного Ввода',
+    'help_manual_mode_content': 'Нажмите на поле ввода X или Y, чтобы переключиться в ручной режим. Введите фиксированные координаты или используйте Ctrl+Shift+2 для захвата позиции.',
+    'help_hotkeys': 'Глобальные Горячие Клавиши',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Старт/Стоп кликов\nCtrl+Shift+2: Захват позиции мыши\n\nПримечание: Требуются права администратора',
+    'faq_title': 'Часто Задаваемые Вопросы',
+    'faq_hotkey_not_work': 'В: Горячие клавиши не работают?',
+    'faq_hotkey_not_work_answer': 'О: Щелкните правой кнопкой мыши и запустите от имени администратора. Горячие клавиши требуют повышенных прав для глобальной работы.',
+    'faq_dll_missing': 'В: Отсутствует файл DLL?',
+    'faq_dll_missing_answer': 'О: Убедитесь, что mouse_controller.dll находится в каталоге native/src/. Запустите diagnose.bat для проверки.',
+    'faq_admin_required': 'В: Почему требуется администратор?',
+    'faq_admin_required_answer': 'О: Глобальные горячие клавиши (Ctrl+Shift+Клавиши) требуют прав администратора для регистрации системных хуков.',
+    'faq_switch_mode': 'В: Как переключить режим?',
+    'faq_switch_mode_answer': 'О: Нажмите на значок обмена (⇄) или нажмите на любое поле ввода координат, чтобы переключаться между режимом автоотслеживания и режимом ручного ввода.',
   };
 
   // Italian
   static const Map<String, String> _italian = {
-    'app_title': 'Controller Auto Mouse',
-    'app_title_with_version': 'Controller Auto Mouse',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': 'Non Catturato',
     'status_click_count': 'volte',
     'status_running': 'In Esecuzione',
@@ -910,12 +1082,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'Aiuto',
+    'help_quick_start': 'Avvio Rapido',
+    'help_quick_start_content': '1. Avviare l\'applicazione\n2. Premere Ctrl+Shift+1 per iniziare a fare clic\n3. Premere di nuovo per fermare',
+    'help_auto_mode': 'Modalità di Tracciamento Automatico',
+    'help_auto_mode_content': 'L\'applicazione traccia automaticamente la posizione del mouse in tempo reale. Basta premere Ctrl+Shift+1 per iniziare a fare clic nella posizione corrente.',
+    'help_manual_mode': 'Modalità di Inserimento Manuale',
+    'help_manual_mode_content': 'Fare clic sul campo di input X o Y per passare alla modalità manuale. Inserire coordinate fisse o utilizzare Ctrl+Shift+2 per catturare la posizione.',
+    'help_hotkeys': 'Scorciatoie Globali',
+    'help_hotkeys_content': 'Ctrl+Shift+1: Avviare/Fermare i clic\nCtrl+Shift+2: Catturare posizione del mouse\n\nNota: Richiede privilegi di amministratore',
+    'faq_title': 'Domande Frequenti',
+    'faq_hotkey_not_work': 'D: Le scorciatoie non funzionano?',
+    'faq_hotkey_not_work_answer': 'R: Fare clic con il tasto destro ed eseguire come amministratore. Le scorciatoie richiedono privilegi elevati per funzionare globalmente.',
+    'faq_dll_missing': 'D: File DLL mancante?',
+    'faq_dll_missing_answer': 'R: Assicurarsi che mouse_controller.dll esista nella directory native/src/. Eseguire diagnose.bat per controllare.',
+    'faq_admin_required': 'D: Perché è richiesto l\'amministratore?',
+    'faq_admin_required_answer': 'R: Le scorciatoie globali (Ctrl+Shift+Tasti) richiedono privilegi di amministratore per registrare hook di sistema.',
+    'faq_switch_mode': 'D: Come cambiare modalità?',
+    'faq_switch_mode_answer': 'R: Fare clic sull\'icona di scambio (⇄) o fare clic su qualsiasi campo di input delle coordinate per passare tra la modalità di tracciamento automatico e la modalità di inserimento manuale.',
   };
 
   // Japanese
   static const Map<String, String> _japanese = {
-    'app_title': 'マウス自動コントローラー',
-    'app_title_with_version': 'マウス自動コントローラー',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': '未キャプチャ',
     'status_click_count': '回',
     'status_running': '実行中',
@@ -992,12 +1183,31 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': 'ヘルプ',
+    'help_quick_start': 'クイックスタート',
+    'help_quick_start_content': '1. アプリを起動\n2. Ctrl+Shift+1 を押してクリック開始\n3. もう一度押して停止',
+    'help_auto_mode': '自動追跡モード',
+    'help_auto_mode_content': 'アプリはマウス位置をリアルタイムで自動追跡します。Ctrl+Shift+1 を押すだけで現在位置でクリックを開始できます。',
+    'help_manual_mode': '手動入力モード',
+    'help_manual_mode_content': 'X または Y 入力フィールドをクリックして手動モードに切り替えます。固定座標を入力するか、Ctrl+Shift+2 を使用して位置をキャプチャします。',
+    'help_hotkeys': 'グローバルホットキー',
+    'help_hotkeys_content': 'Ctrl+Shift+1: クリック開始/停止\nCtrl+Shift+2: マウス位置をキャプチャ\n\n注意: 管理者権限が必要です',
+    'faq_title': 'よくある質問',
+    'faq_hotkey_not_work': 'Q: ホットキーが動作しませんか？',
+    'faq_hotkey_not_work_answer': 'A: 右クリックして管理者として実行してください。ホットキーはグローバルに動作するために昇格した権限が必要です。',
+    'faq_dll_missing': 'Q: DLLファイルが見つかりませんか？',
+    'faq_dll_missing_answer': 'A: mouse_controller.dll が native/src/ ディレクトリに存在することを確認してください。diagnose.bat を実行して確認します。',
+    'faq_admin_required': 'Q: なぜ管理者権限が必要ですか？',
+    'faq_admin_required_answer': 'A: グローバルホットキー（Ctrl+Shift+キー）はシステムワイドフックを登録するために管理者権限が必要です。',
+    'faq_switch_mode': 'Q: モードを切り替えるには？',
+    'faq_switch_mode_answer': 'A: スワップアイコン（⇄）をクリックするか、任意の座標入力フィールドをクリックして、自動追跡モードと手動入力モードを切り替えます。',
   };
 
   // Korean
   static const Map<String, String> _korean = {
-    'app_title': '마우스 자동 컨트롤러',
-    'app_title_with_version': '마우스 자동 컨트롤러',
+    'app_title': 'ClickMate',
+    'app_title_with_version': 'ClickMate',
     'status_not_captured': '캡처되지 않음',
     'status_click_count': '회',
     'status_running': '실행 중',
@@ -1074,6 +1284,25 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Help & FAQ
+    'help_title': '도움말',
+    'help_quick_start': '빠른 시작',
+    'help_quick_start_content': '1. 앱 실행\n2. Ctrl+Shift+1 을 눌러 클릭 시작\n3. 다시 눌러 중지',
+    'help_auto_mode': '자동 추적 모드',
+    'help_auto_mode_content': '앱이 마우스 위치를 실시간으로 자동 추적합니다. 현재 위치에서 클릭을 시작하려면 Ctrl+Shift+1 을 누르기만 하면 됩니다.',
+    'help_manual_mode': '수동 입력 모드',
+    'help_manual_mode_content': 'X 또는 Y 입력 필드를 클릭하여 수동 모드로 전환합니다. 고정 좌표를 입력하거나 Ctrl+Shift+2 를 사용하여 위치를 캡처합니다.',
+    'help_hotkeys': '전역 단축키',
+    'help_hotkeys_content': 'Ctrl+Shift+1: 클릭 시작/중지\nCtrl+Shift+2: 마우스 위치 캡처\n\n참고: 관리자 권한이 필요합니다',
+    'faq_title': '자주 묻는 질문',
+    'faq_hotkey_not_work': 'Q: 단축키가 작동하지 않나요?',
+    'faq_hotkey_not_work_answer': 'A: 마우스 오른쪽 버튼을 클릭하고 관리자 권한으로 실행하세요. 단축키가 전역적으로 작동하려면 상승된 권한이 필요합니다.',
+    'faq_dll_missing': 'Q: DLL 파일이 없나요?',
+    'faq_dll_missing_answer': 'A: mouse_controller.dll 이 native/src/ 디렉토리에 있는지 확인하세요. diagnose.bat 을 실행하여 확인하세요.',
+    'faq_admin_required': 'Q: 왜 관리자 권한이 필요한가요?',
+    'faq_admin_required_answer': 'A: 전역 단축키(Ctrl+Shift+키)는 시스템 전체 후크를 등록하기 위해 관리자 권한이 필요합니다.',
+    'faq_switch_mode': 'Q: 모드를 전환하려면?',
+    'faq_switch_mode_answer': 'A: 교환 아이콘(⇄)을 클릭하거나 아무 좌표 입력 필드를 클릭하여 자동 추적 모드와 수동 입력 모드를 전환합니다.',
   };
 }
 
