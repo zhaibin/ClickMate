@@ -43,8 +43,8 @@ scripts\build_release.bat
 4. 打包ZIP压缩包
 
 输出文件：
-- `releases\v1.3.1\MouseControl_v1.3.1_Portable\` - 便携版文件夹
-- `releases\v1.3.1\鼠标自动控制器_v1.3.1_便携版.zip` - 分发文件
+- `releases\v1.3.2\MouseControl_v1.3.2_Portable\` - 便携版文件夹
+- `releases\v1.3.2\鼠标自动控制器_v1.3.2_便携版.zip` - 分发文件
 
 ## 📖 使用说明
 
@@ -147,9 +147,14 @@ scripts\test_hotkey.bat
 
 ## 📊 版本信息
 
-**当前版本**: v1.3.1  
+**当前版本**: v1.3.2  
 **发布日期**: 2024-11-21  
 **支持系统**: Windows 10/11
+
+### v1.3.2 新功能
+- 📝 完整日志系统（自动记录所有操作）
+- 🔍 辅助诊断工具（查看日志.bat、调试启动.bat）
+- 🐛 改进启动脚本，更好的错误提示
 
 ### v1.3.1 新功能
 - 🐛 修复打包缺少插件DLL的问题

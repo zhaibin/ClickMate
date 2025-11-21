@@ -31,7 +31,7 @@ echo.
 :: 3. 创建便携版
 echo [3/4] 创建便携版...
 set RELEASE_DIR=build\windows\x64\runner\Release
-set VERSION=1.3.1
+set VERSION=1.3.2
 set OUTPUT_DIR=releases\v%VERSION%
 set PORTABLE_DIR=%OUTPUT_DIR%\MouseControl_v%VERSION%_Portable
 
