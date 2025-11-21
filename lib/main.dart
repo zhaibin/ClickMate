@@ -73,12 +73,51 @@ class _MouseControlPageState extends State<MouseControlPage> {
     try {
       final bindings = MouseControllerBindings();
       _service = MouseControllerService(bindings);
+      
+      // 设置捕获位置回调
+      _service.onPositionCaptured = (x, y) {
+        if (mounted) {
+          setState(() {
+            _xController.text = x.toString();
+            _yController.text = y.toString();
+          });
+          // 显示提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('已捕获位置: ($x, $y)'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 1),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      };
+      
       _startUiUpdate();
+      
+      // 延迟显示快捷键状态提示
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _checkHotkeyStatus();
+        }
+      });
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showError('初始化失败: $e');
+        _showError('初始化失败: $e\n\n请查看控制台输出了解详细信息');
       });
     }
+  }
+  
+  void _checkHotkeyStatus() {
+    // 这里可以添加额外的状态检查
+    print('界面已加载，快捷键系统状态已在控制台显示');
+    print('提示: 如果快捷键不工作，请查看上方的初始化日志');
   }
 
   void _startUiUpdate() {
@@ -119,11 +158,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
     showDialog(
       context: context,
       builder: (context) => HotkeySettingsDialog(
-        currentHotkeyCode: _service.currentHotkeyCode,
-        onHotkeyChanged: (vkCode) {
-          bool success = _service.setHotkey(vkCode);
+        currentToggleHotkeyCode: _service.currentToggleHotkeyCode,
+        currentCaptureHotkeyCode: _service.currentCaptureHotkeyCode,
+        onToggleHotkeyChanged: (vkCode) {
+          bool success = _service.setToggleHotkey(vkCode);
           if (!success) {
             _showError('快捷键设置失败！\n可能原因：\n1. 该快捷键已被其他程序占用\n2. 需要管理员权限\n3. DLL加载失败');
+          } else {
+            setState(() {}); // 刷新显示
+          }
+        },
+        onCaptureHotkeyChanged: (vkCode) {
+          bool success = _service.setCaptureHotkey(vkCode);
+          if (!success) {
+            _showError('快捷键设置失败！\n可能原因：\n1. 该快捷键已被其他程序占用\n2. 需要管理员权限\n3. DLL加载失败');
+          } else {
+            setState(() {}); // 刷新显示
           }
         },
       ),
@@ -143,6 +193,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 
   void _toggleAutoClick() {
+    print('========================================');
+    print('界面按钮点击 - 开始/停止');
+    print('========================================');
+    
     try {
       final x = int.tryParse(_xController.text);
       final y = int.tryParse(_yController.text);
@@ -150,34 +204,52 @@ class _MouseControlPageState extends State<MouseControlPage> {
       final intervalRandom = int.tryParse(_intervalRandomController.text);
       final offset = int.tryParse(_offsetController.text);
 
+      print('参数验证:');
+      print('  X坐标: ${_xController.text} → ${x ?? "无效"}');
+      print('  Y坐标: ${_yController.text} → ${y ?? "无效"}');
+      print('  间隔: ${_intervalController.text} → ${interval ?? "无效"}ms');
+      print('  随机: ${_intervalRandomController.text} → ${intervalRandom ?? "无效"}ms');
+      print('  偏移: ${_offsetController.text} → ${offset ?? "无效"}px');
+
       if (x == null || y == null) {
-        _showError('请输入有效的目标坐标');
+        print('× 验证失败：坐标无效');
+        _showError('请输入有效的目标坐标\n\n提示：\n1. 点击"捕获"按钮获取当前鼠标位置\n2. 或手动输入X和Y坐标');
         return;
       }
 
       if (interval == null || interval < 10) {
+        print('× 验证失败：间隔无效');
         _showError('点击间隔必须≥10毫秒');
         return;
       }
 
       if (intervalRandom == null || intervalRandom < 0) {
+        print('× 验证失败：随机范围无效');
         _showError('间隔随机范围必须≥0');
         return;
       }
 
       if (offset == null || offset < 0) {
+        print('× 验证失败：偏移无效');
         _showError('位置偏移必须≥0');
         return;
       }
 
+      print('✓ 参数验证通过');
+      print('设置参数到服务...');
+      
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
       _service.setRandomInterval(intervalRandom);
       _service.setRandomOffset(offset);
       _service.setMouseButton(_selectedButton);
 
+      print('触发切换操作...');
       _service.toggleAutoClick();
+      
+      print('========================================');
     } catch (e) {
+      print('× 异常: $e');
       _showError('操作失败: $e');
     }
   }
@@ -277,32 +349,67 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     ),
                     const SizedBox(height: 6),
                     // 第二行：当前快捷键
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.purple.shade200),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.keyboard_alt, size: 14, color: Colors.purple.shade700),
-                          const SizedBox(width: 6),
-                          Text(
-                            '当前快捷键: ',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey.shade700,
-                            ),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: [
+                        // 开始/停止快捷键
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.green.shade300),
                           ),
-                          _buildHotkeyDisplay('Ctrl'),
-                          const Text(' + ', style: TextStyle(fontSize: 10)),
-                          _buildHotkeyDisplay('Shift'),
-                          const Text(' + ', style: TextStyle(fontSize: 10)),
-                          _buildHotkeyDisplay(_getKeyName(_service.currentHotkeyCode)),
-                        ],
-                      ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.play_arrow, size: 12, color: Colors.green.shade700),
+                              const SizedBox(width: 4),
+                              Text(
+                                '开始/停止: ',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              _buildHotkeyDisplay('Ctrl', Colors.green),
+                              const Text(' + ', style: TextStyle(fontSize: 9)),
+                              _buildHotkeyDisplay('Shift', Colors.green),
+                              const Text(' + ', style: TextStyle(fontSize: 9)),
+                              _buildHotkeyDisplay(_getKeyName(_service.currentToggleHotkeyCode), Colors.green),
+                            ],
+                          ),
+                        ),
+                        // 捕获位置快捷键
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.blue.shade300),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.my_location, size: 12, color: Colors.blue.shade700),
+                              const SizedBox(width: 4),
+                              Text(
+                                '捕获: ',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              _buildHotkeyDisplay('Ctrl', Colors.blue),
+                              const Text(' + ', style: TextStyle(fontSize: 9)),
+                              _buildHotkeyDisplay('Shift', Colors.blue),
+                              const Text(' + ', style: TextStyle(fontSize: 9)),
+                              _buildHotkeyDisplay(_getKeyName(_service.currentCaptureHotkeyCode), Colors.blue),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -597,13 +704,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
     }
   }
 
-  Widget _buildHotkeyDisplay(String key) {
+  Widget _buildHotkeyDisplay(String key, [MaterialColor? color]) {
+    final displayColor = color ?? Colors.purple;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(3),
-        border: Border.all(color: Colors.purple.shade300),
+        border: Border.all(color: displayColor.shade300),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -615,9 +723,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
       child: Text(
         key,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: Colors.purple.shade700,
+          color: displayColor.shade700,
         ),
       ),
     );
@@ -626,13 +734,17 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
 // 快捷键设置对话框
 class HotkeySettingsDialog extends StatefulWidget {
-  final int currentHotkeyCode;
-  final Function(int) onHotkeyChanged;
+  final int currentToggleHotkeyCode;
+  final int currentCaptureHotkeyCode;
+  final Function(int) onToggleHotkeyChanged;
+  final Function(int) onCaptureHotkeyChanged;
 
   const HotkeySettingsDialog({
     super.key,
-    required this.currentHotkeyCode,
-    required this.onHotkeyChanged,
+    required this.currentToggleHotkeyCode,
+    required this.currentCaptureHotkeyCode,
+    required this.onToggleHotkeyChanged,
+    required this.onCaptureHotkeyChanged,
   });
 
   @override
@@ -640,7 +752,9 @@ class HotkeySettingsDialog extends StatefulWidget {
 }
 
 class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
-  late int _selectedKey;
+  late int _selectedToggleKey;
+  late int _selectedCaptureKey;
+  int _activeTab = 0; // 0=开始/停止, 1=捕获位置
 
   // 常用按键的虚拟键码映射
   static const Map<String, int> keyMap = {
@@ -657,7 +771,8 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedKey = widget.currentHotkeyCode;
+    _selectedToggleKey = widget.currentToggleHotkeyCode;
+    _selectedCaptureKey = widget.currentCaptureHotkeyCode;
   }
 
   String _getKeyName(int vkCode) {
@@ -671,6 +786,10 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final currentKey = _activeTab == 0 ? _selectedToggleKey : _selectedCaptureKey;
+    final keyName = _getKeyName(currentKey);
+    final tabTitle = _activeTab == 0 ? '开始/停止' : '捕获位置';
+    
     return AlertDialog(
       title: Row(
         children: [
@@ -680,11 +799,42 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
         ],
       ),
       content: SizedBox(
-        width: 320,
+        width: 340,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 选项卡按钮
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => setState(() => _activeTab = 0),
+                    icon: Icon(Icons.play_arrow, size: 16),
+                    label: const Text('开始/停止', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _activeTab == 0 ? Colors.green : Colors.grey.shade300,
+                      foregroundColor: _activeTab == 0 ? Colors.white : Colors.black87,
+                      elevation: _activeTab == 0 ? 2 : 0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => setState(() => _activeTab = 1),
+                    icon: Icon(Icons.my_location, size: 16),
+                    label: const Text('捕获位置', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _activeTab == 1 ? Colors.blue : Colors.grey.shade300,
+                      foregroundColor: _activeTab == 1 ? Colors.white : Colors.black87,
+                      elevation: _activeTab == 1 ? 2 : 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -696,16 +846,16 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 children: [
                   Icon(Icons.info_outline, size: 16, color: Colors.amber.shade900),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      '快捷键格式: Ctrl + Shift + 按键',
-                      style: TextStyle(fontSize: 12),
+                      '设置[$tabTitle]快捷键',
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             const Text(
               '选择按键:',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
@@ -722,11 +872,15 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 spacing: 4,
                 runSpacing: 4,
                 children: keyMap.entries.map((entry) {
-                  final isSelected = _selectedKey == entry.value;
+                  final isSelected = currentKey == entry.value;
                   return InkWell(
                     onTap: () {
                       setState(() {
-                        _selectedKey = entry.value;
+                        if (_activeTab == 0) {
+                          _selectedToggleKey = entry.value;
+                        } else {
+                          _selectedCaptureKey = entry.value;
+                        }
                       });
                     },
                     borderRadius: BorderRadius.circular(4),
@@ -776,7 +930,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
               child: Column(
                 children: [
                   Text(
-                    '当前快捷键',
+                    '[$tabTitle] 快捷键预览',
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 4),
@@ -787,7 +941,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                       const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                       _buildKeyChip('Shift'),
                       const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      _buildKeyChip(_getKeyName(_selectedKey)),
+                      _buildKeyChip(keyName),
                     ],
                   ),
                 ],
@@ -803,15 +957,22 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
         ),
         ElevatedButton.icon(
           onPressed: () {
-            widget.onHotkeyChanged(_selectedKey);
+            // 根据当前选项卡调用不同的回调
+            if (_activeTab == 0) {
+              widget.onToggleHotkeyChanged(_selectedToggleKey);
+            } else {
+              widget.onCaptureHotkeyChanged(_selectedCaptureKey);
+            }
+            
             Navigator.pop(context);
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
                   children: [
                     const Icon(Icons.check_circle, color: Colors.white, size: 20),
                     const SizedBox(width: 8),
-                    Text('快捷键已设置为: Ctrl+Shift+${_getKeyName(_selectedKey)}'),
+                    Text('[$tabTitle]快捷键已设置为: Ctrl+Shift+$keyName'),
                   ],
                 ),
                 backgroundColor: Colors.green,
@@ -821,9 +982,9 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
             );
           },
           icon: const Icon(Icons.check, size: 16),
-          label: const Text('确定', style: TextStyle(fontSize: 13)),
+          label: const Text('保存', style: TextStyle(fontSize: 13)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: _activeTab == 0 ? Colors.green : Colors.blue,
             foregroundColor: Colors.white,
           ),
         ),

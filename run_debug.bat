@@ -1,52 +1,54 @@
 @echo off
-chcp 65001 >nul
+REM Switch to script directory
+cd /d "%~dp0"
+
 echo ========================================
-echo 鼠标自动控制器 - Debug运行
+echo Mouse Control - Debug Mode
 echo ========================================
 echo.
 
-REM 检查DLL文件
+REM Check DLL file
 if not exist "native\src\mouse_controller.dll" (
-    echo [错误] 未找到 mouse_controller.dll
-    echo 位置: native\src\mouse_controller.dll
+    echo [ERROR] mouse_controller.dll not found
+    echo Location: native\src\mouse_controller.dll
     echo.
-    echo 请先编译DLL文件！
+    echo Please compile DLL first!
     pause
     exit /b 1
 )
 
-echo [√] 找到 DLL 文件
+echo [OK] DLL file found
 echo.
 
-REM 复制DLL到根目录
-echo [1/3] 复制DLL到根目录...
+REM Copy DLL to root
+echo [1/3] Copy DLL to root directory...
 copy /Y "native\src\mouse_controller.dll" "." >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [√] 复制成功
+    echo [OK] Copy successful
 ) else (
-    echo [×] 复制失败
+    echo [ERROR] Copy failed
     pause
     exit /b 1
 )
 echo.
 
-REM 获取依赖
-echo [2/3] 获取Flutter依赖...
+REM Get dependencies
+echo [2/3] Get Flutter dependencies...
 call flutter pub get
 if %errorlevel% neq 0 (
-    echo [×] 依赖获取失败
+    echo [ERROR] Failed to get dependencies
     pause
     exit /b 1
 )
-echo [√] 依赖获取成功
+echo [OK] Dependencies ready
 echo.
 
-REM 清理旧的构建
-echo [3/3] 清理旧构建...
+REM Clean old build
+echo [3/3] Clean old build...
 if exist "build\windows\x64\runner\Debug\" (
     rmdir /s /q "build\windows\x64\runner\Debug\" >nul 2>&1
 )
-echo [√] 清理完成
+echo [OK] Clean complete
 echo.
 
 echo ========================================
