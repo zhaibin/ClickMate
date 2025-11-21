@@ -86,7 +86,7 @@ scripts\build_release.bat        # 自动完成所有打包
 # - 测试快捷键
 
 # 6. 发布
-# - 分发 build\鼠标自动控制器_v1.x.x_便携版.zip
+# - 分发 releases\v1.x.x\鼠标自动控制器_v1.x.x_便携版.zip
 ```
 
 ### 版本号规范
@@ -121,6 +121,7 @@ scripts\build_release.bat        # 自动完成所有打包
 - `docs/` - 详细文档（2个）
 - `logs/` - 日志文件（Git忽略内容）
 - `build/` - 构建输出（Git忽略）
+- `releases/` - 发布版本（Git忽略，按版本号分目录）
 - `.dart_tool/` / `.idea/` - IDE配置（Git忽略）
 
 ### 禁止的文件类型

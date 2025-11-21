@@ -32,9 +32,12 @@ echo.
 echo [3/4] 创建便携版...
 set RELEASE_DIR=build\windows\x64\runner\Release
 set VERSION=1.3.1
-set PORTABLE_DIR=build\MouseControl_v%VERSION%_Portable
+set OUTPUT_DIR=releases\v%VERSION%
+set PORTABLE_DIR=%OUTPUT_DIR%\MouseControl_v%VERSION%_Portable
 
-if exist "%PORTABLE_DIR%" rmdir /s /q "%PORTABLE_DIR%"
+if not exist "releases" mkdir "releases"
+if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
+mkdir "%OUTPUT_DIR%"
 mkdir "%PORTABLE_DIR%"
 
 :: 复制主程序和核心DLL
@@ -77,15 +80,17 @@ echo.
 
 :: 4. 创建ZIP
 echo [4/4] 打包ZIP...
-powershell -Command "Compress-Archive -Path '%PORTABLE_DIR%\*' -DestinationPath 'build\鼠标自动控制器_v%VERSION%_便携版.zip' -Force"
+powershell -Command "Compress-Archive -Path '%PORTABLE_DIR%\*' -DestinationPath '%OUTPUT_DIR%\鼠标自动控制器_v%VERSION%_便携版.zip' -Force"
 echo [OK] ZIP已创建
 echo.
 
 echo ========================================
-echo   发布文件已创建:
-echo   - %PORTABLE_DIR%
-echo   - build\鼠标自动控制器_v%VERSION%_便携版.zip
+echo   发布文件已创建在: releases\v%VERSION%\
+echo   - MouseControl_v%VERSION%_Portable\ (便携版文件夹)
+echo   - 鼠标自动控制器_v%VERSION%_便携版.zip (分发文件)
 echo ========================================
+echo.
+echo 发布路径: %CD%\%OUTPUT_DIR%
 echo.
 pause
 

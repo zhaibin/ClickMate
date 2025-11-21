@@ -8,6 +8,9 @@
 build/
 .metadata
 
+# Releases
+releases/
+
 # IDE
 .idea/
 .vscode/

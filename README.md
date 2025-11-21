@@ -43,8 +43,8 @@ scripts\build_release.bat
 4. 打包ZIP压缩包
 
 输出文件：
-- `build\MouseControl_v1.3.0_Portable\` - 便携版文件夹
-- `build\鼠标自动控制器_v1.3.0_便携版.zip` - 分发文件
+- `releases\v1.3.1\MouseControl_v1.3.1_Portable\` - 便携版文件夹
+- `releases\v1.3.1\鼠标自动控制器_v1.3.1_便携版.zip` - 分发文件
 
 ## 📖 使用说明
 
