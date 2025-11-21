@@ -93,8 +93,8 @@ class MouseControllerService {
         LoggerService.instance.info('快捷键2 [捕获位置] Ctrl+Shift+2: ${regCapture ? "注册成功" : "注册失败"}');
         
         if (regToggle || regCapture) {
-          // 启动热键检查定时器
-          _startHotkeyCheck();
+    // 启动热键检查定时器
+    _startHotkeyCheck();
           print('✓ 热键监听已启动');
           LoggerService.instance.info('热键监听已启动');
         } else {
@@ -215,7 +215,7 @@ class MouseControllerService {
         if (_bindings.checkHotkeyPressed(hotkeyIdToggle)) {
           print('⚡ 检测到快捷键 [开始/停止] 按下！');
           LoggerService.instance.info('快捷键触发: 开始/停止');
-          toggleAutoClick();
+        toggleAutoClick();
         }
         
         // 检查捕获位置快捷键
@@ -284,7 +284,7 @@ class MouseControllerService {
     print('✓ 鼠标按钮: ${selectedButton.name}');
     print('>>> 开始自动点击！');
     LoggerService.instance.info('开始自动点击 - 目标: (${targetPosition!.x}, ${targetPosition!.y}), 间隔: ${clickIntervalMs}ms, 按钮: ${selectedButton.name}');
-    
+
     _isRunning = true;
     clickCount = 0; // 重置计数
     _performClick();
@@ -331,22 +331,22 @@ class MouseControllerService {
 
     // 移动鼠标并点击
     try {
-      _bindings.moveMouse(targetX, targetY);
-      Future.delayed(const Duration(milliseconds: 50), () {
-        _bindings.clickMouse(selectedButton.value);
+    _bindings.moveMouse(targetX, targetY);
+    Future.delayed(const Duration(milliseconds: 50), () {
+      _bindings.clickMouse(selectedButton.value);
 
-        // 记录点击
-        clickCount++;
-        final record = ClickRecord(
-          DateTime.now(),
-          MousePosition(targetX, targetY),
-          selectedButton,
-        );
-        clickHistory.insert(0, record);
-        if (clickHistory.length > maxHistorySize) {
-          clickHistory.removeLast();
-        }
-      });
+      // 记录点击
+      clickCount++;
+      final record = ClickRecord(
+        DateTime.now(),
+        MousePosition(targetX, targetY),
+        selectedButton,
+      );
+      clickHistory.insert(0, record);
+      if (clickHistory.length > maxHistorySize) {
+        clickHistory.removeLast();
+      }
+    });
     } catch (e) {
       print('× 点击执行失败: $e');
       stopAutoClick();

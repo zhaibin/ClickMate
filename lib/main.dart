@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 import 'mouse_controller_bindings.dart';
 import 'mouse_controller_service.dart';
 import 'logger_service.dart';
+import 'version.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -279,7 +280,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
       print('✓ 参数验证通过');
       print('设置参数到服务...');
-      
+
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
       _service.setRandomInterval(intervalRandom);
@@ -341,7 +342,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('鼠标自动控制器', style: TextStyle(fontSize: 15)),
+        title: Text('鼠标自动控制器 v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
           IconButton(
             icon: const Icon(Icons.keyboard, size: 20),
@@ -351,8 +352,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 当前位置和状态卡片
@@ -361,21 +362,21 @@ class _MouseControlPageState extends State<MouseControlPage> {
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
-                  children: [
+                children: [
                     // 第一行：位置和计数
-                    Row(
-                      children: [
+                  Row(
+                    children: [
                         const Icon(Icons.mouse, size: 18, color: Colors.blue),
                         const SizedBox(width: 8),
                         Text('当前位置: $_currentPosition', 
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                        const Spacer(),
-                        Container(
+                      const Spacer(),
+                      Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _isRunning ? Colors.green : Colors.grey,
+                        decoration: BoxDecoration(
+                          color: _isRunning ? Colors.green : Colors.grey,
                             borderRadius: BorderRadius.circular(12),
-                          ),
+                        ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -386,7 +387,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${_service.clickCount}次',
+                          '${_service.clickCount}次',
                                 style: const TextStyle(
                                   color: Colors.white, 
                                   fontSize: 12,
@@ -458,10 +459,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               const Text(' + ', style: TextStyle(fontSize: 9)),
                               _buildHotkeyDisplay(_getKeyName(_service.currentCaptureHotkeyCode), Colors.blue),
                             ],
-                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                   ],
                 ),
               ),
@@ -476,8 +477,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
+                  Row(
+                    children: [
                         const Text('目标位置', 
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 8),
@@ -532,7 +533,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           ),
                         ),
                       ],
-                    ),
+                        ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -540,12 +541,12 @@ class _MouseControlPageState extends State<MouseControlPage> {
                         const SizedBox(width: 8),
                         Expanded(child: _buildCompactField('Y坐标', _yController, width: double.infinity)),
                       ],
-                    ),
-                  ],
+                      ),
+                    ],
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
+                  ),
+                  const SizedBox(height: 8),
 
             // 点击设置
             Card(
@@ -558,22 +559,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     const Text('点击设置', 
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
+                  Row(
+                    children: [
                         Expanded(child: _buildCompactField('间隔(ms)', _intervalController, width: double.infinity)),
                         const SizedBox(width: 8),
                         Expanded(child: _buildCompactField('随机±(ms)', _intervalRandomController, width: double.infinity)),
                         const SizedBox(width: 8),
                         Expanded(child: _buildCompactField('偏移(px)', _offsetController, width: double.infinity)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                     const Text('鼠标按钮', style: TextStyle(fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 4),
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<MouseButton>(
-                        segments: const [
+                    segments: const [
                           ButtonSegment(
                             value: MouseButton.left, 
                             label: Text('左键', style: TextStyle(fontSize: 12)),
@@ -589,47 +590,47 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             label: Text('中键', style: TextStyle(fontSize: 12)),
                             icon: Icon(Icons.mouse, size: 16),
                           ),
-                        ],
-                        selected: {_selectedButton},
-                        onSelectionChanged: (Set<MouseButton> newSelection) {
-                          setState(() {
-                            _selectedButton = newSelection.first;
-                          });
-                        },
+                    ],
+                    selected: {_selectedButton},
+                    onSelectionChanged: (Set<MouseButton> newSelection) {
+                      setState(() {
+                        _selectedButton = newSelection.first;
+                      });
+                    },
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 10),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
 
-            // 控制按钮
-            SizedBox(
+                  // 控制按钮
+                  SizedBox(
               height: 44,
-              child: ElevatedButton.icon(
-                onPressed: _toggleAutoClick,
+                    child: ElevatedButton.icon(
+                      onPressed: _toggleAutoClick,
                 icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
-                label: Text(
+                      label: Text(
                   _isRunning ? '停止点击' : '开始点击',
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isRunning ? Colors.red : Colors.green,
-                  foregroundColor: Colors.white,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isRunning ? Colors.red : Colors.green,
+                        foregroundColor: Colors.white,
                   elevation: 4,
-                ),
-              ),
-            ),
+                      ),
+                    ),
+                  ),
             const SizedBox(height: 8),
 
             // 点击历史
-            Expanded(
+          Expanded(
               child: Card(
                 elevation: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
@@ -645,16 +646,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           const SizedBox(width: 6),
                           Text(
                             '点击历史（最近10次）',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade700,
-                            ),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700,
+                      ),
                           ),
                         ],
-                      ),
                     ),
-                    Expanded(
+                  ),
+                  Expanded(
                       child: _service.clickHistory.isEmpty
                           ? Center(
                               child: Column(
@@ -674,13 +675,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             )
                           : ListView.builder(
                               padding: EdgeInsets.zero,
-                              itemCount: _service.clickHistory.length,
-                              itemBuilder: (context, index) {
-                                final record = _service.clickHistory[index];
+                      itemCount: _service.clickHistory.length,
+                      itemBuilder: (context, index) {
+                        final record = _service.clickHistory[index];
                                 final isEven = index % 2 == 0;
-                                return Container(
+                        return Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
+                          decoration: BoxDecoration(
                                     color: isEven ? Colors.white : Colors.grey.shade50,
                                     border: Border(
                                       bottom: BorderSide(
@@ -688,9 +689,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                         width: 0.5,
                                       ),
                                     ),
-                                  ),
+                          ),
                                   child: Row(
-                                    children: [
+                            children: [
                                       // 序号
                                       Container(
                                         width: 24,
@@ -714,18 +715,18 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                       Expanded(
                                         flex: 2,
                                         child: Row(
-                                          children: [
+                                children: [
                                             Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
                                             const SizedBox(width: 4),
-                                            Text(
-                                              record.timeString,
+                                  Text(
+                                    record.timeString,
                                               style: const TextStyle(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                  ),
+                                  ),
+                                ],
+                              ),
                                       ),
                                       // 位置
                                       Expanded(
@@ -734,8 +735,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                           children: [
                                             Icon(Icons.location_on, size: 12, color: Colors.grey.shade600),
                                             const SizedBox(width: 4),
-                                            Text(
-                                              '(${record.position.x}, ${record.position.y})',
+                              Text(
+                                '(${record.position.x}, ${record.position.y})',
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: Colors.grey.shade700,
@@ -759,18 +760,18 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
+        ],
         ),
       ),
     );
@@ -966,28 +967,28 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: keyMap.entries.map((entry) {
+              spacing: 4,
+              runSpacing: 4,
+              children: keyMap.entries.map((entry) {
                   final isSelected = currentKey == entry.value;
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
+                return InkWell(
+                  onTap: () {
+                    setState(() {
                         if (_activeTab == 0) {
                           _selectedToggleKey = entry.value;
                         } else {
                           _selectedCaptureKey = entry.value;
                         }
-                      });
-                    },
+                    });
+                  },
                     borderRadius: BorderRadius.circular(4),
-                    child: Container(
+                  child: Container(
                       width: 34,
                       height: 34,
-                      decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                         color: isSelected ? Colors.blue : Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
                           color: isSelected ? Colors.blue.shade700 : Colors.grey.shade300,
                           width: isSelected ? 2 : 1,
                         ),
@@ -998,20 +999,20 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                             offset: const Offset(0, 2),
                           ),
                         ] : null,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        entry.key,
-                        style: TextStyle(
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      entry.key,
+                      style: TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? Colors.white : Colors.black87,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                );
+              }).toList(),
+            ),
             ),
             const SizedBox(height: 14),
             Container(

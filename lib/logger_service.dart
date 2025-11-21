@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'version.dart';
 
 /// 日志服务 - 统一管理应用日志
 class LoggerService {
@@ -40,7 +41,7 @@ class LoggerService {
       info('========================================');
       info('日志系统初始化完成');
       info('日志文件: ${_logFile!.path}');
-      info('版本: v1.3.2');
+      info('版本: v$appVersion');
       info('启动时间: ${DateTime.now()}');
       info('========================================');
     } catch (e) {
