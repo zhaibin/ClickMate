@@ -1,57 +1,73 @@
 # 鼠标自动控制器
 
-Windows鼠标自动点击工具，支持全局快捷键和点击历史记录。
+Windows鼠标自动点击工具，支持全局快捷键、自动跟踪和点击历史记录。
 
 ## ✨ 主要功能
 
 - 🖱️ 自动鼠标点击（左键/右键/中键）
-- 🎯 精确位置捕获
-- ⌨️ 全局快捷键（Ctrl+Shift+按键）
-- 📊 点击历史记录（最近10次）
+- 🎯 自动跟踪模式/手动输入模式
+- ⌨️ 全局快捷键（Ctrl+Shift+1/2）
+- 📊 点击历史记录（最近10次，毫秒精度）
 - 🎲 随机间隔和位置偏移
 
 ## 🚀 快速开始
 
-### 开发运行
+### 方式1：直接启动（推荐）
+```bash
+START.bat
+```
+自动检查DLL、提示管理员权限、启动应用
+
+### 方式2：调试模式
 ```bash
 run_debug.bat
 ```
+显示详细日志，适合开发调试
 
-### 打包发布
-
-**方式1: 便携版**（推荐，无需工具）
+### 方式3：管理员模式
 ```bash
-build_portable.bat
+run_as_admin.bat
 ```
-输出：`build\鼠标自动控制器_v1.1.0_便携版.zip`
+以管理员身份运行（快捷键必需）
 
-**方式2: 单EXE**（需要Enigma Virtual Box）
+## 📦 打包发布
+
 ```bash
-build_single_exe.bat
+build_release.bat
 ```
-输出：`build\鼠标自动控制器.exe`（单个文件）
 
-**方式3: 安装程序**（需要Inno Setup）
-```bash
-build_installer.bat
-```
-输出：`build\鼠标自动控制器_Setup.exe`
+自动完成：
+1. 检查DLL文件
+2. 构建Release版本
+3. 创建便携版文件夹
+4. 打包ZIP压缩包
 
-📖 详细打包说明：[打包发布指南.md](打包发布指南.md)
+输出文件：
+- `build\MouseControl_v1.3.0_Portable\` - 便携版文件夹
+- `build\鼠标自动控制器_v1.3.0_便携版.zip` - 分发文件
 
 ## 📖 使用说明
 
-1. **设置目标位置** - 手动输入坐标或点击"捕获"按钮
-2. **配置参数** - 设置间隔、随机范围、偏移
-3. **选择按钮** - 左键/右键/中键
-4. **设置快捷键** - 点击右上角⌨️图标（默认Ctrl+Shift+S）
-5. **开始/停止** - 点击按钮或按快捷键
+### 自动跟踪模式（默认）
+1. 启动应用后自动开启
+2. 实时跟随鼠标位置
+3. 按 `Ctrl+Shift+1` 开始点击
+4. 再按 `Ctrl+Shift+1` 停止
+
+### 手动输入模式
+1. 点击X或Y输入框切换到手动模式
+2. 输入固定坐标
+3. 或点击🔄按钮切换模式
+
+### 快捷键
+- **Ctrl+Shift+1** - 开始/停止点击
+- **Ctrl+Shift+2** - 捕获当前鼠标位置
 
 ### 点击历史
 
 窗口底部显示最近10次点击记录：
 - **序号** - 1-10
-- **时间** - HH:MM:SS
+- **时间** - HH:MM:SS.mmm（精确到毫秒）
 - **位置** - (X, Y)
 - **按键** - 左键(蓝)/右键(橙)/中键(紫)
 
@@ -66,35 +82,77 @@ build_installer.bat
 ```
 mouse_control/
 ├── lib/                    # Flutter代码
+│   ├── main.dart
+│   ├── mouse_controller_service.dart
+│   └── mouse_controller_bindings.dart
 ├── native/src/             # C++ DLL
-├── build_*.bat             # 打包脚本
-├── run_debug.bat           # 开发运行
+│   ├── mouse_controller.cpp
+│   ├── mouse_controller.h
+│   └── mouse_controller.dll
+├── START.bat               # 主启动脚本
+├── run_debug.bat           # 调试模式
+├── run_as_admin.bat        # 管理员模式
+├── build_release.bat       # 发布打包
+├── diagnose.bat            # 诊断工具
+├── test_hotkey.bat         # 快捷键测试
 ├── README.md               # 本文件
 ├── CHANGELOG.md            # 更新日志
+├── BUILD_GUIDE.md          # 构建指南
 └── 打包发布指南.md         # 打包详细说明
 ```
 
+## 🛠️ 开发调试
+
+### 诊断工具
+```bash
+diagnose.bat
+```
+检查：DLL文件、Flutter环境、Windows版本、管理员权限
+
+### 快捷键测试
+```bash
+test_hotkey.bat
+```
+专门测试快捷键功能，显示详细日志
+
 ## ⚠️ 注意事项
 
-1. **DLL文件** - 确保`mouse_controller.dll`在应用目录
-2. **管理员权限** - 某些情况下需要以管理员身份运行
-3. **快捷键冲突** - 避免使用系统保留的快捷键组合
+1. **管理员权限** - 快捷键功能必须以管理员身份运行
+2. **DLL文件** - 确保`mouse_controller.dll`在`native/src/`目录
+3. **快捷键冲突** - 如果冲突可在应用内更改
 4. **合法使用** - 请勿在禁止脚本的游戏中使用
 
 ## 🐛 常见问题
 
 **Q: 快捷键不工作？**
-- 以管理员身份运行`run_debug.bat`查看日志
-- 检查是否显示"热键系统初始化: 成功"
-- 更换其他不常用的按键
+- 右键以管理员身份运行 `run_as_admin.bat`
+- 或运行 `diagnose.bat` 检查问题
+- 查看控制台是否显示"热键注册: 成功"
+
+**Q: 找不到DLL文件？**
+- 运行 `diagnose.bat` 检查DLL位置
+- 确保 `native/src/mouse_controller.dll` 存在
 
 **Q: 打包后无法运行？**
-- 确保DLL文件在同一目录
-- 查看打包发布指南
+- 使用 `build_release.bat` 自动打包
+- 确保所有文件在同一目录
 
 **Q: 界面显示不完整？**
-- 窗口固定为520x680，不要手动调整
-- 重启应用
+- 窗口固定为520x680
+- 重启应用恢复
+
+## 📊 版本信息
+
+**当前版本**: v1.3.0  
+**发布日期**: 2024-11-21  
+**支持系统**: Windows 10/11
+
+### v1.3.0 新功能
+- ✨ 自动跟踪模式（默认）
+- ✨ 手动输入模式切换
+- ✨ 简化快捷键（数字键）
+- ✨ 实时参数同步
+- ✨ 模式切换按钮
 
 ## 📄 许可证
 
@@ -102,7 +160,6 @@ mouse_control/
 
 ---
 
-**版本**: 1.1.0  
-**支持系统**: Windows 10/11
-
-🎉 开始使用：`run_debug.bat`
+🎉 **开始使用**: `START.bat`  
+📖 **详细说明**: [BUILD_GUIDE.md](BUILD_GUIDE.md)  
+📦 **打包指南**: [打包发布指南.md](打包发布指南.md)
