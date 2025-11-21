@@ -1,0 +1,82 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.metadata
+
+# Releases
+releases/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# 构建产物
+*.dll
+*.exe
+*.zip
+*.tar.gz
+
+# 但保留源代码的 DLL
+!native/src/mouse_controller.dll
+
+# 临时文件和日志
+*.tmp
+*.temp
+*.bak
+*.backup
+compile_output.txt
+compile_error.txt
+
+# 日志目录（但保留目录结构）
+logs/*.log
+logs/*.txt
+!logs/.gitkeep
+
+# 测试和临时文档
+更新说明.txt
+
+# 图标源文件（已转换为 .ico）
+icon.png
+
+# CMake 构建文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.stamp
+*.rule
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# 编译输出
+*.obj
+*.o
+*.pdb
+*.ilk
+*.lib
+*.exp
+*.lastbuildstate
+*.tlog
+*.recipe
+*.idb
+*.pch

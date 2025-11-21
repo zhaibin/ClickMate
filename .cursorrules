@@ -1,0 +1,315 @@
+# 鼠标自动控制器 - 开发规范
+
+## 📋 项目原则
+
+1. **保持简洁** - 不添加不必要的文件和功能
+2. **核心优先** - 只保留核心文档和脚本
+3. **标准化** - 遵循统一的开发和发布流程
+4. **国际化** - 软件支持多语言，代码内部与注释使用英语
+
+## 📚 文档管理规则
+
+### 保留的核心文档（禁止删除）
+- `README.md` - 项目说明、快速开始、功能介绍
+- `CHANGELOG.md` - 版本更新记录
+- `docs/BUILD_GUIDE.md` - 构建和编译指南
+- `docs/打包发布指南.md` - 打包详细说明
+- `docs/MULTILINGUAL_GUIDE.md` - 多语言支持指南
+- `.cursorrules` - 本规则文件
+
+### 文档编写原则
+- ❌ 禁止创建临时说明文档（如：更新说明.txt、新功能说明.txt等）
+- ❌ 禁止创建重复内容文档（已有README就不要创建使用说明.txt）
+- ❌ 禁止创建版本特定文档（如：发布说明_v1.3.0.txt）
+- ✅ 所有更新内容统一写入 CHANGELOG.md
+- ✅ 使用说明统一写入 README.md
+- ✅ 技术细节统一写入 BUILD_GUIDE.md
+
+### 文档更新流程
+1. 新功能/修复 → 更新 `CHANGELOG.md`
+2. 用户使用变化 → 更新 `README.md`
+3. 开发流程变化 → 更新 `docs/BUILD_GUIDE.md`
+4. 打包方式变化 → 更新 `docs/打包发布指南.md`
+5. 多语言相关 → 更新 `docs/MULTILINGUAL_GUIDE.md`
+
+## 🔧 脚本管理规则
+
+### 保留的核心脚本（禁止删除）
+所有脚本位于 `scripts/` 目录：
+- `scripts/START.bat` - 主启动脚本（检查DLL + 管理员提示 + 运行）
+- `scripts/run_debug.bat` - 调试模式（显示详细日志）
+- `scripts/run_as_admin.bat` - 管理员模式（快捷键必需）
+- `scripts/build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
+- `scripts/diagnose.bat` - 诊断工具（检查环境和配置）
+- `scripts/test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
+
+根目录保留：
+- `START.bat` - 快捷启动入口（调用 scripts/START.bat）
+
+### 脚本编写原则
+- ❌ 禁止创建功能重复的脚本（如：run_app.bat、setup_and_run.bat等）
+- ❌ 禁止创建临时测试脚本（测试完成后必须删除）
+- ❌ 禁止创建多种打包脚本（只保留build_release.bat）
+- ✅ 所有脚本必须包含 UTF-8 编码设置（chcp 65001）
+- ✅ 所有脚本必须包含目录定位（cd /d "%~dp0"）
+- ✅ 所有脚本必须有清晰的输出提示
+
+### 新脚本创建规则
+如果确实需要新脚本，必须满足：
+1. 功能无法被现有脚本覆盖
+2. 是核心开发/发布流程必需
+3. 命名清晰，符合现有规范
+4. 更新本规则文件记录
+
+## 📦 发版流程规范
+
+### 标准发版流程
+```bash
+# 1. 测试功能
+START.bat                         # 启动测试
+scripts\test_hotkey.bat          # 测试快捷键
+
+# 2. 更新版本号
+# - 编辑 VERSION 文件（设置新版本号，如：1.4.1）
+# - 编辑 lib/version.dart（更新版本号）
+# - 编辑 CHANGELOG.md（添加版本记录）
+# - 编辑 README.md（更新版本号和功能介绍）
+
+# 3. 提交Git
+git add -A
+git commit -m "release: v1.x.x - 版本说明"
+git tag v1.x.x
+
+# 4. 构建发布
+scripts\build_release.bat        # 自动完成所有打包
+
+# 5. 测试发布包
+# - 解压 ZIP 到干净目录
+# - 右键以管理员身份运行
+# - 测试所有核心功能
+# - 测试快捷键
+
+# 6. 发布
+# - 分发 releases\v1.x.x\鼠标自动控制器_v1.x.x_便携版.zip
+```
+
+### 版本号规范
+- **主版本号**（v1.x.x → v2.x.x）：重大架构变更
+- **次版本号**（v1.1.x → v1.2.x）：新功能添加
+- **修订号**（v1.1.1 → v1.1.2）：Bug修复
+
+### 发版检查清单
+- [ ] 所有功能测试通过
+- [ ] 快捷键在管理员模式下工作
+- [ ] 点击历史正常显示
+- [ ] 自动/手动模式切换正常
+- [ ] 多语言切换正常（测试至少3种语言）
+- [ ] 所有界面文本已翻译（无遗漏的中文或硬编码文本）
+- [ ] CHANGELOG.md 已更新
+- [ ] README.md 版本号已更新
+- [ ] VERSION 文件已更新
+- [ ] lib/version.dart 已更新
+- [ ] Git 已提交并打标签
+- [ ] 在干净的 Windows 系统上测试通过
+
+## 🗂️ 文件结构规范
+
+### 根目录（严格控制）
+只允许以下类型文件：
+- `START.bat` - 根目录快捷启动入口（仅1个）
+- `README.md` / `CHANGELOG.md` - 核心文档（2个）
+- `*.yaml` / `*.lock` / `*.iml` - 项目配置
+- `.cursorrules` / `.gitignore` - 配置文件
+- `lib/` - Flutter源码
+- `native/` - C++源码
+- `windows/` - Flutter Windows配置
+- `test/` - 测试代码
+- `scripts/` - 所有批处理脚本（6个）
+- `docs/` - 详细文档（2个）
+- `logs/` - 日志文件（Git忽略内容）
+- `build/` - 构建输出（Git忽略）
+- `releases/` - 发布版本（Git忽略，按版本号分目录）
+- `.dart_tool/` / `.idea/` - IDE配置（Git忽略）
+
+### 禁止的文件类型
+- ❌ 根目录下的 `*.txt` 临时说明文件
+- ❌ 根目录下的 `*.log` 日志文件（应放在 logs/ 目录）
+- ❌ `*.backup` 备份文件
+- ❌ `temp_*.bat` 临时脚本
+- ❌ 根目录下的编译输出文件
+- ❌ `test_*.txt` 测试输出文件
+
+## 🔨 代码开发规范
+
+### 多语言规范 ⭐
+**核心原则：代码用英语，界面多语言**
+
+#### 代码内部（必须使用英语）
+- ✅ 所有变量名、函数名、类名使用英语
+- ✅ 所有代码注释使用英语
+- ✅ 所有日志输出（print、Logger）使用英语
+- ✅ 所有错误消息（内部调试用）使用英语
+- ❌ 禁止在代码逻辑中使用中文或其他语言
+
+#### 用户界面（支持多语言）
+- ✅ 使用 `lib/l10n/app_localizations.dart` 管理翻译
+- ✅ 界面文本通过 `l10n.xxx` 获取
+- ✅ 支持11种语言（English/简中/繁中/法/西/葡/德/俄/意/日/韩）
+- ✅ 首次启动：自动检测系统语言
+- ✅ 用户可通过界面切换语言
+
+#### 翻译文件管理
+- `lib/l10n/app_localizations.dart` - 所有语言翻译的唯一来源
+- `lib/language_preference.dart` - 语言偏好持久化和系统语言检测
+- 新增翻译键必须同时添加到所有11种语言
+- 保持翻译简洁、准确、符合目标语言习惯
+
+#### 示例对比
+```dart
+// ❌ 错误 - 代码中直接使用中文
+print('鼠标点击开始');
+String buttonText = '开始点击';
+
+// ✅ 正确 - 日志用英语，界面用多语言
+print('Auto-click started');  // 日志
+String buttonText = l10n.btnStart;  // 界面文本
+```
+
+### Flutter代码
+- 保持 `lib/` 目录结构清晰
+- 核心文件：main.dart, mouse_controller_service.dart, logger_service.dart
+- 多语言文件：l10n/app_localizations.dart, language_preference.dart
+- 状态管理使用 StatefulWidget（不引入额外框架）
+
+### C++代码
+- DLL必须位于 `native/src/mouse_controller.dll`
+- 头文件和源码在同一目录
+- 编译后立即测试
+- 注释使用英语
+
+### 快捷键相关
+- 默认组合：Ctrl+Shift+数字键
+- 必须支持管理员权限检查
+- 提供清晰的注册成功/失败日志（英语）
+
+## 🎯 功能开发原则
+
+### 添加新功能时
+1. ✅ 评估是否为核心功能
+2. ✅ 确认不会使界面过于复杂
+3. ✅ 更新相关文档
+4. ✅ 添加到测试清单
+5. ✅ 记录到 CHANGELOG.md
+
+### 不添加的功能
+- ❌ 过度的动画效果
+- ❌ 非必要的配置选项
+- ❌ 复杂的主题系统
+- ❌ 网络功能
+- ❌ 数据统计和上报
+
+## 📝 Git规范
+
+### 分支管理
+- `master` - 主分支，稳定版本
+- 小项目不创建多余分支
+
+### 提交信息格式
+```
+<type>: <subject>
+
+[body]
+```
+
+类型（type）：
+- `feat` - 新功能
+- `fix` - Bug修复
+- `docs` - 文档更新
+- `refactor` - 代码重构
+- `release` - 版本发布
+
+示例：
+```
+feat: Add auto-capture mode
+
+- Auto-tracking mode as default
+- Manual input mode toggle
+- Real-time parameter sync
+```
+
+### .gitignore 原则
+忽略所有构建产物、IDE配置、临时文件
+
+## ⚠️ 重要提醒
+
+1. **保持简洁** - 不是所有想法都要实现
+2. **文档精简** - 一个README说清楚比10个txt文件有用
+3. **脚本克制** - 6个脚本足够覆盖所有场景
+4. **发版标准** - 严格按照发版流程，不遗漏步骤
+5. **测试充分** - 尤其是打包后的测试，在干净系统上验证
+
+## 🎓 开发者须知
+
+这是一个个人/小型项目，核心目标是：
+- ✅ 功能实用、稳定
+- ✅ 代码清晰、易维护
+- ✅ 文档简洁、够用
+- ✅ 发版流程标准化
+- ✅ 国际化支持，代码英文化
+
+### 多语言编码准则 ⭐
+1. **代码全部用英语** - 变量名、函数名、注释、日志
+2. **界面支持多语言** - 通过 `l10n.xxx` 获取翻译文本
+3. **新增UI文本** - 必须同时添加11种语言的翻译
+4. **系统语言检测** - 首次启动自动跟随系统语言
+5. **测试多语言** - 发版前至少测试3种语言
+
+### 编码示例
+```dart
+// ✅ 正确做法
+print('Mouse click started');        // 日志用英语
+LoggerService.instance.info('Auto-click enabled');  // 日志英语
+String buttonText = l10n.btnStart;   // 界面用多语言
+
+// ❌ 错误做法  
+print('鼠标点击开始');                // 日志不能用中文
+String buttonText = '开始';           // 界面文本不能硬编码
+```
+
+不要过度设计，不要过度文档化。
+每次添加文件前问自己：这真的必要吗？
+
+---
+
+**最后更新**: 2024-11-21  
+**当前版本**: v1.4.1  
+**支持语言**: 11种（English/简中/繁中/法/西/葡/德/俄/意/日/韩）
+
+## 📂 目录结构说明
+
+```
+mouse_control/
+├── START.bat              # 快捷启动入口
+├── README.md              # 项目说明
+├── CHANGELOG.md           # 更新日志
+├── scripts/               # 所有脚本
+│   ├── START.bat         # 主启动脚本
+│   ├── run_debug.bat     # 调试模式
+│   ├── run_as_admin.bat  # 管理员模式
+│   ├── build_release.bat # 发布打包
+│   ├── diagnose.bat      # 诊断工具
+│   └── test_hotkey.bat   # 快捷键测试
+├── docs/                  # 文档
+│   ├── BUILD_GUIDE.md    # 构建指南
+│   ├── 打包发布指南.md    # 打包说明
+│   └── MULTILINGUAL_GUIDE.md  # 多语言指南
+├── logs/                  # 日志文件（Git忽略内容）
+├── lib/                   # Flutter源码
+│   ├── main.dart         # 主应用（集成多语言）
+│   ├── l10n/             # 多语言翻译
+│   │   └── app_localizations.dart  # 9种语言翻译
+│   └── language_preference.dart    # 语言偏好管理
+├── native/                # C++源码
+└── ...其他配置文件
+```
+
