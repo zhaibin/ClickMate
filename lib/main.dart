@@ -2,32 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'mouse_controller_bindings.dart';
 import 'mouse_controller_service.dart';
 import 'logger_service.dart';
 import 'version.dart';
+import 'l10n/app_localizations.dart';
+import 'language_preference.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 初始化日志系统
+  // Initialize log system
   await LoggerService.instance.initialize();
-  LoggerService.instance.info('应用启动中...');
+  LoggerService.instance.info('Application starting...');
   
-  // 初始化窗口管理器
+  // Initialize language preference
+  await LanguagePreference.instance.initialize();
+  LoggerService.instance.info('Language preference initialized: ${LanguagePreference.instance.currentLocale}');
+  
+  // Initialize window manager
   await windowManager.ensureInitialized();
-  LoggerService.instance.info('窗口管理器初始化完成');
+  LoggerService.instance.info('Window manager initialized');
   
-  // 设置窗口属性
+  // Set window properties
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(520, 680),          // 增加窗口高度以容纳点击历史
-    minimumSize: Size(520, 680),   // 固定窗口大小，避免调整导致布局问题
-    maximumSize: Size(520, 680),   // 固定窗口大小
-    center: true,                  // 居中显示
+    size: Size(520, 680),
+    minimumSize: Size(520, 680),
+    maximumSize: Size(520, 680),
+    center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
-    title: '鼠标自动控制器',
+    title: 'Mouse Auto Controller',
   );
   
   windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -38,24 +45,48 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = LanguagePreference.instance.currentLocale;
+
+  void _changeLanguage(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+    LanguagePreference.instance.changeLanguage(locale);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '鼠标自动控制器',
+      title: 'Mouse Auto Controller',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MouseControlPage(),
+      locale: _locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: MouseControlPage(onLanguageChanged: _changeLanguage),
     );
   }
 }
 
 class MouseControlPage extends StatefulWidget {
-  const MouseControlPage({super.key});
+  final Function(Locale) onLanguageChanged;
+  
+  const MouseControlPage({super.key, required this.onLanguageChanged});
 
   @override
   State<MouseControlPage> createState() => _MouseControlPageState();
@@ -71,9 +102,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   MouseButton _selectedButton = MouseButton.left;
   bool _isRunning = false;
-  String _currentPosition = '未获取';
+  String _currentPosition = '';
   Timer? _uiUpdateTimer;
-  bool _autoCapture = true; // 默认开启自动获取
+  bool _autoCapture = true; // Auto-capture mode enabled by default
 
   @override
   void initState() {
@@ -82,21 +113,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
       final bindings = MouseControllerBindings();
       _service = MouseControllerService(bindings);
       
-      // 设置捕获位置回调
+      // Set position capture callback
       _service.onPositionCaptured = (x, y) {
         if (mounted) {
           setState(() {
             _xController.text = x.toString();
             _yController.text = y.toString();
           });
-          // 显示提示
+          // Show notification
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
-                  Text('已捕获位置: ($x, $y)'),
+                  Text('${l10n.msgPositionCaptured}: ($x, $y)'),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -109,7 +141,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       
       _startUiUpdate();
       
-      // 延迟显示快捷键状态提示
+      // Delayed hotkey status check
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
           _checkHotkeyStatus();
@@ -117,15 +149,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
       });
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showError('初始化失败: $e\n\n请查看控制台输出了解详细信息');
+        final l10n = AppLocalizations.of(context);
+        _showError('${l10n.errorInitFailed}: $e\n\nPlease check console output for details');
       });
     }
   }
   
   void _checkHotkeyStatus() {
-    // 这里可以添加额外的状态检查
-    print('界面已加载，快捷键系统状态已在控制台显示');
-    print('提示: 如果快捷键不工作，请查看上方的初始化日志');
+    // Additional status check can be added here
+    print('Interface loaded, hotkey system status displayed in console');
+    print('Tip: If hotkeys don\'t work, check initialization logs above');
   }
 
   void _startUiUpdate() {
@@ -138,17 +171,17 @@ class _MouseControlPageState extends State<MouseControlPage> {
             _currentPosition = '(${pos.x}, ${pos.y})';
             _isRunning = _service.isRunning;
             
-            // 如果开启自动捕获且未运行，更新坐标
+            // Update coordinates if auto-capture is enabled and not running
             if (_autoCapture && !_isRunning) {
               _xController.text = pos.x.toString();
               _yController.text = pos.y.toString();
             }
           });
           
-          // 实时同步参数到服务
+          // Real-time parameter sync to service
           _syncParametersToService();
         } catch (e) {
-          // 忽略错误
+          // Ignore errors
         }
       }
     });
@@ -176,21 +209,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
       }
       _service.setMouseButton(_selectedButton);
     } catch (e) {
-      // 忽略错误
+      // Ignore errors
     }
   }
 
   void _showError(String message) {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('错误'),
+        title: Text(l10n.errorTitle),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('确定'),
+            child: Text(l10n.btnOk),
           ),
         ],
       ),
@@ -206,80 +240,125 @@ class _MouseControlPageState extends State<MouseControlPage> {
         onToggleHotkeyChanged: (vkCode) {
           bool success = _service.setToggleHotkey(vkCode);
           if (!success) {
-            _showError('快捷键设置失败！\n可能原因：\n1. 该快捷键已被其他程序占用\n2. 需要管理员权限\n3. DLL加载失败');
+            final l10n = AppLocalizations.of(context);
+            _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
           } else {
-            setState(() {}); // 刷新显示
+            setState(() {}); // Refresh display
           }
         },
         onCaptureHotkeyChanged: (vkCode) {
           bool success = _service.setCaptureHotkey(vkCode);
           if (!success) {
-            _showError('快捷键设置失败！\n可能原因：\n1. 该快捷键已被其他程序占用\n2. 需要管理员权限\n3. DLL加载失败');
+            final l10n = AppLocalizations.of(context);
+            _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
           } else {
-            setState(() {}); // 刷新显示
+            setState(() {}); // Refresh display
           }
         },
       ),
     );
   }
 
-  void _captureCurrentPosition() {
-    try {
-      final pos = _service.getCurrentMousePosition();
-      setState(() {
-        _xController.text = pos.x.toString();
-        _yController.text = pos.y.toString();
-      });
-    } catch (e) {
-      _showError('捕获位置失败: $e');
-    }
+  void _showLanguageSettings() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.language, size: 20, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(l10n.labelLanguage, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: SizedBox(
+          width: 300,
+          child: ListView(
+            shrinkWrap: true,
+            children: AppLocalizations.supportedLocales.map((locale) {
+              final isSelected = LanguagePreference.instance.currentLocale == locale;
+              return ListTile(
+                leading: Radio<Locale>(
+                  value: locale,
+                  groupValue: LanguagePreference.instance.currentLocale,
+                  onChanged: (Locale? value) {
+                    if (value != null) {
+                      widget.onLanguageChanged(value);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                title: Text(
+                  LanguagePreference.instance.getLanguageName(locale, l10n),
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                onTap: () {
+                  widget.onLanguageChanged(locale);
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.btnCancel),
+          ),
+        ],
+      ),
+    );
   }
+
 
   void _toggleAutoClick() {
     print('========================================');
-    print('界面按钮点击 - 开始/停止');
+    print('UI button click - Start/Stop');
     print('========================================');
     
     try {
+      final l10n = AppLocalizations.of(context);
       final x = int.tryParse(_xController.text);
       final y = int.tryParse(_yController.text);
       final interval = int.tryParse(_intervalController.text);
       final intervalRandom = int.tryParse(_intervalRandomController.text);
       final offset = int.tryParse(_offsetController.text);
 
-      print('参数验证:');
-      print('  X坐标: ${_xController.text} → ${x ?? "无效"}');
-      print('  Y坐标: ${_yController.text} → ${y ?? "无效"}');
-      print('  间隔: ${_intervalController.text} → ${interval ?? "无效"}ms');
-      print('  随机: ${_intervalRandomController.text} → ${intervalRandom ?? "无效"}ms');
-      print('  偏移: ${_offsetController.text} → ${offset ?? "无效"}px');
+      print('Parameter validation:');
+      print('  X coordinate: ${_xController.text} → ${x ?? "invalid"}');
+      print('  Y coordinate: ${_yController.text} → ${y ?? "invalid"}');
+      print('  Interval: ${_intervalController.text} → ${interval ?? "invalid"}ms');
+      print('  Random: ${_intervalRandomController.text} → ${intervalRandom ?? "invalid"}ms');
+      print('  Offset: ${_offsetController.text} → ${offset ?? "invalid"}px');
 
       if (x == null || y == null) {
-        print('× 验证失败：坐标无效');
-        _showError('请输入有效的目标坐标\n\n提示：\n1. 点击"捕获"按钮获取当前鼠标位置\n2. 或手动输入X和Y坐标');
+        print('× Validation failed: Invalid coordinates');
+        _showError('${l10n.errorInvalidCoordinates}\n\n${l10n.hintCaptureCoordinates}\n${l10n.hintInputCoordinates}');
         return;
       }
 
       if (interval == null || interval < 10) {
-        print('× 验证失败：间隔无效');
-        _showError('点击间隔必须≥10毫秒');
+        print('× Validation failed: Invalid interval');
+        _showError(l10n.errorInvalidInterval);
         return;
       }
 
       if (intervalRandom == null || intervalRandom < 0) {
-        print('× 验证失败：随机范围无效');
-        _showError('间隔随机范围必须≥0');
+        print('× Validation failed: Invalid random range');
+        _showError(l10n.errorInvalidRandomRange);
         return;
       }
 
       if (offset == null || offset < 0) {
-        print('× 验证失败：偏移无效');
-        _showError('位置偏移必须≥0');
+        print('× Validation failed: Invalid offset');
+        _showError(l10n.errorInvalidOffset);
         return;
       }
 
-      print('✓ 参数验证通过');
-      print('设置参数到服务...');
+      print('✓ Parameter validation passed');
+      print('Setting parameters to service...');
 
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
@@ -287,13 +366,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _service.setRandomOffset(offset);
       _service.setMouseButton(_selectedButton);
 
-      print('触发切换操作...');
+      print('Triggering toggle operation...');
       _service.toggleAutoClick();
       
       print('========================================');
     } catch (e) {
-      print('× 异常: $e');
-      _showError('操作失败: $e');
+      print('× Exception: $e');
+      final l10n = AppLocalizations.of(context);
+      _showError('${l10n.errorOperationFailed}: $e');
     }
   }
 
@@ -325,12 +405,12 @@ class _MouseControlPageState extends State<MouseControlPage> {
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         onTap: () {
-          // 点击输入框自动切换到手动模式
+          // Switch to manual mode when clicking input field
           if (_autoCapture) {
             setState(() {
               _autoCapture = false;
             });
-            print('切换到手动输入模式');
+            print('Switched to manual input mode');
           }
         },
       ),
@@ -339,15 +419,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('鼠标自动控制器 v$appVersion', style: const TextStyle(fontSize: 15)),
+        title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.language, size: 20),
+            onPressed: _showLanguageSettings,
+            tooltip: l10n.labelLanguage,
+          ),
           IconButton(
             icon: const Icon(Icons.keyboard, size: 20),
             onPressed: _showHotkeySettings,
-            tooltip: '快捷键设置',
+            tooltip: l10n.hotkeySettings,
           ),
         ],
       ),
@@ -356,19 +443,19 @@ class _MouseControlPageState extends State<MouseControlPage> {
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 当前位置和状态卡片
+            // Current position and status card
             Card(
               elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
                 children: [
-                    // 第一行：位置和计数
+                    // First row: Position and count
                   Row(
                     children: [
                         const Icon(Icons.mouse, size: 18, color: Colors.blue),
                         const SizedBox(width: 8),
-                        Text('当前位置: $_currentPosition', 
+                        Text('${l10n.labelCurrentPosition}: $_currentPosition', 
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                       const Spacer(),
                       Container(
@@ -387,7 +474,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                          '${_service.clickCount}次',
+                          '${_service.clickCount}${l10n.statusClickCount}',
                                 style: const TextStyle(
                                   color: Colors.white, 
                                   fontSize: 12,
@@ -400,12 +487,12 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    // 第二行：当前快捷键
+                    // Second row: Current hotkeys
                     Wrap(
                       spacing: 4,
                       runSpacing: 4,
                       children: [
-                        // 开始/停止快捷键
+                        // Start/Stop hotkey
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -419,7 +506,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               Icon(Icons.play_arrow, size: 12, color: Colors.green.shade700),
                               const SizedBox(width: 4),
                               Text(
-                                '开始/停止: ',
+                                '${l10n.hotkeyToggle}: ',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey.shade700,
@@ -433,7 +520,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             ],
                           ),
                         ),
-                        // 捕获位置快捷键
+                        // Capture position hotkey
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -447,7 +534,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               Icon(Icons.my_location, size: 12, color: Colors.blue.shade700),
                               const SizedBox(width: 4),
                               Text(
-                                '捕获: ',
+                                '${l10n.hotkeyCapture}: ',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey.shade700,
@@ -469,7 +556,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ),
             const SizedBox(height: 8),
 
-            // 目标位置设置
+            // Target position settings
             Card(
               elevation: 2,
               child: Padding(
@@ -479,8 +566,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   children: [
                   Row(
                     children: [
-                        const Text('目标位置', 
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text(l10n.labelTargetPosition, 
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -501,7 +588,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                _autoCapture ? '自动' : '手动',
+                                _autoCapture ? l10n.modeAuto : l10n.modeManual,
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: _autoCapture ? Colors.green.shade700 : Colors.grey.shade600,
@@ -517,7 +604,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             setState(() {
                               _autoCapture = !_autoCapture;
                             });
-                            print('切换模式: ${_autoCapture ? "自动跟随" : "手动输入"}');
+                            print('Toggle mode: ${_autoCapture ? "Auto-track" : "Manual input"}');
                           },
                           child: Container(
                             padding: const EdgeInsets.all(4),
@@ -537,9 +624,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(child: _buildCompactField('X坐标', _xController, width: double.infinity)),
+                        Expanded(child: _buildCompactField(l10n.labelXCoordinate, _xController, width: double.infinity)),
                         const SizedBox(width: 8),
-                        Expanded(child: _buildCompactField('Y坐标', _yController, width: double.infinity)),
+                        Expanded(child: _buildCompactField(l10n.labelYCoordinate, _yController, width: double.infinity)),
                       ],
                       ),
                     ],
@@ -548,7 +635,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ),
                   const SizedBox(height: 8),
 
-            // 点击设置
+            // Click settings
             Card(
               elevation: 2,
               child: Padding(
@@ -556,39 +643,39 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('点击设置', 
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    Text(l10n.labelClickSettings, 
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                   Row(
                     children: [
-                        Expanded(child: _buildCompactField('间隔(ms)', _intervalController, width: double.infinity)),
+                        Expanded(child: _buildCompactField(l10n.labelIntervalMs, _intervalController, width: double.infinity)),
                         const SizedBox(width: 8),
-                        Expanded(child: _buildCompactField('随机±(ms)', _intervalRandomController, width: double.infinity)),
+                        Expanded(child: _buildCompactField(l10n.labelRandomMs, _intervalRandomController, width: double.infinity)),
                         const SizedBox(width: 8),
-                        Expanded(child: _buildCompactField('偏移(px)', _offsetController, width: double.infinity)),
+                        Expanded(child: _buildCompactField(l10n.labelOffsetPx, _offsetController, width: double.infinity)),
                     ],
                   ),
                   const SizedBox(height: 8),
-                    const Text('鼠标按钮', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(l10n.labelMouseButton, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 4),
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<MouseButton>(
-                    segments: const [
+                    segments: [
                           ButtonSegment(
                             value: MouseButton.left, 
-                            label: Text('左键', style: TextStyle(fontSize: 12)),
-                            icon: Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelLeftButton, style: const TextStyle(fontSize: 12)),
+                            icon: const Icon(Icons.mouse, size: 16),
                           ),
                           ButtonSegment(
                             value: MouseButton.right, 
-                            label: Text('右键', style: TextStyle(fontSize: 12)),
-                            icon: Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelRightButton, style: const TextStyle(fontSize: 12)),
+                            icon: const Icon(Icons.mouse, size: 16),
                           ),
                           ButtonSegment(
                             value: MouseButton.middle, 
-                            label: Text('中键', style: TextStyle(fontSize: 12)),
-                            icon: Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelMiddleButton, style: const TextStyle(fontSize: 12)),
+                            icon: const Icon(Icons.mouse, size: 16),
                           ),
                     ],
                     selected: {_selectedButton},
@@ -605,14 +692,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ),
                   const SizedBox(height: 10),
 
-                  // 控制按钮
+                  // Control button
                   SizedBox(
               height: 44,
                     child: ElevatedButton.icon(
                       onPressed: _toggleAutoClick,
                 icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
                       label: Text(
-                  _isRunning ? '停止点击' : '开始点击',
+                  _isRunning ? l10n.btnStop : l10n.btnStart,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -624,7 +711,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ),
             const SizedBox(height: 8),
 
-            // 点击历史
+            // Click history
           Expanded(
               child: Card(
                 elevation: 2,
@@ -645,7 +732,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           Icon(Icons.history, size: 16, color: Colors.grey.shade700),
                           const SizedBox(width: 6),
                           Text(
-                            '点击历史（最近10次）',
+                            l10n.historyRecentClicks,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -664,7 +751,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                   Icon(Icons.inbox, size: 40, color: Colors.grey.shade300),
                                   const SizedBox(height: 8),
                                   Text(
-                                    '暂无点击记录',
+                                    l10n.msgNoClickHistory,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey.shade500,
@@ -692,7 +779,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           ),
                                   child: Row(
                             children: [
-                                      // 序号
+                                      // Index
                                       Container(
                                         width: 24,
                                         height: 24,
@@ -711,7 +798,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                         ),
                                       ),
                                       const SizedBox(width: 10),
-                                      // 时间
+                                      // Time
                                       Expanded(
                                         flex: 2,
                                         child: Row(
@@ -728,7 +815,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                 ],
                               ),
                                       ),
-                                      // 位置
+                                      // Position
                                       Expanded(
                                         flex: 2,
                                         child: Row(
@@ -745,7 +832,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                           ],
                                         ),
                                       ),
-                                      // 按钮
+                                      // Button
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
@@ -830,7 +917,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 }
 
-// 快捷键设置对话框
+// Hotkey settings dialog
 class HotkeySettingsDialog extends StatefulWidget {
   final int currentToggleHotkeyCode;
   final int currentCaptureHotkeyCode;
@@ -852,9 +939,9 @@ class HotkeySettingsDialog extends StatefulWidget {
 class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   late int _selectedToggleKey;
   late int _selectedCaptureKey;
-  int _activeTab = 0; // 0=开始/停止, 1=捕获位置
+  int _activeTab = 0; // 0=Start/Stop, 1=Capture
 
-  // 常用按键的虚拟键码映射
+  // Common key virtual key code mapping
   static const Map<String, int> keyMap = {
     'A': 0x41, 'B': 0x42, 'C': 0x43, 'D': 0x44, 'E': 0x45,
     'F': 0x46, 'G': 0x47, 'H': 0x48, 'I': 0x49, 'J': 0x4A,
@@ -879,21 +966,22 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
         return entry.key;
       }
     }
-    return '未知';
+    return '?';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final currentKey = _activeTab == 0 ? _selectedToggleKey : _selectedCaptureKey;
     final keyName = _getKeyName(currentKey);
-    final tabTitle = _activeTab == 0 ? '开始/停止' : '捕获位置';
+    final tabTitle = _activeTab == 0 ? l10n.hotkeyStartStop : l10n.hotkeyCapturePosition;
     
     return AlertDialog(
       title: Row(
         children: [
           Icon(Icons.keyboard, size: 20, color: Colors.blue.shade700),
           const SizedBox(width: 8),
-          const Text('快捷键设置', style: TextStyle(fontSize: 16)),
+          Text(l10n.hotkeySettingsTitle, style: const TextStyle(fontSize: 16)),
         ],
       ),
       content: SizedBox(
@@ -902,14 +990,14 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 选项卡按钮
+            // Tab buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => setState(() => _activeTab = 0),
-                    icon: Icon(Icons.play_arrow, size: 16),
-                    label: const Text('开始/停止', style: TextStyle(fontSize: 12)),
+                    icon: const Icon(Icons.play_arrow, size: 16),
+                    label: Text(l10n.hotkeyStartStop, style: const TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _activeTab == 0 ? Colors.green : Colors.grey.shade300,
                       foregroundColor: _activeTab == 0 ? Colors.white : Colors.black87,
@@ -921,8 +1009,8 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => setState(() => _activeTab = 1),
-                    icon: Icon(Icons.my_location, size: 16),
-                    label: const Text('捕获位置', style: TextStyle(fontSize: 12)),
+                    icon: const Icon(Icons.my_location, size: 16),
+                    label: Text(l10n.hotkeyCapturePosition, style: const TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _activeTab == 1 ? Colors.blue : Colors.grey.shade300,
                       foregroundColor: _activeTab == 1 ? Colors.white : Colors.black87,
@@ -946,7 +1034,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '设置[$tabTitle]快捷键 (Ctrl+Shift+按键)',
+                      '${l10n.hotkeySetFor} [$tabTitle] (Ctrl+Shift+Key)',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -954,9 +1042,9 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              '选择按键:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            Text(
+              l10n.hotkeySelectKey,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Container(
@@ -1028,7 +1116,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
               child: Column(
                 children: [
                   Text(
-                    '[$tabTitle] 快捷键预览',
+                    '[$tabTitle] ${l10n.hotkeyPreview}',
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 4),
@@ -1051,11 +1139,11 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消', style: TextStyle(fontSize: 13)),
+          child: Text(l10n.btnCancel, style: const TextStyle(fontSize: 13)),
         ),
         ElevatedButton.icon(
           onPressed: () {
-            // 根据当前选项卡调用不同的回调
+            // Call different callbacks based on current tab
             if (_activeTab == 0) {
               widget.onToggleHotkeyChanged(_selectedToggleKey);
             } else {
@@ -1070,7 +1158,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   children: [
                     const Icon(Icons.check_circle, color: Colors.white, size: 20),
                     const SizedBox(width: 8),
-                    Text('[$tabTitle]快捷键已设置为: Ctrl+Shift+$keyName'),
+                    Text('[$tabTitle] ${l10n.msgHotkeySaved}: Ctrl+Shift+$keyName'),
                   ],
                 ),
                 backgroundColor: Colors.green,
@@ -1080,7 +1168,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
             );
           },
           icon: const Icon(Icons.check, size: 16),
-          label: const Text('保存', style: TextStyle(fontSize: 13)),
+          label: Text(l10n.btnSave, style: const TextStyle(fontSize: 13)),
           style: ElevatedButton.styleFrom(
             backgroundColor: _activeTab == 0 ? Colors.green : Colors.blue,
             foregroundColor: Colors.white,

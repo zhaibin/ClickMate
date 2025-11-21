@@ -1,10 +1,9 @@
-/// 应用版本号
+/// Application version
 /// 
-/// ⚠️ 发版时需要同步更新以下文件：
-/// 1. VERSION 文件（根目录）
-/// 2. lib/version.dart（本文件）
-/// 3. CHANGELOG.md（添加版本记录）
-/// 4. README.md（更新版本号）
+/// ⚠️ Update these files when releasing:
+/// 1. VERSION file (root directory)
+/// 2. lib/version.dart (this file)
+/// 3. CHANGELOG.md (add version record)
+/// 4. README.md (update version number)
 
-const String appVersion = '1.3.3';
-
+const String appVersion = '1.4.1';
