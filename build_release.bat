@@ -31,15 +31,22 @@ echo.
 :: 3. 创建便携版
 echo [3/4] 创建便携版...
 set RELEASE_DIR=build\windows\x64\runner\Release
-set VERSION=1.3.0
+set VERSION=1.3.1
 set PORTABLE_DIR=build\MouseControl_v%VERSION%_Portable
 
 if exist "%PORTABLE_DIR%" rmdir /s /q "%PORTABLE_DIR%"
 mkdir "%PORTABLE_DIR%"
 
+:: 复制主程序和核心DLL
 copy "%RELEASE_DIR%\mouse_control.exe" "%PORTABLE_DIR%\" >nul
 copy "%RELEASE_DIR%\flutter_windows.dll" "%PORTABLE_DIR%\" >nul
-copy "native\src\mouse_controller.dll" "%PORTABLE_DIR%\" >nul
+
+:: 复制插件DLL
+copy "%RELEASE_DIR%\window_manager_plugin.dll" "%PORTABLE_DIR%\" >nul
+copy "%RELEASE_DIR%\screen_retriever_windows_plugin.dll" "%PORTABLE_DIR%\" >nul
+copy "%RELEASE_DIR%\mouse_controller.dll" "%PORTABLE_DIR%\" >nul
+
+:: 复制资源文件
 xcopy "%RELEASE_DIR%\data" "%PORTABLE_DIR%\data\" /E /I /Y >nul
 
 :: 创建使用说明
