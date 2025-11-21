@@ -1,6 +1,6 @@
 @echo off
-REM Switch to script directory
-cd /d "%~dp0"
+REM Switch to project root
+cd /d "%~dp0\.."
 
 echo ========================================
 echo Mouse Control - Debug Mode

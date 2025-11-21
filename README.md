@@ -20,20 +20,20 @@ START.bat
 
 ### 方式2：调试模式
 ```bash
-run_debug.bat
+scripts\run_debug.bat
 ```
 显示详细日志，适合开发调试
 
 ### 方式3：管理员模式
 ```bash
-run_as_admin.bat
+scripts\run_as_admin.bat
 ```
 以管理员身份运行（快捷键必需）
 
 ## 📦 打包发布
 
 ```bash
-build_release.bat
+scripts\build_release.bat
 ```
 
 自动完成：
@@ -81,37 +81,41 @@ build_release.bat
 
 ```
 mouse_control/
-├── lib/                    # Flutter代码
+├── START.bat                    # 快捷启动入口
+├── README.md                    # 项目说明
+├── CHANGELOG.md                 # 更新日志
+├── scripts/                     # 所有脚本
+│   ├── START.bat               # 主启动脚本
+│   ├── run_debug.bat           # 调试模式
+│   ├── run_as_admin.bat        # 管理员模式
+│   ├── build_release.bat       # 发布打包
+│   ├── diagnose.bat            # 诊断工具
+│   └── test_hotkey.bat         # 快捷键测试
+├── docs/                        # 详细文档
+│   ├── BUILD_GUIDE.md          # 构建指南
+│   └── 打包发布指南.md          # 打包说明
+├── logs/                        # 日志文件
+├── lib/                         # Flutter代码
 │   ├── main.dart
 │   ├── mouse_controller_service.dart
 │   └── mouse_controller_bindings.dart
-├── native/src/             # C++ DLL
-│   ├── mouse_controller.cpp
-│   ├── mouse_controller.h
-│   └── mouse_controller.dll
-├── START.bat               # 主启动脚本
-├── run_debug.bat           # 调试模式
-├── run_as_admin.bat        # 管理员模式
-├── build_release.bat       # 发布打包
-├── diagnose.bat            # 诊断工具
-├── test_hotkey.bat         # 快捷键测试
-├── README.md               # 本文件
-├── CHANGELOG.md            # 更新日志
-├── BUILD_GUIDE.md          # 构建指南
-└── 打包发布指南.md         # 打包详细说明
+└── native/src/                  # C++ DLL
+    ├── mouse_controller.cpp
+    ├── mouse_controller.h
+    └── mouse_controller.dll
 ```
 
 ## 🛠️ 开发调试
 
 ### 诊断工具
 ```bash
-diagnose.bat
+scripts\diagnose.bat
 ```
 检查：DLL文件、Flutter环境、Windows版本、管理员权限
 
 ### 快捷键测试
 ```bash
-test_hotkey.bat
+scripts\test_hotkey.bat
 ```
 专门测试快捷键功能，显示详细日志
 
@@ -125,16 +129,16 @@ test_hotkey.bat
 ## 🐛 常见问题
 
 **Q: 快捷键不工作？**
-- 右键以管理员身份运行 `run_as_admin.bat`
-- 或运行 `diagnose.bat` 检查问题
+- 右键以管理员身份运行 `scripts\run_as_admin.bat`
+- 或运行 `scripts\diagnose.bat` 检查问题
 - 查看控制台是否显示"热键注册: 成功"
 
 **Q: 找不到DLL文件？**
-- 运行 `diagnose.bat` 检查DLL位置
+- 运行 `scripts\diagnose.bat` 检查DLL位置
 - 确保 `native/src/mouse_controller.dll` 存在
 
 **Q: 打包后无法运行？**
-- 使用 `build_release.bat` 自动打包
+- 使用 `scripts\build_release.bat` 自动打包
 - 确保所有文件在同一目录
 
 **Q: 界面显示不完整？**
@@ -165,5 +169,5 @@ test_hotkey.bat
 ---
 
 🎉 **开始使用**: `START.bat`  
-📖 **详细说明**: [BUILD_GUIDE.md](BUILD_GUIDE.md)  
-📦 **打包指南**: [打包发布指南.md](打包发布指南.md)
+📖 **详细说明**: [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md)  
+📦 **打包指南**: [docs/打包发布指南.md](docs/打包发布指南.md)

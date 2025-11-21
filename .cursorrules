@@ -11,8 +11,8 @@
 ### 保留的核心文档（禁止删除）
 - `README.md` - 项目说明、快速开始、功能介绍
 - `CHANGELOG.md` - 版本更新记录
-- `BUILD_GUIDE.md` - 构建和编译指南
-- `打包发布指南.md` - 打包详细说明
+- `docs/BUILD_GUIDE.md` - 构建和编译指南
+- `docs/打包发布指南.md` - 打包详细说明
 - `.cursorrules` - 本规则文件
 
 ### 文档编写原则
@@ -26,18 +26,22 @@
 ### 文档更新流程
 1. 新功能/修复 → 更新 `CHANGELOG.md`
 2. 用户使用变化 → 更新 `README.md`
-3. 开发流程变化 → 更新 `BUILD_GUIDE.md`
-4. 打包方式变化 → 更新 `打包发布指南.md`
+3. 开发流程变化 → 更新 `docs/BUILD_GUIDE.md`
+4. 打包方式变化 → 更新 `docs/打包发布指南.md`
 
 ## 🔧 脚本管理规则
 
 ### 保留的核心脚本（禁止删除）
-- `START.bat` - 主启动脚本（检查DLL + 管理员提示 + 运行）
-- `run_debug.bat` - 调试模式（显示详细日志）
-- `run_as_admin.bat` - 管理员模式（快捷键必需）
-- `build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
-- `diagnose.bat` - 诊断工具（检查环境和配置）
-- `test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
+所有脚本位于 `scripts/` 目录：
+- `scripts/START.bat` - 主启动脚本（检查DLL + 管理员提示 + 运行）
+- `scripts/run_debug.bat` - 调试模式（显示详细日志）
+- `scripts/run_as_admin.bat` - 管理员模式（快捷键必需）
+- `scripts/build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
+- `scripts/diagnose.bat` - 诊断工具（检查环境和配置）
+- `scripts/test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
+
+根目录保留：
+- `START.bat` - 快捷启动入口（调用 scripts/START.bat）
 
 ### 脚本编写原则
 - ❌ 禁止创建功能重复的脚本（如：run_app.bat、setup_and_run.bat等）
@@ -59,13 +63,13 @@
 ### 标准发版流程
 ```bash
 # 1. 测试功能
-START.bat                    # 启动测试
-test_hotkey.bat             # 测试快捷键
+START.bat                         # 启动测试
+scripts\test_hotkey.bat          # 测试快捷键
 
 # 2. 更新文档
 # - 编辑 CHANGELOG.md（添加版本记录）
 # - 编辑 README.md（更新版本号）
-# - 编辑 build_release.bat（更新VERSION变量）
+# - 编辑 scripts/build_release.bat（更新VERSION变量）
 
 # 3. 提交Git
 git add -A
@@ -73,7 +77,7 @@ git commit -m "release: v1.x.x - 版本说明"
 git tag v1.x.x
 
 # 4. 构建发布
-build_release.bat           # 自动完成所有打包
+scripts\build_release.bat        # 自动完成所有打包
 
 # 5. 测试发布包
 # - 解压 ZIP 到干净目录
@@ -97,7 +101,7 @@ build_release.bat           # 自动完成所有打包
 - [ ] 自动/手动模式切换正常
 - [ ] CHANGELOG.md 已更新
 - [ ] README.md 版本号已更新
-- [ ] build_release.bat 的 VERSION 已更新
+- [ ] scripts/build_release.bat 的 VERSION 已更新
 - [ ] Git 已提交并打标签
 - [ ] 在干净的 Windows 系统上测试通过
 
@@ -105,23 +109,26 @@ build_release.bat           # 自动完成所有打包
 
 ### 根目录（严格控制）
 只允许以下类型文件：
-- `*.bat` - 核心脚本（6个）
-- `*.md` - 核心文档（4个）
+- `START.bat` - 根目录快捷启动入口（仅1个）
+- `README.md` / `CHANGELOG.md` - 核心文档（2个）
 - `*.yaml` / `*.lock` / `*.iml` - 项目配置
 - `.cursorrules` / `.gitignore` - 配置文件
 - `lib/` - Flutter源码
 - `native/` - C++源码
 - `windows/` - Flutter Windows配置
 - `test/` - 测试代码
+- `scripts/` - 所有批处理脚本（6个）
+- `docs/` - 详细文档（2个）
+- `logs/` - 日志文件（Git忽略内容）
 - `build/` - 构建输出（Git忽略）
 - `.dart_tool/` / `.idea/` - IDE配置（Git忽略）
 
 ### 禁止的文件类型
-- ❌ `*.txt` 临时说明文件
-- ❌ `*.log` 日志文件（除非在.gitignore）
+- ❌ 根目录下的 `*.txt` 临时说明文件
+- ❌ 根目录下的 `*.log` 日志文件（应放在 logs/ 目录）
 - ❌ `*.backup` 备份文件
 - ❌ `temp_*.bat` 临时脚本
-- ❌ `compile_output.*` 编译输出文件
+- ❌ 根目录下的编译输出文件
 - ❌ `test_*.txt` 测试输出文件
 
 ## 🔨 代码开发规范
@@ -212,5 +219,28 @@ feat: Add auto-capture mode
 ---
 
 **最后更新**: 2024-11-21  
-**当前版本**: v1.3.0
+**当前版本**: v1.3.1
+
+## 📂 目录结构说明
+
+```
+mouse_control/
+├── START.bat              # 快捷启动入口
+├── README.md              # 项目说明
+├── CHANGELOG.md           # 更新日志
+├── scripts/               # 所有脚本
+│   ├── START.bat         # 主启动脚本
+│   ├── run_debug.bat     # 调试模式
+│   ├── run_as_admin.bat  # 管理员模式
+│   ├── build_release.bat # 发布打包
+│   ├── diagnose.bat      # 诊断工具
+│   └── test_hotkey.bat   # 快捷键测试
+├── docs/                  # 文档
+│   ├── BUILD_GUIDE.md    # 构建指南
+│   └── 打包发布指南.md    # 打包说明
+├── logs/                  # 日志文件（Git忽略内容）
+├── lib/                   # Flutter源码
+├── native/                # C++源码
+└── ...其他配置文件
+```
 

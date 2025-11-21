@@ -1,6 +1,6 @@
 @echo off
-REM 切换到脚本所在目录
-cd /d "%~dp0"
+REM 切换到项目根目录
+cd /d "%~dp0\.."
 
 REM 检查管理员权限
 net session >nul 2>&1

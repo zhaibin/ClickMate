@@ -31,14 +31,18 @@ Desktop.ini
 # 但保留源代码的 DLL
 !native/src/mouse_controller.dll
 
-# 临时文件
-*.log
+# 临时文件和日志
 *.tmp
 *.temp
 *.bak
 *.backup
 compile_output.txt
 compile_error.txt
+
+# 日志目录（但保留目录结构）
+logs/*.log
+logs/*.txt
+!logs/.gitkeep
 
 # 测试和临时文档
 更新说明.txt
