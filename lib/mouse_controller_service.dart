@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'mouse_controller_bindings.dart';
+import 'logger_service.dart';
 
 class MousePosition {
   final int x;
@@ -73,40 +74,50 @@ class MouseControllerService {
     print('========================================');
     
     // 初始化热键系统
+    LoggerService.instance.info('========================================');
+    LoggerService.instance.info('初始化热键系统...');
     try {
       bool initSuccess = _bindings.initHotkeySystem();
       print('✓ 热键系统初始化: ${initSuccess ? "成功" : "失败"}');
+      LoggerService.instance.info('热键系统初始化: ${initSuccess ? "成功" : "失败"}');
       
       if (initSuccess) {
         // 注册快捷键1: 开始/停止 (Ctrl+Shift+1)
         bool regToggle = _bindings.registerHotkey(hotkeyIdToggle, currentToggleHotkeyCode);
         print('${regToggle ? "✓" : "×"} 快捷键1 [开始/停止] Ctrl+Shift+1 (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "成功" : "失败"}');
+        LoggerService.instance.info('快捷键1 [开始/停止] Ctrl+Shift+1: ${regToggle ? "注册成功" : "注册失败"}');
         
         // 注册快捷键2: 捕获位置 (Ctrl+Shift+2)
         bool regCapture = _bindings.registerHotkey(hotkeyIdCapture, currentCaptureHotkeyCode);
         print('${regCapture ? "✓" : "×"} 快捷键2 [捕获位置] Ctrl+Shift+2 (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "成功" : "失败"}');
+        LoggerService.instance.info('快捷键2 [捕获位置] Ctrl+Shift+2: ${regCapture ? "注册成功" : "注册失败"}');
         
         if (regToggle || regCapture) {
           // 启动热键检查定时器
           _startHotkeyCheck();
           print('✓ 热键监听已启动');
+          LoggerService.instance.info('热键监听已启动');
         } else {
           print('× 所有热键注册失败！可能原因:');
           print('  1. 快捷键已被其他程序占用');
           print('  2. 需要以管理员权限运行');
           print('  解决方法: 尝试更换其他快捷键或以管理员身份运行');
+          LoggerService.instance.warning('所有热键注册失败 - 可能需要管理员权限或快捷键被占用');
         }
       } else {
         print('× 热键系统初始化失败！');
         print('  原因: DLL加载失败或Windows API调用失败');
         print('  解决方法: 确保mouse_controller.dll在应用目录');
+        LoggerService.instance.error('热键系统初始化失败 - DLL加载失败');
       }
     } catch (e) {
       print('× 热键系统初始化异常: $e');
       print('  请确保mouse_controller.dll文件存在');
+      LoggerService.instance.error('热键系统初始化异常', e);
     }
     
     print('========================================');
+    LoggerService.instance.info('========================================');
   }
 
   bool setToggleHotkey(int vkCode) {
@@ -196,22 +207,26 @@ class MouseControllerService {
   void _startHotkeyCheck() {
     _hotkeyCheckTimer?.cancel();
     print('启动热键监听定时器（每100ms检查一次）...');
+    LoggerService.instance.debug('启动热键监听定时器（每100ms检查一次）');
     
     _hotkeyCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       try {
         // 检查开始/停止快捷键
         if (_bindings.checkHotkeyPressed(hotkeyIdToggle)) {
           print('⚡ 检测到快捷键 [开始/停止] 按下！');
+          LoggerService.instance.info('快捷键触发: 开始/停止');
           toggleAutoClick();
         }
         
         // 检查捕获位置快捷键
         if (_bindings.checkHotkeyPressed(hotkeyIdCapture)) {
           print('⚡ 检测到快捷键 [捕获位置] 按下！');
+          LoggerService.instance.info('快捷键触发: 捕获位置');
           _capturePosition();
         }
       } catch (e) {
         print('× 热键检查异常: $e');
+        LoggerService.instance.error('热键检查异常', e);
       }
     });
   }
@@ -247,15 +262,18 @@ class MouseControllerService {
 
   void startAutoClick() {
     print('--- 开始点击检查 ---');
+    LoggerService.instance.info('--- 开始点击检查 ---');
     
     if (_isRunning) {
       print('× 已经在运行中，忽略');
+      LoggerService.instance.warning('尝试启动但已在运行中');
       return;
     }
     
     if (targetPosition == null) {
       print('× 无法开始：未设置目标位置！');
       print('  请先设置X和Y坐标（点击"捕获"按钮或手动输入）');
+      LoggerService.instance.warning('无法开始 - 未设置目标位置');
       return;
     }
     
@@ -265,6 +283,7 @@ class MouseControllerService {
     print('✓ 位置偏移: ±${randomOffsetRange}px');
     print('✓ 鼠标按钮: ${selectedButton.name}');
     print('>>> 开始自动点击！');
+    LoggerService.instance.info('开始自动点击 - 目标: (${targetPosition!.x}, ${targetPosition!.y}), 间隔: ${clickIntervalMs}ms, 按钮: ${selectedButton.name}');
     
     _isRunning = true;
     clickCount = 0; // 重置计数
@@ -274,6 +293,7 @@ class MouseControllerService {
   void stopAutoClick() {
     print('>>> 已停止点击');
     print('    总计点击: $clickCount 次');
+    LoggerService.instance.info('停止自动点击 - 总计: $clickCount 次');
     _isRunning = false;
     _clickTimer?.cancel();
     _clickTimer = null;
@@ -302,6 +322,9 @@ class MouseControllerService {
 
     // 每10次点击输出一次统计
     final shouldLog = clickCount == 0 || clickCount % 10 == 0;
+    if (shouldLog) {
+      LoggerService.instance.debug('点击统计: $clickCount 次, 目标: ($targetX, $targetY), 间隔: ${actualInterval}ms');
+    }
     if (shouldLog) {
       print('[点击 #${clickCount + 1}] 位置:(${targetX},${targetY}) 间隔:${actualInterval}ms');
     }

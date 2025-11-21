@@ -4,12 +4,18 @@ import 'dart:async';
 import 'package:window_manager/window_manager.dart';
 import 'mouse_controller_bindings.dart';
 import 'mouse_controller_service.dart';
+import 'logger_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // 初始化日志系统
+  await LoggerService.instance.initialize();
+  LoggerService.instance.info('应用启动中...');
+  
   // 初始化窗口管理器
   await windowManager.ensureInitialized();
+  LoggerService.instance.info('窗口管理器初始化完成');
   
   // 设置窗口属性
   WindowOptions windowOptions = const WindowOptions(
