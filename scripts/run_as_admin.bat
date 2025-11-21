@@ -1,8 +1,9 @@
 @echo off
-REM 切换到项目根目录
+chcp 65001 >nul
+REM Switch to project root
 cd /d "%~dp0\.."
 
-REM 检查管理员权限
+REM Check admin privileges
 net session >nul 2>&1
 if %errorlevel% == 0 (
     echo ========================================

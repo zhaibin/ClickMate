@@ -40,6 +40,10 @@ void main() async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
+    // Lock window size - disable resizing and maximizing
+    await windowManager.setResizable(false);
+    await windowManager.setMaximizable(false);
+    LoggerService.instance.info('Window size locked: resizable=false, maximizable=false');
   });
   
   runApp(const MyApp());
