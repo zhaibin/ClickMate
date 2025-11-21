@@ -39,13 +39,13 @@ class LoggerService {
       );
       
       info('========================================');
-      info('日志系统初始化完成');
-      info('日志文件: ${_logFile!.path}');
-      info('版本: v$appVersion');
-      info('启动时间: ${DateTime.now()}');
+      info('Logger system initialized');
+      info('Log file: ${_logFile!.path}');
+      info('Version: v$appVersion');
+      info('Start time: ${DateTime.now()}');
       info('========================================');
     } catch (e) {
-      print('日志系统初始化失败: $e');
+      print('Logger system initialization failed: $e');
     }
   }
   
@@ -82,12 +82,12 @@ class LoggerService {
           
           if (age > keepDays) {
             await file.delete();
-            print('已删除旧日志: ${file.path}');
+            print('Old log deleted: ${file.path}');
           }
         }
       }
     } catch (e) {
-      print('清理旧日志失败: $e');
+      print('Failed to clean old logs: $e');
     }
   }
   
@@ -118,11 +118,11 @@ class LoggerService {
   /// 获取当前日志文件路径
   String? get logFilePath => _logFile?.path;
   
-  /// 关闭日志系统
+  /// Close logger system
   void close() {
     info('========================================');
-    info('日志系统关闭');
-    info('结束时间: ${DateTime.now()}');
+    info('Logger system closing');
+    info('End time: ${DateTime.now()}');
     info('========================================');
     _logger?.close();
   }
@@ -132,8 +132,6 @@ class LoggerService {
 class _CustomLogPrinter extends LogPrinter {
   @override
   List<String> log(LogEvent event) {
-    final color = PrettyPrinter.defaultLevelColors[event.level];
-    final emoji = PrettyPrinter.defaultLevelEmojis[event.level];
     final message = event.message;
     final time = DateTime.now();
     final timeStr = '${time.hour.toString().padLeft(2, '0')}:'
@@ -143,7 +141,7 @@ class _CustomLogPrinter extends LogPrinter {
     
     final levelStr = event.level.toString().split('.').last.toUpperCase().padRight(7);
     
-    // 文件日志格式: [时间] [级别] 消息
+    // File log format: [Time] [Level] Message
     final logLine = '[$timeStr] [$levelStr] $message';
     
     // 如果有错误信息，添加到下一行
@@ -175,7 +173,7 @@ class _FileOutput extends LogOutput {
       }
       file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
     } catch (e) {
-      print('写入日志文件失败: $e');
+      print('Failed to write log file: $e');
     }
   }
 }

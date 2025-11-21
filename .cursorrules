@@ -5,6 +5,7 @@
 1. **保持简洁** - 不添加不必要的文件和功能
 2. **核心优先** - 只保留核心文档和脚本
 3. **标准化** - 遵循统一的开发和发布流程
+4. **国际化** - 软件支持多语言，代码内部与注释使用英语
 
 ## 📚 文档管理规则
 
@@ -13,6 +14,7 @@
 - `CHANGELOG.md` - 版本更新记录
 - `docs/BUILD_GUIDE.md` - 构建和编译指南
 - `docs/打包发布指南.md` - 打包详细说明
+- `docs/MULTILINGUAL_GUIDE.md` - 多语言支持指南
 - `.cursorrules` - 本规则文件
 
 ### 文档编写原则
@@ -28,6 +30,7 @@
 2. 用户使用变化 → 更新 `README.md`
 3. 开发流程变化 → 更新 `docs/BUILD_GUIDE.md`
 4. 打包方式变化 → 更新 `docs/打包发布指南.md`
+5. 多语言相关 → 更新 `docs/MULTILINGUAL_GUIDE.md`
 
 ## 🔧 脚本管理规则
 
@@ -67,10 +70,10 @@ START.bat                         # 启动测试
 scripts\test_hotkey.bat          # 测试快捷键
 
 # 2. 更新版本号
-# - 编辑 VERSION 文件（设置新版本号，如：1.3.3）
+# - 编辑 VERSION 文件（设置新版本号，如：1.4.1）
+# - 编辑 lib/version.dart（更新版本号）
 # - 编辑 CHANGELOG.md（添加版本记录）
-# - 编辑 README.md（更新版本号）
-# - 编辑 lib/logger_service.dart（更新日志中的版本号）
+# - 编辑 README.md（更新版本号和功能介绍）
 
 # 3. 提交Git
 git add -A
@@ -100,9 +103,12 @@ scripts\build_release.bat        # 自动完成所有打包
 - [ ] 快捷键在管理员模式下工作
 - [ ] 点击历史正常显示
 - [ ] 自动/手动模式切换正常
+- [ ] 多语言切换正常（测试至少3种语言）
+- [ ] 所有界面文本已翻译（无遗漏的中文或硬编码文本）
 - [ ] CHANGELOG.md 已更新
 - [ ] README.md 版本号已更新
-- [ ] scripts/build_release.bat 的 VERSION 已更新
+- [ ] VERSION 文件已更新
+- [ ] lib/version.dart 已更新
 - [ ] Git 已提交并打标签
 - [ ] 在干净的 Windows 系统上测试通过
 
@@ -135,20 +141,56 @@ scripts\build_release.bat        # 自动完成所有打包
 
 ## 🔨 代码开发规范
 
+### 多语言规范 ⭐
+**核心原则：代码用英语，界面多语言**
+
+#### 代码内部（必须使用英语）
+- ✅ 所有变量名、函数名、类名使用英语
+- ✅ 所有代码注释使用英语
+- ✅ 所有日志输出（print、Logger）使用英语
+- ✅ 所有错误消息（内部调试用）使用英语
+- ❌ 禁止在代码逻辑中使用中文或其他语言
+
+#### 用户界面（支持多语言）
+- ✅ 使用 `lib/l10n/app_localizations.dart` 管理翻译
+- ✅ 界面文本通过 `l10n.xxx` 获取
+- ✅ 支持11种语言（English/简中/繁中/法/西/葡/德/俄/意/日/韩）
+- ✅ 首次启动：自动检测系统语言
+- ✅ 用户可通过界面切换语言
+
+#### 翻译文件管理
+- `lib/l10n/app_localizations.dart` - 所有语言翻译的唯一来源
+- `lib/language_preference.dart` - 语言偏好持久化和系统语言检测
+- 新增翻译键必须同时添加到所有11种语言
+- 保持翻译简洁、准确、符合目标语言习惯
+
+#### 示例对比
+```dart
+// ❌ 错误 - 代码中直接使用中文
+print('鼠标点击开始');
+String buttonText = '开始点击';
+
+// ✅ 正确 - 日志用英语，界面用多语言
+print('Auto-click started');  // 日志
+String buttonText = l10n.btnStart;  // 界面文本
+```
+
 ### Flutter代码
-- 保持 `lib/` 目录简洁（3个核心文件）
-- 不创建过度的目录结构
+- 保持 `lib/` 目录结构清晰
+- 核心文件：main.dart, mouse_controller_service.dart, logger_service.dart
+- 多语言文件：l10n/app_localizations.dart, language_preference.dart
 - 状态管理使用 StatefulWidget（不引入额外框架）
 
 ### C++代码
 - DLL必须位于 `native/src/mouse_controller.dll`
 - 头文件和源码在同一目录
 - 编译后立即测试
+- 注释使用英语
 
 ### 快捷键相关
 - 默认组合：Ctrl+Shift+数字键
 - 必须支持管理员权限检查
-- 提供清晰的注册成功/失败日志
+- 提供清晰的注册成功/失败日志（英语）
 
 ## 🎯 功能开发原则
 
@@ -163,7 +205,6 @@ scripts\build_release.bat        # 自动完成所有打包
 - ❌ 过度的动画效果
 - ❌ 非必要的配置选项
 - ❌ 复杂的主题系统
-- ❌ 多语言支持（仅中文）
 - ❌ 网络功能
 - ❌ 数据统计和上报
 
@@ -214,6 +255,26 @@ feat: Add auto-capture mode
 - ✅ 代码清晰、易维护
 - ✅ 文档简洁、够用
 - ✅ 发版流程标准化
+- ✅ 国际化支持，代码英文化
+
+### 多语言编码准则 ⭐
+1. **代码全部用英语** - 变量名、函数名、注释、日志
+2. **界面支持多语言** - 通过 `l10n.xxx` 获取翻译文本
+3. **新增UI文本** - 必须同时添加11种语言的翻译
+4. **系统语言检测** - 首次启动自动跟随系统语言
+5. **测试多语言** - 发版前至少测试3种语言
+
+### 编码示例
+```dart
+// ✅ 正确做法
+print('Mouse click started');        // 日志用英语
+LoggerService.instance.info('Auto-click enabled');  // 日志英语
+String buttonText = l10n.btnStart;   // 界面用多语言
+
+// ❌ 错误做法  
+print('鼠标点击开始');                // 日志不能用中文
+String buttonText = '开始';           // 界面文本不能硬编码
+```
 
 不要过度设计，不要过度文档化。
 每次添加文件前问自己：这真的必要吗？
@@ -221,7 +282,8 @@ feat: Add auto-capture mode
 ---
 
 **最后更新**: 2024-11-21  
-**当前版本**: v1.3.1
+**当前版本**: v1.4.1  
+**支持语言**: 11种（English/简中/繁中/法/西/葡/德/俄/意/日/韩）
 
 ## 📂 目录结构说明
 
@@ -239,9 +301,14 @@ mouse_control/
 │   └── test_hotkey.bat   # 快捷键测试
 ├── docs/                  # 文档
 │   ├── BUILD_GUIDE.md    # 构建指南
-│   └── 打包发布指南.md    # 打包说明
+│   ├── 打包发布指南.md    # 打包说明
+│   └── MULTILINGUAL_GUIDE.md  # 多语言指南
 ├── logs/                  # 日志文件（Git忽略内容）
 ├── lib/                   # Flutter源码
+│   ├── main.dart         # 主应用（集成多语言）
+│   ├── l10n/             # 多语言翻译
+│   │   └── app_localizations.dart  # 9种语言翻译
+│   └── language_preference.dart    # 语言偏好管理
 ├── native/                # C++源码
 └── ...其他配置文件
 ```
