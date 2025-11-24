@@ -266,8 +266,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _intervalRandomController.text = config.randomInterval.toString();
       _offsetController.text = config.offset.toString();
       _selectedButton = MouseButton.values[config.mouseButton];
+      // Switch to manual mode when loading config (config contains fixed coordinates)
+      _autoCapture = false;
     });
-    print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms');
+    print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms, Mode: Manual');
     
     // Auto-move mouse to config position
     _moveMouseToTarget();
