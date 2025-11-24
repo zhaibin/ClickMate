@@ -37,11 +37,13 @@
 ### 保留的核心脚本（禁止删除）
 所有脚本位于 `scripts/` 目录：
 - `scripts/START.bat` - 主启动脚本（检查DLL + 管理员提示 + 运行）
+- `scripts/quick_start.bat` - 智能启动（检查Debug exe，不存在则构建）
 - `scripts/run_debug.bat` - 调试模式（显示详细日志）
 - `scripts/run_as_admin.bat` - 管理员模式（快捷键必需）
 - `scripts/build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
 - `scripts/diagnose.bat` - 诊断工具（检查环境和配置）
 - `scripts/test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
+- `scripts/generate_icons.py` - 图标生成（从源图标生成多尺寸）
 
 根目录保留：
 - `START.bat` - 快捷启动入口（调用 scripts/START.bat）
