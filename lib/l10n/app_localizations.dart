@@ -65,6 +65,7 @@ class AppLocalizations {
   String get btnCancel => get('btn_cancel');
   String get btnOk => get('btn_ok');
   String get btnToggleMode => get('btn_toggle_mode');
+  String get btnResetDefaults => get('btn_reset_defaults');
 
   // Modes
   String get modeAuto => get('mode_auto');
@@ -238,6 +239,7 @@ class AppLocalizations {
     'btn_cancel': 'Cancel',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Toggle Mode',
+    'btn_reset_defaults': 'Reset Defaults',
     'mode_auto': 'Auto',
     'mode_manual': 'Manual',
     'mode_auto_desc': 'Auto-track mode',
@@ -366,6 +368,7 @@ class AppLocalizations {
     'btn_cancel': '取消',
     'btn_ok': '确定',
     'btn_toggle_mode': '切换模式',
+    'btn_reset_defaults': '恢复默认',
     'mode_auto': '自动',
     'mode_manual': '手动',
     'mode_auto_desc': '自动跟随模式',
@@ -494,6 +497,7 @@ class AppLocalizations {
     'btn_cancel': '取消',
     'btn_ok': '確定',
     'btn_toggle_mode': '切換模式',
+    'btn_reset_defaults': '恢復默認',
     'mode_auto': '自動',
     'mode_manual': '手動',
     'mode_auto_desc': '自動跟隨模式',
@@ -622,6 +626,7 @@ class AppLocalizations {
     'btn_cancel': 'Annuler',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Changer Mode',
+    'btn_reset_defaults': 'Réinitialiser',
     'mode_auto': 'Auto',
     'mode_manual': 'Manuel',
     'mode_auto_desc': 'Mode de suivi automatique',
@@ -750,6 +755,7 @@ class AppLocalizations {
     'btn_cancel': 'Cancelar',
     'btn_ok': 'Aceptar',
     'btn_toggle_mode': 'Cambiar Modo',
+    'btn_reset_defaults': 'Restablecer',
     'mode_auto': 'Auto',
     'mode_manual': 'Manual',
     'mode_auto_desc': 'Modo de seguimiento automático',
@@ -878,6 +884,7 @@ class AppLocalizations {
     'btn_cancel': 'Cancelar',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Alternar Modo',
+    'btn_reset_defaults': 'Redefinir Padrões',
     'mode_auto': 'Auto',
     'mode_manual': 'Manual',
     'mode_auto_desc': 'Modo de rastreamento automático',
@@ -1006,6 +1013,7 @@ class AppLocalizations {
     'btn_cancel': 'Abbrechen',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Modus Wechseln',
+    'btn_reset_defaults': 'Zurücksetzen',
     'mode_auto': 'Auto',
     'mode_manual': 'Manuell',
     'mode_auto_desc': 'Automatischer Tracking-Modus',
@@ -1134,6 +1142,7 @@ class AppLocalizations {
     'btn_cancel': 'Отмена',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Переключить Режим',
+    'btn_reset_defaults': 'Сбросить',
     'mode_auto': 'Авто',
     'mode_manual': 'Ручной',
     'mode_auto_desc': 'Режим автоотслеживания',
@@ -1262,6 +1271,7 @@ class AppLocalizations {
     'btn_cancel': 'Annulla',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'Cambia Modalità',
+    'btn_reset_defaults': 'Ripristina Predefiniti',
     'mode_auto': 'Auto',
     'mode_manual': 'Manuale',
     'mode_auto_desc': 'Modalità di tracciamento automatico',
@@ -1390,6 +1400,7 @@ class AppLocalizations {
     'btn_cancel': 'キャンセル',
     'btn_ok': 'OK',
     'btn_toggle_mode': 'モード切替',
+    'btn_reset_defaults': 'デフォルトに戻す',
     'mode_auto': '自動',
     'mode_manual': '手動',
     'mode_auto_desc': '自動追跡モード',
@@ -1518,6 +1529,7 @@ class AppLocalizations {
     'btn_cancel': '취소',
     'btn_ok': '확인',
     'btn_toggle_mode': '모드 전환',
+    'btn_reset_defaults': '기본값으로 재설정',
     'mode_auto': '자동',
     'mode_manual': '수동',
     'mode_auto_desc': '자동 추적 모드',

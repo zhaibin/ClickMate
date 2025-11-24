@@ -270,6 +270,33 @@ class _MouseControlPageState extends State<MouseControlPage> {
     print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms');
   }
 
+  void _resetToDefaults() {
+    setState(() {
+      _intervalController.text = '1000';
+      _intervalRandomController.text = '0';
+      _offsetController.text = '0';
+      _selectedButton = MouseButton.left;
+    });
+    print('Reset click settings to defaults: Interval=1000ms, Random=0ms, Offset=0px, Button=Left');
+    
+    // Show notification
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.refresh, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(l10n.btnResetDefaults),
+          ],
+        ),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _saveCurrentConfig() async {
     final l10n = AppLocalizations.of(context);
     
@@ -1060,8 +1087,23 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.labelClickSettings, 
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Text(l10n.labelClickSettings, 
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: _resetToDefaults,
+                          icon: const Icon(Icons.refresh, size: 14),
+                          label: Text(l10n.btnResetDefaults, style: const TextStyle(fontSize: 11)),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                   Row(
                     children: [
