@@ -9,6 +9,8 @@ import 'logger_service.dart';
 import 'version.dart';
 import 'l10n/app_localizations.dart';
 import 'language_preference.dart';
+import 'click_config.dart';
+import 'config_management_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,14 +21,21 @@ void main() async {
   // Initialize language preference
   await LanguagePreference.instance.initialize();
   
+  // Initialize click config service (non-critical, won't block startup)
+  try {
+    await ClickConfigService.instance.initialize();
+  } catch (e) {
+    print('Warning: Failed to initialize config service: $e');
+  }
+  
   // Initialize window manager
   await windowManager.ensureInitialized();
   
   // Set window properties
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(520, 680),
-    minimumSize: Size(520, 680),
-    maximumSize: Size(520, 680),
+    size: Size(480, 680),
+    minimumSize: Size(480, 680),
+    maximumSize: Size(480, 680),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
@@ -111,6 +120,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
       final bindings = MouseControllerBindings();
       _service = MouseControllerService(bindings);
       
+      // Load last used configuration
+      _loadLastUsedConfig();
+      
       // Set position capture callback
       _service.onPositionCaptured = (x, y) {
         if (mounted) {
@@ -135,6 +147,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ),
           );
         }
+      };
+      
+      // Set before start callback for auto-saving config
+      _service.onBeforeStart = () async {
+        await _autoSaveCurrentConfig();
       };
       
       _startUiUpdate();
@@ -225,6 +242,211 @@ class _MouseControlPageState extends State<MouseControlPage> {
             child: Text(l10n.btnOk),
           ),
         ],
+      ),
+    );
+  }
+
+  void _loadLastUsedConfig() {
+    try {
+      final config = ClickConfigService.instance.getLastUsedConfig();
+      if (config != null) {
+        _loadConfig(config);
+        print('Loaded last used config: ${config.name}');
+      }
+    } catch (e) {
+      print('Failed to load last used config: $e');
+    }
+  }
+
+  void _loadConfig(ClickConfig config) {
+    setState(() {
+      _xController.text = config.x.toString();
+      _yController.text = config.y.toString();
+      _intervalController.text = config.interval.toString();
+      _intervalRandomController.text = config.randomInterval.toString();
+      _offsetController.text = config.offset.toString();
+      _selectedButton = MouseButton.values[config.mouseButton];
+      // Switch to manual mode when loading config (config contains fixed coordinates)
+      _autoCapture = false;
+    });
+    print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms, Mode: Manual');
+    
+    // Auto-move mouse to config position
+    _moveMouseToTarget();
+  }
+
+  void _moveMouseToTarget() {
+    try {
+      final x = int.tryParse(_xController.text);
+      final y = int.tryParse(_yController.text);
+      
+      if (x != null && y != null) {
+        _service.setTargetPosition(x, y);
+        // Use the service bindings to move mouse
+        _service.bindings.moveMouse(x, y);
+        print('Mouse moved to: ($x, $y)');
+        
+        // Show notification
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.near_me, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('${l10n.btnMoveMouse}: ($x, $y)'),
+              ],
+            ),
+            backgroundColor: Colors.blue,
+            duration: const Duration(milliseconds: 800),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Failed to move mouse: $e');
+    }
+  }
+
+  void _resetToDefaults() {
+    setState(() {
+      _intervalController.text = '1000';
+      _intervalRandomController.text = '0';
+      _offsetController.text = '0';
+      _selectedButton = MouseButton.left;
+    });
+    print('Reset click settings to defaults: Interval=1000ms, Random=0ms, Offset=0px, Button=Left');
+    
+    // Show notification
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.refresh, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(l10n.btnResetDefaults),
+          ],
+        ),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _saveCurrentConfig() async {
+    final l10n = AppLocalizations.of(context);
+    
+    // Validate current settings
+    final x = int.tryParse(_xController.text);
+    final y = int.tryParse(_yController.text);
+    final interval = int.tryParse(_intervalController.text);
+    final intervalRandom = int.tryParse(_intervalRandomController.text);
+    final offset = int.tryParse(_offsetController.text);
+
+    if (x == null || y == null) {
+      _showError(l10n.errorInvalidCoordinates);
+      return;
+    }
+    if (interval == null || interval < 10) {
+      _showError(l10n.errorInvalidInterval);
+      return;
+    }
+    if (intervalRandom == null || intervalRandom < 0) {
+      _showError(l10n.errorInvalidRandomRange);
+      return;
+    }
+    if (offset == null || offset < 0) {
+      _showError(l10n.errorInvalidOffset);
+      return;
+    }
+
+    // Ask for config name
+    final controller = TextEditingController(
+      text: ClickConfigService.instance.generateDefaultName(),
+    );
+
+    final configName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.save, color: Colors.blue, size: 20),
+            const SizedBox(width: 8),
+            Text(l10n.configSave, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: l10n.configName,
+            border: const OutlineInputBorder(),
+          ),
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(50),
+          ],
+          onSubmitted: (value) => Navigator.pop(context, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.btnCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: Text(l10n.btnSave),
+          ),
+        ],
+      ),
+    );
+
+    if (configName != null && configName.isNotEmpty) {
+      try {
+        final config = ClickConfigService.instance.createConfig(
+          name: configName,
+          x: x,
+          y: y,
+          interval: interval,
+          randomInterval: intervalRandom,
+          offset: offset,
+          mouseButton: _selectedButton.value,
+        );
+
+        await ClickConfigService.instance.addConfig(config);
+        await ClickConfigService.instance.setLastUsedConfig(config.id);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('${l10n.configSaveSuccess}: $configName'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error saving config: $e');
+        _showError('${l10n.errorOperationFailed}: $e');
+      }
+    }
+  }
+
+  void _showConfigManagement() {
+    showDialog(
+      context: context,
+      builder: (context) => ConfigManagementDialog(
+        currentConfigId: ClickConfigService.instance.getLastUsedConfigId(),
+        onConfigLoaded: (config) {
+          _loadConfig(config);
+        },
       ),
     );
   }
@@ -478,7 +700,34 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 
 
-  void _toggleAutoClick() {
+  Future<void> _autoSaveCurrentConfig() async {
+    print('Auto-saving current configuration...');
+    try {
+      final x = int.tryParse(_xController.text);
+      final y = int.tryParse(_yController.text);
+      final interval = int.tryParse(_intervalController.text);
+      final intervalRandom = int.tryParse(_intervalRandomController.text);
+      final offset = int.tryParse(_offsetController.text);
+
+      if (x != null && y != null && 
+          interval != null && interval >= 10 &&
+          intervalRandom != null && intervalRandom >= 0 &&
+          offset != null && offset >= 0) {
+        await ClickConfigService.instance.autoSaveConfig(
+          x: x,
+          y: y,
+          interval: interval,
+          randomInterval: intervalRandom,
+          offset: offset,
+          mouseButton: _selectedButton.value,
+        );
+      }
+    } catch (e) {
+      print('Warning: Auto-save config failed: $e');
+    }
+  }
+
+  void _toggleAutoClick() async {
     print('========================================');
     print('UI button click - Start/Stop');
     print('========================================');
@@ -524,7 +773,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
       print('✓ Parameter validation passed');
       print('Setting parameters to service...');
-
+      
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
       _service.setRandomInterval(intervalRandom);
@@ -591,20 +840,83 @@ class _MouseControlPageState extends State<MouseControlPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline, size: 20),
-            onPressed: _showHelp,
-            tooltip: l10n.helpTitle,
-          ),
-          IconButton(
-            icon: const Icon(Icons.language, size: 20),
-            onPressed: _showLanguageSettings,
-            tooltip: l10n.labelLanguage,
-          ),
-          IconButton(
-            icon: const Icon(Icons.keyboard, size: 20),
-            onPressed: _showHotkeySettings,
-            tooltip: l10n.hotkeySettings,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.menu, size: 22),
+            tooltip: l10n.menuTitle,
+            offset: const Offset(0, 45),
+            onSelected: (value) {
+              switch (value) {
+                case 'save':
+                  _saveCurrentConfig();
+                  break;
+                case 'manage':
+                  _showConfigManagement();
+                  break;
+                case 'hotkey':
+                  _showHotkeySettings();
+                  break;
+                case 'language':
+                  _showLanguageSettings();
+                  break;
+                case 'help':
+                  _showHelp();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'save',
+                child: Row(
+                  children: [
+                    const Icon(Icons.save, size: 18, color: Colors.blue),
+                    const SizedBox(width: 12),
+                    Text(l10n.configSave, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'manage',
+                child: Row(
+                  children: [
+                    const Icon(Icons.folder_special, size: 18, color: Colors.orange),
+                    const SizedBox(width: 12),
+                    Text(l10n.configManage, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'hotkey',
+                child: Row(
+                  children: [
+                    const Icon(Icons.keyboard, size: 18, color: Colors.purple),
+                    const SizedBox(width: 12),
+                    Text(l10n.hotkeySettings, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'language',
+                child: Row(
+                  children: [
+                    const Icon(Icons.language, size: 18, color: Colors.green),
+                    const SizedBox(width: 12),
+                    Text(l10n.labelLanguage, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'help',
+                child: Row(
+                  children: [
+                    const Icon(Icons.help_outline, size: 18, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(l10n.helpTitle, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -813,8 +1125,23 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.labelClickSettings, 
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Text(l10n.labelClickSettings, 
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: _resetToDefaults,
+                          icon: const Icon(Icons.refresh, size: 14),
+                          label: Text(l10n.btnResetDefaults, style: const TextStyle(fontSize: 11)),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                   Row(
                     children: [
@@ -862,22 +1189,48 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Control button
-                  SizedBox(
-              height: 44,
-                    child: ElevatedButton.icon(
-                      onPressed: _toggleAutoClick,
-                icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
-                      label: Text(
-                  _isRunning ? l10n.btnStop : l10n.btnStart,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  // Control buttons
+                  Row(
+                    children: [
+                      // Move mouse button
+                      SizedBox(
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: _moveMouseToTarget,
+                          icon: const Icon(Icons.near_me, size: 16),
+                          label: Text(
+                            l10n.btnMoveMouse,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                        ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isRunning ? Colors.red : Colors.green,
-                        foregroundColor: Colors.white,
-                  elevation: 4,
+                      const SizedBox(width: 8),
+                      // Start/Stop button
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            onPressed: _toggleAutoClick,
+                            icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
+                            label: Text(
+                              _isRunning ? l10n.btnStop : l10n.btnStart,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isRunning ? Colors.red : Colors.green,
+                              foregroundColor: Colors.white,
+                              elevation: 4,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
             const SizedBox(height: 8),
 

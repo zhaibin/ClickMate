@@ -6,4 +6,4 @@
 /// 3. CHANGELOG.md (add version record)
 /// 4. README.md (update version number)
 
-const String appVersion = '1.0.0';
+const String appVersion = '1.1.0';
