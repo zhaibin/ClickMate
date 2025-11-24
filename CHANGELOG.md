@@ -6,33 +6,61 @@ All notable changes to ClickMate will be documented in this file.
 
 ### ✨ New Features
 
-**Configuration Management**
-- Save and load click configurations
+**Configuration Management System**
+- Save and load click configurations with automatic naming
 - Multiple configuration profiles support
-- Auto-save last used configuration
+- Auto-save on click start (button or hotkey)
+- Auto-save when parameters differ from existing configs
 - Rename and delete configurations
-- Configuration details display (position, interval, offset)
+- Configuration details display (position, interval, offset, button)
 - Created/Updated timestamps for each config
-- Quick access from title bar icons
+- Visual highlighting of currently active configuration
+- Auto-load last used configuration on startup
+- Auto-switch to manual mode when loading config
+
+**Smart Mouse Movement**
+- New "Move" button to manually move mouse to target position
+- Auto-move mouse when loading a configuration
+- Visual notification showing target coordinates
+- Compact button design next to "Start Clicking"
+
+**Click Settings Enhancements**
+- "Reset Defaults" button to quickly restore default values
+- One-click reset: Interval=1000ms, Random=0ms, Offset=0px, Button=Left
+- Compact button with icon in Click Settings header
 
 **UI Improvements**
-- New save configuration button in title bar
-- New configuration management button in title bar
+- Consolidated menu in title bar (replaced multiple buttons)
+- Save/Manage/Settings options in popup menu
 - Configuration dialog with list view
+- Active config badge with blue highlight
 - Inline edit and delete actions
 - Color-coded mouse button indicators
+- Compact window size (480x680)
 - Persistent configuration storage using SharedPreferences
 
 **Multi-language Support**
-- Added configuration management translations for all 11 languages
-- New translation keys: config_title, config_manage, config_save, etc.
+- Added translations for all new features across 11 languages
+- New keys: config_*, btn_reset_defaults, btn_move_mouse, menu_*
+- Languages: English, 简中, 繁中, Français, Español, Português, Deutsch, Русский, Italiano, 日本語, 한국어
 
 ### 🔧 Technical Changes
-- Added `shared_preferences` dependency for configuration storage
-- New `ClickConfig` data model
-- New `ClickConfigService` for configuration management
-- New `ConfigManagementDialog` widget
-- Automatic configuration loading on startup
+- Added `shared_preferences` dependency for configuration persistence
+- New `ClickConfig` data model with JSON serialization
+- New `ClickConfigService` for configuration CRUD operations
+- New `ConfigManagementDialog` widget with interactive UI
+- Callback mechanism for pre-start configuration saving
+- Exposed `MouseControllerBindings` for direct mouse control
+- CMakeLists.txt fix to ensure mouse_controller.dll is copied correctly
+- Enhanced error handling in configuration service initialization
+- Auto-load last used configuration on app startup
+- Smart mode switching logic (auto→manual when loading config)
+
+### 🐛 Bug Fixes
+- Fixed DLL loading issue by updating CMakeLists.txt
+- Added robust error handling for SharedPreferences initialization
+- Fixed configuration service crash on initialization failure
+- Ensured consistent behavior between button and hotkey start
 
 ## [1.0.0] - 2025-11-24
 
