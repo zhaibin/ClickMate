@@ -14,7 +14,7 @@ releases/
 # IDE
 .idea/
 .vscode/
-*.iml
+mouse_control.iml
 *.ipr
 *.iws
 
@@ -50,9 +50,8 @@ logs/*.txt
 # 测试和临时文档
 更新说明.txt
 
-# Icon files (keep source, ignore generated)
-icon_*.png
-!icon.png
+# Icon files (keep source in assets/icons/, ignore generated sizes)
+assets/icons/icon_*.png
 
 # Flutter crash logs
 flutter_*.log

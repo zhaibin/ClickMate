@@ -16,7 +16,8 @@ def generate_icons():
     project_root = os.path.dirname(script_dir)
     
     # Source and destination paths
-    source_icon = os.path.join(project_root, 'icon.png')
+    assets_icons_dir = os.path.join(project_root, 'assets', 'icons')
+    source_icon = os.path.join(assets_icons_dir, 'icon.png')
     windows_runner_resources = os.path.join(project_root, 'windows', 'runner', 'resources')
     
     if not os.path.exists(source_icon):
@@ -67,13 +68,13 @@ def generate_icons():
         
         for filename, size in sizes_to_generate.items():
             resized = img.resize(size, Image.Resampling.LANCZOS)
-            output_path = os.path.join(project_root, filename)
+            output_path = os.path.join(assets_icons_dir, filename)
             resized.save(output_path, 'PNG')
             print(f"[OK] Generated: {output_path}")
         
         print("\n[SUCCESS] All icon files generated successfully!")
         print(f"  - ICO file: {ico_path}")
-        print(f"  - PNG files: {project_root}/icon_*.png")
+        print(f"  - PNG files: {assets_icons_dir}/icon_*.png")
         
         return True
         
