@@ -106,3 +106,13 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Install mouse_controller.dll to output directory
+set(MOUSE_CONTROLLER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/../native/src/mouse_controller.dll")
+if(EXISTS "${MOUSE_CONTROLLER_DLL}")
+  install(FILES "${MOUSE_CONTROLLER_DLL}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+  message(STATUS "Found mouse_controller.dll, will copy to output directory")
+else()
+  message(WARNING "mouse_controller.dll not found at ${MOUSE_CONTROLLER_DLL}")
+endif()

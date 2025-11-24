@@ -111,10 +111,16 @@ class ClickConfigService {
 
   /// Initialize service
   Future<void> initialize() async {
-    print('Initializing ClickConfigService...');
-    _prefs = await SharedPreferences.getInstance();
-    await loadConfigs();
-    print('ClickConfigService initialized. Loaded ${_configs.length} configs');
+    try {
+      print('Initializing ClickConfigService...');
+      _prefs = await SharedPreferences.getInstance();
+      await loadConfigs();
+      print('ClickConfigService initialized. Loaded ${_configs.length} configs');
+    } catch (e) {
+      print('Warning: ClickConfigService initialization failed: $e');
+      print('The app will continue without config management features');
+      _configs = [];
+    }
   }
 
   /// Load all configurations

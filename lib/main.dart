@@ -21,8 +21,12 @@ void main() async {
   // Initialize language preference
   await LanguagePreference.instance.initialize();
   
-  // Initialize click config service
-  await ClickConfigService.instance.initialize();
+  // Initialize click config service (non-critical, won't block startup)
+  try {
+    await ClickConfigService.instance.initialize();
+  } catch (e) {
+    print('Warning: Failed to initialize config service: $e');
+  }
   
   // Initialize window manager
   await windowManager.ensureInitialized();
@@ -238,10 +242,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 
   void _loadLastUsedConfig() {
-    final config = ClickConfigService.instance.getLastUsedConfig();
-    if (config != null) {
-      _loadConfig(config);
-      print('Loaded last used config: ${config.name}');
+    try {
+      final config = ClickConfigService.instance.getLastUsedConfig();
+      if (config != null) {
+        _loadConfig(config);
+        print('Loaded last used config: ${config.name}');
+      }
+    } catch (e) {
+      print('Failed to load last used config: $e');
     }
   }
 
