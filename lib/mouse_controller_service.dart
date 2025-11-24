@@ -46,6 +46,9 @@ class MouseControllerService {
   Timer? _clickTimer;
   Timer? _hotkeyCheckTimer;
   bool _isRunning = false;
+  
+  // Expose bindings for direct mouse movement
+  MouseControllerBindings get bindings => _bindings;
 
   // Configuration parameters
   int clickIntervalMs = 1000;

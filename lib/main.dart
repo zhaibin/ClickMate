@@ -268,6 +268,42 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _selectedButton = MouseButton.values[config.mouseButton];
     });
     print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms');
+    
+    // Auto-move mouse to config position
+    _moveMouseToTarget();
+  }
+
+  void _moveMouseToTarget() {
+    try {
+      final x = int.tryParse(_xController.text);
+      final y = int.tryParse(_yController.text);
+      
+      if (x != null && y != null) {
+        _service.setTargetPosition(x, y);
+        // Use the service bindings to move mouse
+        _service.bindings.moveMouse(x, y);
+        print('Mouse moved to: ($x, $y)');
+        
+        // Show notification
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.near_me, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('${l10n.btnMoveMouse}: ($x, $y)'),
+              ],
+            ),
+            backgroundColor: Colors.blue,
+            duration: const Duration(milliseconds: 800),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Failed to move mouse: $e');
+    }
   }
 
   void _resetToDefaults() {
@@ -1151,22 +1187,48 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Control button
-                  SizedBox(
-              height: 44,
-                    child: ElevatedButton.icon(
-                      onPressed: _toggleAutoClick,
-                icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
-                      label: Text(
-                  _isRunning ? l10n.btnStop : l10n.btnStart,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  // Control buttons
+                  Row(
+                    children: [
+                      // Move mouse button
+                      SizedBox(
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: _moveMouseToTarget,
+                          icon: const Icon(Icons.near_me, size: 16),
+                          label: Text(
+                            l10n.btnMoveMouse,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                        ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isRunning ? Colors.red : Colors.green,
-                        foregroundColor: Colors.white,
-                  elevation: 4,
+                      const SizedBox(width: 8),
+                      // Start/Stop button
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            onPressed: _toggleAutoClick,
+                            icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
+                            label: Text(
+                              _isRunning ? l10n.btnStop : l10n.btnStart,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isRunning ? Colors.red : Colors.green,
+                              foregroundColor: Colors.white,
+                              elevation: 4,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
             const SizedBox(height: 8),
 
