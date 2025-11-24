@@ -2,6 +2,38 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [1.1.0] - 2025-11-24
+
+### ✨ New Features
+
+**Configuration Management**
+- Save and load click configurations
+- Multiple configuration profiles support
+- Auto-save last used configuration
+- Rename and delete configurations
+- Configuration details display (position, interval, offset)
+- Created/Updated timestamps for each config
+- Quick access from title bar icons
+
+**UI Improvements**
+- New save configuration button in title bar
+- New configuration management button in title bar
+- Configuration dialog with list view
+- Inline edit and delete actions
+- Color-coded mouse button indicators
+- Persistent configuration storage using SharedPreferences
+
+**Multi-language Support**
+- Added configuration management translations for all 11 languages
+- New translation keys: config_title, config_manage, config_save, etc.
+
+### 🔧 Technical Changes
+- Added `shared_preferences` dependency for configuration storage
+- New `ClickConfig` data model
+- New `ClickConfigService` for configuration management
+- New `ConfigManagementDialog` widget
+- Automatic configuration loading on startup
+
 ## [1.0.0] - 2025-11-24
 
 ### 🎉 Initial Release

@@ -9,6 +9,8 @@ import 'logger_service.dart';
 import 'version.dart';
 import 'l10n/app_localizations.dart';
 import 'language_preference.dart';
+import 'click_config.dart';
+import 'config_management_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,9 @@ void main() async {
   
   // Initialize language preference
   await LanguagePreference.instance.initialize();
+  
+  // Initialize click config service
+  await ClickConfigService.instance.initialize();
   
   // Initialize window manager
   await windowManager.ensureInitialized();
@@ -110,6 +115,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
     try {
       final bindings = MouseControllerBindings();
       _service = MouseControllerService(bindings);
+      
+      // Load last used configuration
+      _loadLastUsedConfig();
       
       // Set position capture callback
       _service.onPositionCaptured = (x, y) {
@@ -225,6 +233,141 @@ class _MouseControlPageState extends State<MouseControlPage> {
             child: Text(l10n.btnOk),
           ),
         ],
+      ),
+    );
+  }
+
+  void _loadLastUsedConfig() {
+    final config = ClickConfigService.instance.getLastUsedConfig();
+    if (config != null) {
+      _loadConfig(config);
+      print('Loaded last used config: ${config.name}');
+    }
+  }
+
+  void _loadConfig(ClickConfig config) {
+    setState(() {
+      _xController.text = config.x.toString();
+      _yController.text = config.y.toString();
+      _intervalController.text = config.interval.toString();
+      _intervalRandomController.text = config.randomInterval.toString();
+      _offsetController.text = config.offset.toString();
+      _selectedButton = MouseButton.values[config.mouseButton];
+    });
+    print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms');
+  }
+
+  Future<void> _saveCurrentConfig() async {
+    final l10n = AppLocalizations.of(context);
+    
+    // Validate current settings
+    final x = int.tryParse(_xController.text);
+    final y = int.tryParse(_yController.text);
+    final interval = int.tryParse(_intervalController.text);
+    final intervalRandom = int.tryParse(_intervalRandomController.text);
+    final offset = int.tryParse(_offsetController.text);
+
+    if (x == null || y == null) {
+      _showError(l10n.errorInvalidCoordinates);
+      return;
+    }
+    if (interval == null || interval < 10) {
+      _showError(l10n.errorInvalidInterval);
+      return;
+    }
+    if (intervalRandom == null || intervalRandom < 0) {
+      _showError(l10n.errorInvalidRandomRange);
+      return;
+    }
+    if (offset == null || offset < 0) {
+      _showError(l10n.errorInvalidOffset);
+      return;
+    }
+
+    // Ask for config name
+    final controller = TextEditingController(
+      text: ClickConfigService.instance.generateDefaultName(),
+    );
+
+    final configName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.save, color: Colors.blue, size: 20),
+            const SizedBox(width: 8),
+            Text(l10n.configSave, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: l10n.configName,
+            border: const OutlineInputBorder(),
+          ),
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(50),
+          ],
+          onSubmitted: (value) => Navigator.pop(context, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.btnCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: Text(l10n.btnSave),
+          ),
+        ],
+      ),
+    );
+
+    if (configName != null && configName.isNotEmpty) {
+      try {
+        final config = ClickConfigService.instance.createConfig(
+          name: configName,
+          x: x,
+          y: y,
+          interval: interval,
+          randomInterval: intervalRandom,
+          offset: offset,
+          mouseButton: _selectedButton.value,
+        );
+
+        await ClickConfigService.instance.addConfig(config);
+        await ClickConfigService.instance.setLastUsedConfig(config.id);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('${l10n.configSaveSuccess}: $configName'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error saving config: $e');
+        _showError('${l10n.errorOperationFailed}: $e');
+      }
+    }
+  }
+
+  void _showConfigManagement() {
+    showDialog(
+      context: context,
+      builder: (context) => ConfigManagementDialog(
+        onConfigLoaded: (config) {
+          _loadConfig(config);
+        },
       ),
     );
   }
@@ -591,6 +734,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.save, size: 20),
+            onPressed: _saveCurrentConfig,
+            tooltip: l10n.configSave,
+          ),
+          IconButton(
+            icon: const Icon(Icons.folder_special, size: 20),
+            onPressed: _showConfigManagement,
+            tooltip: l10n.configManage,
+          ),
           IconButton(
             icon: const Icon(Icons.help_outline, size: 20),
             onPressed: _showHelp,
