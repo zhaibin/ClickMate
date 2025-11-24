@@ -742,30 +742,83 @@ class _MouseControlPageState extends State<MouseControlPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save, size: 20),
-            onPressed: _saveCurrentConfig,
-            tooltip: l10n.configSave,
-          ),
-          IconButton(
-            icon: const Icon(Icons.folder_special, size: 20),
-            onPressed: _showConfigManagement,
-            tooltip: l10n.configManage,
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline, size: 20),
-            onPressed: _showHelp,
-            tooltip: l10n.helpTitle,
-          ),
-          IconButton(
-            icon: const Icon(Icons.language, size: 20),
-            onPressed: _showLanguageSettings,
-            tooltip: l10n.labelLanguage,
-          ),
-          IconButton(
-            icon: const Icon(Icons.keyboard, size: 20),
-            onPressed: _showHotkeySettings,
-            tooltip: l10n.hotkeySettings,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.menu, size: 22),
+            tooltip: l10n.menuTitle,
+            offset: const Offset(0, 45),
+            onSelected: (value) {
+              switch (value) {
+                case 'save':
+                  _saveCurrentConfig();
+                  break;
+                case 'manage':
+                  _showConfigManagement();
+                  break;
+                case 'hotkey':
+                  _showHotkeySettings();
+                  break;
+                case 'language':
+                  _showLanguageSettings();
+                  break;
+                case 'help':
+                  _showHelp();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'save',
+                child: Row(
+                  children: [
+                    const Icon(Icons.save, size: 18, color: Colors.blue),
+                    const SizedBox(width: 12),
+                    Text(l10n.configSave, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'manage',
+                child: Row(
+                  children: [
+                    const Icon(Icons.folder_special, size: 18, color: Colors.orange),
+                    const SizedBox(width: 12),
+                    Text(l10n.configManage, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'hotkey',
+                child: Row(
+                  children: [
+                    const Icon(Icons.keyboard, size: 18, color: Colors.purple),
+                    const SizedBox(width: 12),
+                    Text(l10n.hotkeySettings, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'language',
+                child: Row(
+                  children: [
+                    const Icon(Icons.language, size: 18, color: Colors.green),
+                    const SizedBox(width: 12),
+                    Text(l10n.labelLanguage, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'help',
+                child: Row(
+                  children: [
+                    const Icon(Icons.help_outline, size: 18, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(l10n.helpTitle, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

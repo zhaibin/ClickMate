@@ -147,6 +147,10 @@ class AppLocalizations {
   String get langJapanese => get('lang_japanese');
   String get langKorean => get('lang_korean');
 
+  // Menu
+  String get menuTitle => get('menu_title');
+  String get menuSettings => get('menu_settings');
+  
   // Configuration Management
   String get configTitle => get('config_title');
   String get configManage => get('config_manage');
@@ -299,6 +303,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menu',
+    'menu_settings': 'Settings',
     // Configuration Management
     'config_title': 'Configurations',
     'config_manage': 'Manage Configs',
@@ -424,6 +431,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': '菜单',
+    'menu_settings': '设置',
     // Configuration Management
     'config_title': '配置管理',
     'config_manage': '管理配置',
@@ -549,6 +559,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': '菜單',
+    'menu_settings': '設置',
     // Configuration Management
     'config_title': '配置管理',
     'config_manage': '管理配置',
@@ -674,6 +687,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menu',
+    'menu_settings': 'Paramètres',
     // Configuration Management
     'config_title': 'Configurations',
     'config_manage': 'Gérer les Configs',
@@ -799,6 +815,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menú',
+    'menu_settings': 'Configuración',
     // Configuration Management
     'config_title': 'Configuraciones',
     'config_manage': 'Gestionar Configs',
@@ -923,7 +942,10 @@ class AppLocalizations {
     'lang_russian': 'Русский',
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
-    'lang_korean': '한国어',
+    'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menu',
+    'menu_settings': 'Configurações',
     // Configuration Management
     'config_title': 'Configurações',
     'config_manage': 'Gerenciar Configs',
@@ -1049,6 +1071,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menü',
+    'menu_settings': 'Einstellungen',
     // Configuration Management
     'config_title': 'Konfigurationen',
     'config_manage': 'Configs Verwalten',
@@ -1174,6 +1199,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Меню',
+    'menu_settings': 'Настройки',
     // Configuration Management
     'config_title': 'Конфигурации',
     'config_manage': 'Управлять Конфигами',
@@ -1299,6 +1327,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'Menu',
+    'menu_settings': 'Impostazioni',
     // Configuration Management
     'config_title': 'Configurazioni',
     'config_manage': 'Gestire Config',
@@ -1424,6 +1455,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': 'メニュー',
+    'menu_settings': '設定',
     // Configuration Management
     'config_title': '設定管理',
     'config_manage': '設定を管理',
@@ -1549,6 +1583,9 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    // Menu
+    'menu_title': '메뉴',
+    'menu_settings': '설정',
     // Configuration Management
     'config_title': '구성 관리',
     'config_manage': '구성 관리',
