@@ -181,6 +181,75 @@ class ClickConfigService {
     return null;
   }
 
+  /// Get last used configuration ID
+  String? getLastUsedConfigId() {
+    return _lastUsedConfigId;
+  }
+
+  /// Check if a configuration with same settings exists
+  ClickConfig? findMatchingConfig({
+    required int x,
+    required int y,
+    required int interval,
+    required int randomInterval,
+    required int offset,
+    required int mouseButton,
+  }) {
+    for (final config in _configs) {
+      if (config.x == x &&
+          config.y == y &&
+          config.interval == interval &&
+          config.randomInterval == randomInterval &&
+          config.offset == offset &&
+          config.mouseButton == mouseButton) {
+        return config;
+      }
+    }
+    return null;
+  }
+
+  /// Auto-save configuration if it doesn't exist
+  Future<ClickConfig> autoSaveConfig({
+    required int x,
+    required int y,
+    required int interval,
+    required int randomInterval,
+    required int offset,
+    required int mouseButton,
+  }) async {
+    // Check if matching config exists
+    final existing = findMatchingConfig(
+      x: x,
+      y: y,
+      interval: interval,
+      randomInterval: randomInterval,
+      offset: offset,
+      mouseButton: mouseButton,
+    );
+
+    if (existing != null) {
+      // Config already exists, just update last used
+      await setLastUsedConfig(existing.id);
+      return existing;
+    }
+
+    // Create new config with auto-generated name
+    final config = createConfig(
+      name: generateDefaultName(),
+      x: x,
+      y: y,
+      interval: interval,
+      randomInterval: randomInterval,
+      offset: offset,
+      mouseButton: mouseButton,
+    );
+
+    await addConfig(config);
+    await setLastUsedConfig(config.id);
+    print('Auto-saved new config: ${config.name}');
+    return config;
+  }
+
   /// Add new configuration
   Future<ClickConfig> addConfig(ClickConfig config) async {
     _configs.add(config);

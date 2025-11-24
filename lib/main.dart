@@ -373,6 +373,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
     showDialog(
       context: context,
       builder: (context) => ConfigManagementDialog(
+        currentConfigId: ClickConfigService.instance.getLastUsedConfigId(),
         onConfigLoaded: (config) {
           _loadConfig(config);
         },
@@ -629,7 +630,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 
 
-  void _toggleAutoClick() {
+  void _toggleAutoClick() async {
     print('========================================');
     print('UI button click - Start/Stop');
     print('========================================');
@@ -674,8 +675,25 @@ class _MouseControlPageState extends State<MouseControlPage> {
       }
 
       print('✓ Parameter validation passed');
+      
+      // Auto-save configuration when starting
+      if (!_service.isRunning) {
+        print('Auto-saving current configuration...');
+        try {
+          await ClickConfigService.instance.autoSaveConfig(
+            x: x,
+            y: y,
+            interval: interval,
+            randomInterval: intervalRandom,
+            offset: offset,
+            mouseButton: _selectedButton.value,
+          );
+        } catch (e) {
+          print('Warning: Auto-save config failed: $e');
+        }
+      }
+      
       print('Setting parameters to service...');
-
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
       _service.setRandomInterval(intervalRandom);

@@ -6,10 +6,12 @@ import 'l10n/app_localizations.dart';
 /// Configuration management dialog
 class ConfigManagementDialog extends StatefulWidget {
   final Function(ClickConfig) onConfigLoaded;
+  final String? currentConfigId;
 
   const ConfigManagementDialog({
     super.key,
     required this.onConfigLoaded,
+    this.currentConfigId,
   });
 
   @override
@@ -281,32 +283,62 @@ class _ConfigManagementDialogState extends State<ConfigManagementDialog> {
                     itemCount: _configs.length,
                     itemBuilder: (context, index) {
                       final config = _configs[index];
+                      final isSelected = config.id == widget.currentConfigId;
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
-                        elevation: 2,
+                        elevation: isSelected ? 4 : 2,
+                        color: isSelected ? Colors.blue.shade50 : null,
                         child: InkWell(
                           onTap: () => _loadConfig(config),
                           borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
+                          child: Container(
+                            decoration: isSelected ? BoxDecoration(
+                              border: Border.all(color: Colors.blue.shade300, width: 2),
+                              borderRadius: BorderRadius.circular(4),
+                            ) : null,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
                                     Icon(
-                                      Icons.bookmark,
+                                      isSelected ? Icons.bookmark : Icons.bookmark_border,
                                       size: 16,
-                                      color: Colors.blue.shade700,
+                                      color: isSelected ? Colors.blue.shade700 : Colors.grey.shade600,
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
-                                      child: Text(
-                                        config.name,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              config.name,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                                color: isSelected ? Colors.blue.shade700 : Colors.black87,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSelected)
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.green,
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Text(
+                                                l10n.configLoaded,
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
                                     Container(
@@ -406,6 +438,7 @@ class _ConfigManagementDialogState extends State<ConfigManagementDialog> {
                               ],
                             ),
                           ),
+                        ),
                         ),
                       );
                     },
