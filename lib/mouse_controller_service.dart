@@ -67,6 +67,9 @@ class MouseControllerService {
   
   // Capture callback function
   Function(int, int)? onPositionCaptured;
+  
+  // Before start callback function - for auto-saving config
+  Future<void> Function()? onBeforeStart;
 
   MouseControllerService(this._bindings) {
     print('========================================');
@@ -239,13 +242,24 @@ class MouseControllerService {
     }
   }
 
-  void toggleAutoClick() {
+  void toggleAutoClick() async {
     print('>>> Toggle click status (Current: ${_isRunning ? "Running" : "Stopped"})');
     if (_isRunning) {
       print('>>> Stopping click...');
       stopAutoClick();
     } else {
       print('>>> Trying to start click...');
+      
+      // Call onBeforeStart callback if exists (for auto-saving config)
+      if (onBeforeStart != null) {
+        try {
+          print('Calling onBeforeStart callback...');
+          await onBeforeStart!();
+        } catch (e) {
+          print('× onBeforeStart callback failed: $e');
+        }
+      }
+      
       startAutoClick();
     }
   }

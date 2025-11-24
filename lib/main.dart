@@ -149,6 +149,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
         }
       };
       
+      // Set before start callback for auto-saving config
+      _service.onBeforeStart = () async {
+        await _autoSaveCurrentConfig();
+      };
+      
       _startUiUpdate();
       
       // Delayed hotkey status check
@@ -630,6 +635,33 @@ class _MouseControlPageState extends State<MouseControlPage> {
   }
 
 
+  Future<void> _autoSaveCurrentConfig() async {
+    print('Auto-saving current configuration...');
+    try {
+      final x = int.tryParse(_xController.text);
+      final y = int.tryParse(_yController.text);
+      final interval = int.tryParse(_intervalController.text);
+      final intervalRandom = int.tryParse(_intervalRandomController.text);
+      final offset = int.tryParse(_offsetController.text);
+
+      if (x != null && y != null && 
+          interval != null && interval >= 10 &&
+          intervalRandom != null && intervalRandom >= 0 &&
+          offset != null && offset >= 0) {
+        await ClickConfigService.instance.autoSaveConfig(
+          x: x,
+          y: y,
+          interval: interval,
+          randomInterval: intervalRandom,
+          offset: offset,
+          mouseButton: _selectedButton.value,
+        );
+      }
+    } catch (e) {
+      print('Warning: Auto-save config failed: $e');
+    }
+  }
+
   void _toggleAutoClick() async {
     print('========================================');
     print('UI button click - Start/Stop');
@@ -675,25 +707,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
       }
 
       print('✓ Parameter validation passed');
-      
-      // Auto-save configuration when starting
-      if (!_service.isRunning) {
-        print('Auto-saving current configuration...');
-        try {
-          await ClickConfigService.instance.autoSaveConfig(
-            x: x,
-            y: y,
-            interval: interval,
-            randomInterval: intervalRandom,
-            offset: offset,
-            mouseButton: _selectedButton.value,
-          );
-        } catch (e) {
-          print('Warning: Auto-save config failed: $e');
-        }
-      }
-      
       print('Setting parameters to service...');
+      
       _service.setTargetPosition(x, y);
       _service.setClickInterval(interval);
       _service.setRandomInterval(intervalRandom);
