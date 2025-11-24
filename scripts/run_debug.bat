@@ -3,7 +3,7 @@ REM Switch to project root
 cd /d "%~dp0\.."
 
 echo ========================================
-echo Mouse Control - Debug Mode
+echo ClickMate - Debug Mode
 echo ========================================
 echo.
 
@@ -52,28 +52,28 @@ echo [OK] Clean complete
 echo.
 
 echo ========================================
-echo 启动应用程序（Debug模式）...
+echo Starting Application (Debug Mode)...
 echo ========================================
 echo.
-echo 提示：
-echo - 控制台将显示调试信息
-echo - 查看 "热键系统初始化" 和 "热键注册" 状态
-echo - 如果显示失败，可能需要以管理员权限运行
+echo Tips:
+echo - Console will display debug information
+echo - Watch for "Hotkey system init" and "Hotkey register" status
+echo - If failed, may need to run as administrator
 echo.
 echo ========================================
 echo.
 
-REM 运行应用
+REM Run application
 call flutter run -d windows
 
 if %errorlevel% neq 0 (
     echo.
-    echo [×] 应用启动失败！
+    echo [X] Application failed to start!
     echo.
-    echo 常见问题：
-    echo 1. 确保已安装Visual Studio 2022
-    echo 2. 确保DLL文件存在且可访问
-    echo 3. 尝试以管理员身份运行此脚本
+    echo Common issues:
+    echo 1. Ensure Visual Studio 2022 is installed
+    echo 2. Ensure DLL file exists and is accessible
+    echo 3. Try running this script as administrator
     echo.
 )
 

@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 
-:: 接收参数：目标目录 和 版本号
+:: Receive parameters: target directory and version
 set TARGET_DIR=%~1
 set VERSION=%~2
 
@@ -11,7 +11,7 @@ if "%TARGET_DIR%"=="" (
 )
 
 :: ========================================
-:: 1. 创建启动脚本（启动.bat）
+:: 1. Create Startup Script (START.bat)
 :: ========================================
 (
 echo @echo off
@@ -19,378 +19,378 @@ echo chcp 65001 ^>nul
 echo cd /d "%%~dp0"
 echo.
 echo :: ========================================
-echo :: 鼠标自动控制器 - 启动脚本 v%VERSION%
+echo :: ClickMate - Startup Script v%VERSION%
 echo :: ========================================
 echo echo.
-echo echo 正在启动鼠标自动控制器...
+echo echo Starting ClickMate...
 echo echo.
 echo.
-echo :: 检查必要文件
-echo if not exist "mouse_control.exe" ^(
-echo     echo [错误] 找不到 mouse_control.exe
-echo     echo 请确保您在正确的目录中运行此脚本。
+echo :: Check required files
+echo if not exist "clickmate.exe" ^(
+echo     echo [ERROR] clickmate.exe not found
+echo     echo Please ensure you are running this script in the correct directory.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
 echo if not exist "flutter_windows.dll" ^(
-echo     echo [错误] 找不到 flutter_windows.dll
-echo     echo 请重新下载完整的安装包。
+echo     echo [ERROR] flutter_windows.dll not found
+echo     echo Please download the complete package again.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
 echo if not exist "window_manager_plugin.dll" ^(
-echo     echo [错误] 找不到 window_manager_plugin.dll
-echo     echo 请重新下载完整的安装包。
+echo     echo [ERROR] window_manager_plugin.dll not found
+echo     echo Please download the complete package again.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
 echo if not exist "screen_retriever_windows_plugin.dll" ^(
-echo     echo [错误] 找不到 screen_retriever_windows_plugin.dll
-echo     echo 请重新下载完整的安装包。
+echo     echo [ERROR] screen_retriever_windows_plugin.dll not found
+echo     echo Please download the complete package again.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
 echo if not exist "mouse_controller.dll" ^(
-echo     echo [错误] 找不到 mouse_controller.dll
-echo     echo 请重新下载完整的安装包。
+echo     echo [ERROR] mouse_controller.dll not found
+echo     echo Please download the complete package again.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
 echo if not exist "data" ^(
-echo     echo [错误] 找不到 data 文件夹
-echo     echo 请重新下载完整的安装包。
+echo     echo [ERROR] data folder not found
+echo     echo Please download the complete package again.
 echo     pause
 echo     exit /b 1
 echo ^)
 echo.
-echo :: 检查管理员权限
+echo :: Check administrator privileges
 echo net session ^>nul 2^>^&1
 echo if %%ERRORLEVEL%% NEQ 0 ^(
 echo     echo ========================================
-echo     echo   ⚠️  建议以管理员身份运行
+echo     echo   WARNING: Recommend running as admin
 echo     echo ========================================
 echo     echo.
-echo     echo 快捷键功能需要管理员权限才能正常工作。
+echo     echo Hotkey functions require administrator privileges.
 echo     echo.
-echo     echo 是否以管理员身份重新运行？
+echo     echo Run as administrator?
 echo     echo.
-echo     choice /C YN /M "请选择 [Y]是 [N]否"
+echo     choice /C YN /M "Choose [Y]es [N]o"
 echo     if %%ERRORLEVEL%% EQU 1 ^(
 echo         powershell -Command "Start-Process '%%~f0' -Verb RunAs"
 echo         exit
 echo     ^) else ^(
 echo         echo.
-echo         echo 继续以普通权限运行...
-echo         echo 注意：快捷键功能可能无法使用。
+echo         echo Continuing with normal privileges...
+echo         echo Note: Hotkey functions may not work.
 echo         echo.
 echo         timeout /t 2 ^>nul
 echo     ^)
 echo ^)
 echo.
-echo :: 启动程序
-echo echo [✓] 所有检查通过，正在启动...
+echo :: Start program
+echo echo [OK] All checks passed, starting...
 echo echo.
-echo start "" "%%~dp0mouse_control.exe"
+echo start "" "%%~dp0clickmate.exe"
 echo.
-echo :: 等待程序窗口出现
+echo :: Wait for program window to appear
 echo timeout /t 2 /nobreak ^>nul
 echo.
 echo echo ========================================
-echo echo   程序已启动
+echo echo   Program Started
 echo echo ========================================
 echo echo.
-echo echo 提示：
-echo echo - 默认快捷键：Ctrl+Shift+1 ^(开始/停止^)
-echo echo - 捕获位置：Ctrl+Shift+2
-echo echo - 如果快捷键无效，请以管理员身份运行此脚本
-echo echo - 日志文件位置：%%USERPROFILE%%\Documents\MouseControl\logs
+echo echo Tips:
+echo echo - Default hotkey: Ctrl+Shift+1 ^(Start/Stop^)
+echo echo - Capture position: Ctrl+Shift+2
+echo echo - If hotkeys don't work, run as administrator
+echo echo - Log location: %%USERPROFILE%%\Documents\ClickMate\logs
 echo echo.
-echo echo 如果程序窗口没有出现，可能的原因：
-echo echo 1. 缺少 Visual C++ 运行库 ^(请安装 VC++ Redistributable^)
-echo echo 2. 杀毒软件拦截 ^(请添加信任^)
-echo echo 3. Windows 版本过低 ^(需要 Windows 10 或更高版本^)
+echo echo If program window doesn't appear, possible reasons:
+echo echo 1. Missing Visual C++ Runtime ^(install VC++ Redistributable^)
+echo echo 2. Antivirus blocking ^(add to trusted^)
+echo echo 3. Windows version too old ^(requires Windows 10+^)
 echo echo.
-echo echo 请查看日志获取详细错误信息：
-echo echo %%USERPROFILE%%\Documents\MouseControl\logs\app_*.log
+echo echo Check logs for detailed error information:
+echo echo %%USERPROFILE%%\Documents\ClickMate\logs\app_*.log
 echo echo.
 echo pause
-) > "%TARGET_DIR%\启动.bat"
+) > "%TARGET_DIR%\START.bat"
 
 :: ========================================
-:: 2. 创建使用说明（使用说明.txt）
+:: 2. Create User Manual (README.txt)
 :: ========================================
 (
 echo ========================================
-echo   鼠标自动控制器 v%VERSION% - 使用说明
+echo   ClickMate v%VERSION% - User Manual
 echo ========================================
 echo.
-echo 一、快速开始
+echo I. Quick Start
 echo ------------
-echo 1. 双击"启动.bat"启动程序
-echo 2. 建议以管理员身份运行^(快捷键功能需要^)
-echo 3. 首次使用请先测试基本功能
+echo 1. Double-click "START.bat" to launch
+echo 2. Recommend running as administrator ^(for hotkey functions^)
+echo 3. Test basic functions first
 echo.
 echo.
-echo 二、主要功能
+echo II. Main Features
 echo ------------
-echo ✓ 自动鼠标点击
-echo ✓ 可选左键/右键/中键
-echo ✓ 自定义点击间隔
-echo ✓ 随机时间偏移
-echo ✓ 随机位置偏移
-echo ✓ 全局快捷键控制
-echo ✓ 点击历史记录
+echo [OK] Auto mouse clicking
+echo [OK] Left/Right/Middle button options
+echo [OK] Custom click interval
+echo [OK] Random time offset
+echo [OK] Random position offset
+echo [OK] Global hotkey control
+echo [OK] Click history
 echo.
 echo.
-echo 三、操作模式
+echo III. Operating Modes
 echo ------------
-echo 【自动跟踪模式】^(默认^)
-echo - 实时跟随鼠标位置
-echo - 绿色"自动"标签
-echo - 适合需要随时调整位置的场景
+echo [Auto-tracking Mode] ^(Default^)
+echo - Follows mouse position in real-time
+echo - Green "Auto" label
+echo - Suitable for scenarios requiring position adjustments
 echo.
-echo 【手动输入模式】
-echo - 点击X或Y输入框切换
-echo - 或点击🔄按钮切换
-echo - 灰色"手动"标签
-echo - 适合固定位置重复点击
+echo [Manual Input Mode]
+echo - Click X or Y input box to switch
+echo - Or click refresh button to switch
+echo - Gray "Manual" label
+echo - Suitable for fixed position repeated clicking
 echo.
 echo.
-echo 四、快捷键
+echo IV. Hotkeys
 echo ----------
-echo Ctrl+Shift+1  开始/停止自动点击
-echo Ctrl+Shift+2  捕获当前鼠标位置
+echo Ctrl+Shift+1  Start/Stop auto-clicking
+echo Ctrl+Shift+2  Capture current mouse position
 echo.
-echo ⚠️ 注意：
-echo - 快捷键需要管理员权限
-echo - 如果无效请右键"启动.bat"选择"以管理员身份运行"
+echo WARNING:
+echo - Hotkeys require administrator privileges
+echo - If not working, right-click "START.bat" and "Run as administrator"
 echo.
 echo.
-echo 五、参数说明
+echo V. Parameter Description
 echo ------------
-echo 【点击间隔】
-echo - 两次点击之间的时间^(毫秒^)
-echo - 最小值：100ms
-echo - 建议值：1000ms
+echo [Click Interval]
+echo - Time between two clicks ^(milliseconds^)
+echo - Minimum: 100ms
+echo - Recommended: 1000ms
 echo.
-echo 【随机偏移±】
-echo - 在间隔基础上随机增减
-echo - 例如：间隔1000ms，偏移±200ms
-echo - 实际间隔将在800-1200ms之间
+echo [Random Offset +/-]
+echo - Random variance on interval
+echo - Example: Interval 1000ms, Offset +/-200ms
+echo - Actual interval will be 800-1200ms
 echo.
-echo 【位置偏移】
-echo - 点击位置的随机偏移范围^(像素^)
-echo - 例如：偏移10，实际点击位置在±10像素内
-echo - 用于模拟人工点击
+echo [Position Offset]
+echo - Random offset range for click position ^(pixels^)
+echo - Example: Offset 10, actual click within +/-10 pixels
+echo - Used to simulate human clicking
 echo.
 echo.
-echo 六、常见问题
+echo VI. FAQ
 echo ------------
-echo 【Q1】快捷键不工作？
-echo A: 需要以管理员身份运行，右键"启动.bat"→"以管理员身份运行"
+echo [Q1] Hotkeys not working?
+echo A: Need to run as administrator, right-click "START.bat" -^> "Run as administrator"
 echo.
-echo 【Q2】程序无法启动？
-echo A: 确保已安装 Visual C++ Redistributable
-echo    下载地址：https://aka.ms/vs/17/release/vc_redist.x64.exe
+echo [Q2] Program won't start?
+echo A: Ensure Visual C++ Redistributable is installed
+echo    Download: https://aka.ms/vs/17/release/vc_redist.x64.exe
 echo.
-echo 【Q3】点击不准确？
-echo A: 检查位置偏移设置，设为0可精确点击
+echo [Q3] Clicking inaccurate?
+echo A: Check position offset settings, set to 0 for precise clicking
 echo.
-echo 【Q4】如何查看日志？
-echo A: 双击"查看日志.bat"，或手动打开
-echo    %%USERPROFILE%%\Documents\MouseControl\logs\
+echo [Q4] How to view logs?
+echo A: Double-click "VIEW_LOGS.bat", or manually open
+echo    %%USERPROFILE%%\Documents\ClickMate\logs\
 echo.
-echo 【Q5】如何卸载？
-echo A: 直接删除整个文件夹即可，无残留
+echo [Q5] How to uninstall?
+echo A: Simply delete the entire folder, no residue
 echo.
 echo.
-echo 七、技术支持
+echo VII. Technical Support
 echo ------------
-echo 版本：v%VERSION%
-echo 系统要求：Windows 10/11
-echo 日志位置：%%USERPROFILE%%\Documents\MouseControl\logs\
+echo Version: v%VERSION%
+echo Requirements: Windows 10/11
+echo Log location: %%USERPROFILE%%\Documents\ClickMate\logs\
 echo.
-echo 如有问题请查看日志文件获取详细信息。
+echo Check log files for detailed information if issues occur.
 echo.
 echo ========================================
-echo   祝使用愉快！
+echo   Enjoy!
 echo ========================================
-) > "%TARGET_DIR%\使用说明.txt"
+) > "%TARGET_DIR%\README.txt"
 
 :: ========================================
-:: 3. 创建常见问题（常见问题.txt）
+:: 3. Create FAQ (FAQ.txt)
 :: ========================================
 (
 echo ========================================
-echo   常见问题解答 ^(FAQ^)
+echo   Frequently Asked Questions ^(FAQ^)
 echo ========================================
 echo.
-echo 【1】程序双击后无反应？
+echo [1] Program doesn't respond when double-clicked?
 echo.
-echo   症状：双击mouse_control.exe后没有窗口弹出
+echo   Symptom: No window appears after double-clicking clickmate.exe
 echo.
-echo   解决方法：
-echo   √ 右键"启动.bat"→"以管理员身份运行"
-echo   √ 检查是否缺少必要的DLL文件
-echo   √ 查看任务管理器中是否已经在运行
-echo   √ 查看日志：%%USERPROFILE%%\Documents\MouseControl\logs\
+echo   Solutions:
+echo   [OK] Right-click "START.bat" -^> "Run as administrator"
+echo   [OK] Check for missing DLL files
+echo   [OK] Check Task Manager if already running
+echo   [OK] View logs: %%USERPROFILE%%\Documents\ClickMate\logs\
 echo.
-echo   如果仍无法启动：
-echo   - 安装 Visual C++ Redistributable
-echo     下载：https://aka.ms/vs/17/release/vc_redist.x64.exe
-echo   - 检查杀毒软件是否拦截
-echo   - 尝试在Windows 10/11上运行
-echo.
-echo.
-echo 【2】快捷键按了没反应？
-echo.
-echo   症状：按Ctrl+Shift+1/2无效果
-echo.
-echo   解决方法：
-echo   √ 必须以管理员身份运行
-echo   √ 右键"启动.bat"→"以管理员身份运行"
-echo   √ 或右键"mouse_control.exe"→"以管理员身份运行"
-echo.
-echo   检查方法：
-echo   1. 打开程序
-echo   2. 查看控制台输出
-echo   3. 看是否有"热键注册成功"的提示
-echo   4. 查看日志文件确认快捷键状态
+echo   If still won't start:
+echo   - Install Visual C++ Redistributable
+echo     Download: https://aka.ms/vs/17/release/vc_redist.x64.exe
+echo   - Check if antivirus is blocking
+echo   - Try running on Windows 10/11
 echo.
 echo.
-echo 【3】找不到window_manager_plugin.dll？
+echo [2] Hotkeys not responding?
 echo.
-echo   症状：启动时提示缺少DLL
+echo   Symptom: Pressing Ctrl+Shift+1/2 has no effect
 echo.
-echo   解决方法：
-echo   √ 确认以下文件都在同一目录：
-echo     - mouse_control.exe
+echo   Solutions:
+echo   [OK] Must run as administrator
+echo   [OK] Right-click "START.bat" -^> "Run as administrator"
+echo   [OK] Or right-click "clickmate.exe" -^> "Run as administrator"
+echo.
+echo   How to check:
+echo   1. Open program
+echo   2. View console output
+echo   3. Look for "Hotkey registered successfully" message
+echo   4. Check log file for hotkey status
+echo.
+echo.
+echo [3] Cannot find window_manager_plugin.dll?
+echo.
+echo   Symptom: Missing DLL error on startup
+echo.
+echo   Solutions:
+echo   [OK] Confirm these files are in same directory:
+echo     - clickmate.exe
 echo     - flutter_windows.dll
 echo     - window_manager_plugin.dll
 echo     - screen_retriever_windows_plugin.dll
 echo     - mouse_controller.dll
-echo     - data\文件夹
+echo     - data\ folder
 echo.
-echo   √ 如果文件不全，请重新下载完整安装包
-echo   √ 解压时使用"解压到当前文件夹"
-echo.
-echo.
-echo 【4】点击位置不准？
-echo.
-echo   症状：点击位置偏离目标
-echo.
-echo   解决方法：
-echo   √ 将"位置偏移"设置为0
-echo   √ 使用"手动输入模式"指定精确坐标
-echo   √ 关闭"随机偏移±"
-echo   √ 使用Ctrl+Shift+2捕获精确位置
+echo   [OK] If files incomplete, download full package again
+echo   [OK] Extract using "Extract to current folder"
 echo.
 echo.
-echo 【5】如何查看详细日志？
+echo [4] Click position inaccurate?
 echo.
-echo   方法1：双击"查看日志.bat"
-echo   方法2：手动打开
-echo     - 按Win+R
-echo     - 输入：%%USERPROFILE%%\Documents\MouseControl\logs
-echo     - 打开最新的app_*.log文件
+echo   Symptom: Click position deviates from target
 echo.
-echo   日志包含：
-echo   - 程序启动信息
-echo   - 快捷键注册状态
-echo   - 点击统计
-echo   - 错误详细信息
+echo   Solutions:
+echo   [OK] Set "Position Offset" to 0
+echo   [OK] Use "Manual Input Mode" for precise coordinates
+echo   [OK] Disable "Random Offset +/-"
+echo   [OK] Use Ctrl+Shift+2 to capture precise position
 echo.
 echo.
-echo 【6】程序占用CPU/内存太高？
+echo [5] How to view detailed logs?
 echo.
-echo   正常情况：
+echo   Method 1: Double-click "VIEW_LOGS.bat"
+echo   Method 2: Open manually
+echo     - Press Win+R
+echo     - Type: %%USERPROFILE%%\Documents\ClickMate\logs
+echo     - Open latest app_*.log file
+echo.
+echo   Logs contain:
+echo   - Program startup info
+echo   - Hotkey registration status
+echo   - Click statistics
+echo   - Detailed error info
+echo.
+echo.
+echo [6] Program using too much CPU/Memory?
+echo.
+echo   Normal usage:
 echo   - CPU: ^<1%%
-echo   - 内存: 50-100MB
+echo   - Memory: 50-100MB
 echo.
-echo   如果异常：
-echo   1. 停止自动点击
-echo   2. 重启程序
-echo   3. 检查点击间隔是否太小^(建议≥100ms^)
-echo   4. 查看日志是否有错误循环
-echo.
-echo.
-echo 【7】想要移动到其他电脑使用？
-echo.
-echo   解决方法：
-echo   √ 这是便携版，直接复制整个文件夹即可
-echo   √ 目标电脑需要：Windows 10/11
-echo   √ 目标电脑需要：Visual C++ Redistributable
-echo   √ 无需安装，无注册表残留
+echo   If abnormal:
+echo   1. Stop auto-clicking
+echo   2. Restart program
+echo   3. Check if click interval too small ^(recommend >=100ms^)
+echo   4. Check logs for error loops
 echo.
 echo.
-echo 【8】如何完全卸载？
+echo [7] Want to use on another computer?
 echo.
-echo   卸载步骤：
-echo   1. 关闭程序
-echo   2. 删除整个程序文件夹
-echo   3. ^(可选^) 删除日志文件夹：
-echo      %%USERPROFILE%%\Documents\MouseControl\
-echo.
-echo   注意：程序不写注册表，无其他残留。
+echo   Solutions:
+echo   [OK] This is portable version, just copy entire folder
+echo   [OK] Target PC needs: Windows 10/11
+echo   [OK] Target PC needs: Visual C++ Redistributable
+echo   [OK] No installation needed, no registry residue
 echo.
 echo.
-echo 【9】支持哪些Windows版本？
+echo [8] How to completely uninstall?
 echo.
-echo   支持的版本：
-echo   √ Windows 10 ^(1809及更高版本^)
-echo   √ Windows 11 ^(所有版本^)
+echo   Uninstall steps:
+echo   1. Close program
+echo   2. Delete entire program folder
+echo   3. ^(Optional^) Delete log folder:
+echo      %%USERPROFILE%%\Documents\ClickMate\
 echo.
-echo   不支持的版本：
-echo   × Windows 7
-echo   × Windows 8/8.1
+echo   Note: Program doesn't write to registry, no other residue.
 echo.
 echo.
-echo 【10】程序安全吗？会不会有病毒？
+echo [9] Which Windows versions are supported?
 echo.
-echo   安全说明：
-echo   √ 本程序是开源项目
-echo   √ 仅使用Windows官方API
-echo   √ 不联网，不上传数据
-echo   √ 不修改系统文件
-echo   √ 不写入注册表
-echo   √ 源代码可供审查
+echo   Supported versions:
+echo   [OK] Windows 10 ^(1809 and higher^)
+echo   [OK] Windows 11 ^(all versions^)
 echo.
-echo   杀毒软件可能误报：
-echo   - 因为使用了全局快捷键API
-echo   - 因为使用了鼠标控制API
-echo   - 请添加到白名单
+echo   Unsupported versions:
+echo   [X] Windows 7
+echo   [X] Windows 8/8.1
+echo.
+echo.
+echo [10] Is the program safe? Any viruses?
+echo.
+echo   Security statement:
+echo   [OK] This is an open-source project
+echo   [OK] Only uses official Windows APIs
+echo   [OK] No internet connection, no data upload
+echo   [OK] Doesn't modify system files
+echo   [OK] Doesn't write to registry
+echo   [OK] Source code available for review
+echo.
+echo   Antivirus may false-positive:
+echo   - Because it uses global hotkey API
+echo   - Because it uses mouse control API
+echo   - Please add to whitelist
 echo.
 echo.
 echo ========================================
-echo   仍有问题？请查看日志文件
-echo   %%USERPROFILE%%\Documents\MouseControl\logs\
+echo   Still have questions? Check log files
+echo   %%USERPROFILE%%\Documents\ClickMate\logs\
 echo ========================================
-) > "%TARGET_DIR%\常见问题.txt"
+) > "%TARGET_DIR%\FAQ.txt"
 
 :: ========================================
-:: 4. 创建查看日志脚本（查看日志.bat）
+:: 4. Create View Logs Script (VIEW_LOGS.bat)
 :: ========================================
 (
 echo @echo off
 echo chcp 65001 ^>nul
 echo.
-echo 正在打开日志目录...
+echo Opening log directory...
 echo.
-echo 日志位置：%%USERPROFILE%%\Documents\MouseControl\logs
+echo Log location: %%USERPROFILE%%\Documents\ClickMate\logs
 echo.
-echo 按任意键打开日志文件夹...
+echo Press any key to open log folder...
 echo pause ^>nul
 echo.
-echo explorer "%%USERPROFILE%%\Documents\MouseControl\logs"
-) > "%TARGET_DIR%\查看日志.bat"
+echo explorer "%%USERPROFILE%%\Documents\ClickMate\logs"
+) > "%TARGET_DIR%\VIEW_LOGS.bat"
 
 :: ========================================
-:: 5. 创建调试启动脚本（调试启动.bat）
+:: 5. Create Debug Startup Script (DEBUG_START.bat)
 :: ========================================
 (
 echo @echo off
@@ -398,33 +398,33 @@ echo chcp 65001 ^>nul
 echo cd /d "%%~dp0"
 echo.
 echo ========================================
-echo   调试模式 - 显示详细日志
+echo   Debug Mode - Show Detailed Logs
 echo ========================================
 echo.
-echo 此模式会显示所有调试信息，用于诊断问题。
-echo 窗口不会自动关闭，可以查看完整输出。
+echo This mode displays all debug information for diagnostics.
+echo Window will not auto-close, you can view complete output.
 echo.
 echo ========================================
 echo.
-echo 正在启动...
+echo Starting...
 echo.
 echo.
-echo "%%~dp0mouse_control.exe"
+echo "%%~dp0clickmate.exe"
 echo.
 echo.
 echo ========================================
-echo   程序已关闭
+echo   Program Closed
 echo ========================================
 echo.
-echo 如果程序立即关闭，可能是：
-echo 1. 缺少必要的DLL文件
-echo 2. Visual C++ 运行库未安装
-echo 3. 权限不足
+echo If program closes immediately, possible reasons:
+echo 1. Missing required DLL files
+echo 2. Visual C++ Runtime not installed
+echo 3. Insufficient permissions
 echo.
-echo 请查看上方的错误信息。
+echo Please check error messages above.
 echo.
 echo pause
-) > "%TARGET_DIR%\调试启动.bat"
+) > "%TARGET_DIR%\DEBUG_START.bat"
 
 echo [OK] All helper files created in: %TARGET_DIR%
 exit /b 0

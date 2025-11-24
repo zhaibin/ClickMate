@@ -15,7 +15,7 @@ if exist "VERSION" (
 :: ========================================
 
 echo ========================================
-echo   Mouse Auto Clicker - Build Release
+echo   ClickMate - Build Release
 echo   Version: %VERSION%
 echo ========================================
 echo.
@@ -43,7 +43,7 @@ echo.
 echo [3/5] Creating portable package...
 set RELEASE_DIR=build\windows\x64\runner\Release
 set OUTPUT_DIR=releases\v%VERSION%
-set PORTABLE_DIR=%OUTPUT_DIR%\MouseControl_v%VERSION%_Portable
+set PORTABLE_DIR=%OUTPUT_DIR%\ClickMate_v%VERSION%_Portable
 
 if not exist "releases" mkdir "releases"
 if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
@@ -51,7 +51,7 @@ mkdir "%OUTPUT_DIR%"
 mkdir "%PORTABLE_DIR%"
 
 :: Copy main program and core DLLs
-copy "%RELEASE_DIR%\mouse_control.exe" "%PORTABLE_DIR%\" >nul
+copy "%RELEASE_DIR%\clickmate.exe" "%PORTABLE_DIR%\" >nul
 copy "%RELEASE_DIR%\flutter_windows.dll" "%PORTABLE_DIR%\" >nul
 
 :: Copy plugin DLLs
@@ -79,7 +79,7 @@ echo.
 
 :: 5. Create ZIP
 echo [5/5] Creating ZIP package...
-powershell -Command "Compress-Archive -Path '%PORTABLE_DIR%\*' -DestinationPath '%OUTPUT_DIR%\MouseControl_v%VERSION%_Portable.zip' -Force"
+powershell -Command "Compress-Archive -Path '%PORTABLE_DIR%\*' -DestinationPath '%OUTPUT_DIR%\ClickMate_v%VERSION%_Portable.zip' -Force"
 echo [OK] ZIP created
 echo.
 
@@ -88,8 +88,8 @@ echo   Build Complete!
 echo ========================================
 echo.
 echo Output directory: %OUTPUT_DIR%
-echo   - MouseControl_v%VERSION%_Portable\
-echo   - MouseControl_v%VERSION%_Portable.zip
+echo   - ClickMate_v%VERSION%_Portable\
+echo   - ClickMate_v%VERSION%_Portable.zip
 echo.
 echo Opening output folder...
 start explorer "%CD%\%OUTPUT_DIR%"

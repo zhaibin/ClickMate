@@ -2,64 +2,64 @@
 chcp 65001 >nul
 cd /d "%~dp0\.."
 echo ========================================
-echo 快捷键问题诊断工具
+echo ClickMate - Diagnostic Tool
 echo ========================================
 echo.
 
-echo [检查1] DLL文件
+echo [Check 1] DLL Files
 echo ----------------------------------------
 if exist "native\src\mouse_controller.dll" (
-    echo ✓ 源DLL存在: native\src\mouse_controller.dll
-    for %%A in ("native\src\mouse_controller.dll") do echo   大小: %%~zA 字节
+    echo [OK] Source DLL exists: native\src\mouse_controller.dll
+    for %%A in ("native\src\mouse_controller.dll") do echo   Size: %%~zA bytes
 ) else (
-    echo × 源DLL不存在！
-    echo   请先编译DLL: compile_dll.ps1
+    echo [X] Source DLL not found!
+    echo   Please compile DLL first: compile_dll.ps1
 )
 
 if exist "mouse_controller.dll" (
-    echo ✓ 根目录DLL存在: mouse_controller.dll
-    for %%A in ("mouse_controller.dll") do echo   大小: %%~zA 字节
+    echo [OK] Root DLL exists: mouse_controller.dll
+    for %%A in ("mouse_controller.dll") do echo   Size: %%~zA bytes
 ) else (
-    echo × 根目录DLL不存在！
-    echo   正在复制...
+    echo [X] Root DLL not found!
+    echo   Copying...
     copy /Y "native\src\mouse_controller.dll" "." >nul 2>&1
     if exist "mouse_controller.dll" (
-        echo ✓ 复制成功
+        echo [OK] Copy successful
     ) else (
-        echo × 复制失败
+        echo [X] Copy failed
     )
 )
 echo.
 
-echo [检查2] Flutter环境
+echo [Check 2] Flutter Environment
 echo ----------------------------------------
 flutter --version | findstr "Flutter"
 echo.
 
-echo [检查3] Windows版本
+echo [Check 3] Windows Version
 echo ----------------------------------------
 ver
 echo.
 
-echo [检查4] 管理员权限
+echo [Check 4] Administrator Privileges
 echo ----------------------------------------
 net session >nul 2>&1
 if %errorlevel% == 0 (
-    echo ✓ 当前以管理员权限运行
+    echo [OK] Running with administrator privileges
 ) else (
-    echo × 当前非管理员权限
-    echo   建议: 右键点击此文件，选择"以管理员身份运行"
+    echo [X] Not running as administrator
+    echo   Suggestion: Right-click this file and select "Run as administrator"
 )
 echo.
 
 echo ========================================
-echo 诊断完成
+echo Diagnostic Complete
 echo ========================================
 echo.
-echo 建议操作:
-echo 1. 如果DLL文件缺失，请先编译
-echo 2. 建议以管理员身份运行应用
-echo 3. 使用 test_hotkey.bat 启动并查看日志
+echo Recommendations:
+echo 1. If DLL files are missing, compile them first
+echo 2. Recommend running the app as administrator
+echo 3. Use test_hotkey.bat to start and view logs
 echo.
 
 pause

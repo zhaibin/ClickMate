@@ -2,7 +2,7 @@
 cd /d "%~dp0\.."
 
 echo ========================================
-echo Mouse Auto Clicker
+echo ClickMate - Mouse Auto Clicker
 echo ========================================
 echo.
 

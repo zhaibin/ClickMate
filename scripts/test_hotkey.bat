@@ -2,16 +2,16 @@
 chcp 65001 >nul
 cd /d "%~dp0\.."
 echo ========================================
-echo 快捷键调试 - 启动测试
+echo ClickMate - Hotkey Test
 echo ========================================
 echo.
 
-echo [1/2] 复制DLL文件...
+echo [1/2] Copying DLL file...
 copy /Y "native\src\mouse_controller.dll" "." >nul 2>&1
-echo 完成
+echo Done
 echo.
 
-echo [2/2] 启动应用（请观察控制台日志）...
+echo [2/2] Starting application (watch console logs)...
 echo ========================================
 echo.
 

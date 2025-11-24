@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "mouse_control" "\0"
+            VALUE "CompanyName", "xants" "\0"
+            VALUE "FileDescription", "ClickMate - Mouse Auto Clicker" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mouse_control" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mouse_control.exe" "\0"
-            VALUE "ProductName", "mouse_control" "\0"
+            VALUE "InternalName", "clickmate" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 xants. All rights reserved." "\0"
+            VALUE "OriginalFilename", "clickmate.exe" "\0"
+            VALUE "ProductName", "ClickMate" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

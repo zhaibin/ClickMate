@@ -1,12 +1,12 @@
 @echo off
-REM 切换到项目根目录
+REM Switch to project root directory
 cd /d "%~dp0\.."
 
-REM 检查管理员权限
+REM Check administrator privileges
 net session >nul 2>&1
 if %errorlevel% == 0 (
     echo ========================================
-    echo Mouse Control - Admin Mode
+    echo ClickMate - Admin Mode
     echo ========================================
     echo.
     echo [OK] Running with admin privileges

@@ -50,8 +50,12 @@ logs/*.txt
 # 测试和临时文档
 更新说明.txt
 
-# 图标源文件（已转换为 .ico）
-icon.png
+# Icon files (keep source, ignore generated)
+icon_*.png
+!icon.png
+
+# Flutter crash logs
+flutter_*.log
 
 # CMake 构建文件
 CMakeCache.txt
