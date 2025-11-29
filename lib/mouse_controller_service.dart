@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'mouse_controller_bindings.dart';
 import 'logger_service.dart';
+
+// Get modifier key display string based on platform
+String get _modifierDisplay => Platform.isMacOS ? '⌘+⇧' : 'Ctrl+Shift';
 
 class MousePosition {
   final int x;
@@ -85,13 +89,13 @@ class MouseControllerService {
       print('✓ Hotkey system initialization: ${initSuccess ? "Success" : "Failed"}');
       
       if (initSuccess) {
-        // Register hotkey 1: Start/Stop (Ctrl+Shift+1)
+        // Register hotkey 1: Start/Stop
         bool regToggle = _bindings.registerHotkey(hotkeyIdToggle, currentToggleHotkeyCode);
-        print('${regToggle ? "✓" : "×"} Hotkey 1 [Start/Stop] Ctrl+Shift+1 (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "Success" : "Failed"}');
+        print('${regToggle ? "✓" : "×"} Hotkey 1 [Start/Stop] $_modifierDisplay+1 (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "Success" : "Failed"}');
         
-        // Register hotkey 2: Capture position (Ctrl+Shift+2)
+        // Register hotkey 2: Capture position
         bool regCapture = _bindings.registerHotkey(hotkeyIdCapture, currentCaptureHotkeyCode);
-        print('${regCapture ? "✓" : "×"} Hotkey 2 [Capture] Ctrl+Shift+2 (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "Success" : "Failed"}');
+        print('${regCapture ? "✓" : "×"} Hotkey 2 [Capture] $_modifierDisplay+2 (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "Success" : "Failed"}');
         
         if (regToggle || regCapture) {
     // Start hotkey check timer
@@ -137,7 +141,7 @@ class MouseControllerService {
     
     try {
       success = _bindings.registerHotkey(hotkeyIdToggle, vkCode);
-      print('${success ? "✓" : "×"} New hotkey register Ctrl+Shift+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}');
+      print('${success ? "✓" : "×"} New hotkey register $_modifierDisplay+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}');
       
       if (!success) {
         print('× Registration failed possible reasons:');
@@ -171,7 +175,7 @@ class MouseControllerService {
     
     try {
       success = _bindings.registerHotkey(hotkeyIdCapture, vkCode);
-      print('${success ? "✓" : "×"} New hotkey register Ctrl+Shift+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}');
+      print('${success ? "✓" : "×"} New hotkey register $_modifierDisplay+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}');
       
       if (!success) {
         print('× Registration failed possible reasons:');

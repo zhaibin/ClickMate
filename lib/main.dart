@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:window_manager/window_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'mouse_controller_bindings.dart';
 import 'mouse_controller_service.dart';
@@ -33,9 +35,9 @@ void main() async {
   
   // Set window properties
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(480, 680),
-    minimumSize: Size(480, 680),
-    maximumSize: Size(480, 680),
+    size: Size(400, 640),
+    minimumSize: Size(400, 640),
+    maximumSize: Size(400, 640),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
@@ -100,7 +102,9 @@ class MouseControlPage extends StatefulWidget {
 }
 
 class _MouseControlPageState extends State<MouseControlPage> {
-  late MouseControllerService _service;
+  MouseControllerService? _service;
+  bool _serviceInitialized = false;
+  String? _initError;
   final TextEditingController _xController = TextEditingController();
   final TextEditingController _yController = TextEditingController();
   final TextEditingController _intervalController = TextEditingController(text: '1000');
@@ -119,12 +123,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
     try {
       final bindings = MouseControllerBindings();
       _service = MouseControllerService(bindings);
+      _serviceInitialized = true;
       
       // Load last used configuration
       _loadLastUsedConfig();
       
       // Set position capture callback
-      _service.onPositionCaptured = (x, y) {
+      _service!.onPositionCaptured = (x, y) {
         if (mounted) {
           setState(() {
             _xController.text = x.toString();
@@ -150,7 +155,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       };
       
       // Set before start callback for auto-saving config
-      _service.onBeforeStart = () async {
+      _service!.onBeforeStart = () async {
         await _autoSaveCurrentConfig();
       };
       
@@ -163,9 +168,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
         }
       });
     } catch (e) {
+      _initError = e.toString();
+      print('Failed to initialize MouseControllerService: $e');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final l10n = AppLocalizations.of(context);
-        _showError('${l10n.errorInitFailed}: $e\n\nPlease check console output for details');
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          _showError('${l10n.errorInitFailed}: $e\n\nPlease check console output for details');
+        }
       });
     }
   }
@@ -181,10 +190,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
     _uiUpdateTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
       if (mounted) {
         try {
-          final pos = _service.getCurrentMousePosition();
+          final pos = _service!.getCurrentMousePosition();
           setState(() {
             _currentPosition = '(${pos.x}, ${pos.y})';
-            _isRunning = _service.isRunning;
+            _isRunning = _service!.isRunning;
             
             // Update coordinates if auto-capture is enabled and not running
             if (_autoCapture && !_isRunning) {
@@ -211,18 +220,18 @@ class _MouseControlPageState extends State<MouseControlPage> {
       final offset = int.tryParse(_offsetController.text);
 
       if (x != null && y != null) {
-        _service.setTargetPosition(x, y);
+        _service!.setTargetPosition(x, y);
       }
       if (interval != null && interval >= 10) {
-        _service.setClickInterval(interval);
+        _service!.setClickInterval(interval);
       }
       if (intervalRandom != null && intervalRandom >= 0) {
-        _service.setRandomInterval(intervalRandom);
+        _service!.setRandomInterval(intervalRandom);
       }
       if (offset != null && offset >= 0) {
-        _service.setRandomOffset(offset);
+        _service!.setRandomOffset(offset);
       }
-      _service.setMouseButton(_selectedButton);
+      _service!.setMouseButton(_selectedButton);
     } catch (e) {
       // Ignore errors
     }
@@ -281,9 +290,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
       final y = int.tryParse(_yController.text);
       
       if (x != null && y != null) {
-        _service.setTargetPosition(x, y);
+        _service!.setTargetPosition(x, y);
         // Use the service bindings to move mouse
-        _service.bindings.moveMouse(x, y);
+        _service!.bindings.moveMouse(x, y);
         print('Mouse moved to: ($x, $y)');
         
         // Show notification
@@ -455,10 +464,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
     showDialog(
       context: context,
       builder: (context) => HotkeySettingsDialog(
-        currentToggleHotkeyCode: _service.currentToggleHotkeyCode,
-        currentCaptureHotkeyCode: _service.currentCaptureHotkeyCode,
+        currentToggleHotkeyCode: _service!.currentToggleHotkeyCode,
+        currentCaptureHotkeyCode: _service!.currentCaptureHotkeyCode,
         onToggleHotkeyChanged: (vkCode) {
-          bool success = _service.setToggleHotkey(vkCode);
+          bool success = _service!.setToggleHotkey(vkCode);
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
@@ -467,7 +476,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
           }
         },
         onCaptureHotkeyChanged: (vkCode) {
-          bool success = _service.setCaptureHotkey(vkCode);
+          bool success = _service!.setCaptureHotkey(vkCode);
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
@@ -481,6 +490,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   void _showHelp() {
     final l10n = AppLocalizations.of(context);
+    final isMac = Platform.isMacOS;
+    
+    // Platform-specific hotkey content
+    final hotkeyContent = isMac 
+        ? '⌘+⇧+1: ${l10n.hotkeyToggle}\n⌘+⇧+2: ${l10n.hotkeyCapture}\n\n${l10n.msgPermissionRequired}'
+        : 'Ctrl+Shift+1: ${l10n.hotkeyToggle}\nCtrl+Shift+2: ${l10n.hotkeyCapture}\n\n${l10n.msgAdminRequired}';
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -497,6 +513,35 @@ class _MouseControlPageState extends State<MouseControlPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Platform indicator
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isMac ? Colors.grey.shade800 : Colors.blue.shade700,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isMac ? Icons.laptop_mac : Icons.laptop_windows,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isMac ? 'macOS' : 'Windows',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
                 // Quick Start
                 _buildHelpSection(
                   Icons.rocket_launch,
@@ -524,11 +569,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 ),
                 const SizedBox(height: 16),
                 
-                // Hotkeys
+                // Hotkeys (platform-specific)
                 _buildHelpSection(
                   Icons.keyboard,
                   l10n.helpHotkeys,
-                  l10n.helpHotkeysContent,
+                  hotkeyContent,
                   Colors.purple,
                 ),
                 const SizedBox(height: 20),
@@ -557,12 +602,29 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 ),
                 const SizedBox(height: 12),
                 
-                // FAQ Items
-                _buildFaqItem(l10n.faqHotkeyNotWork, l10n.faqHotkeyNotWorkAnswer),
-                const SizedBox(height: 12),
-                _buildFaqItem(l10n.faqDllMissing, l10n.faqDllMissingAnswer),
-                const SizedBox(height: 12),
-                _buildFaqItem(l10n.faqAdminRequired, l10n.faqAdminRequiredAnswer),
+                // FAQ Items (platform-specific)
+                if (isMac) ...[
+                  _buildFaqItem(
+                    l10n.faqHotkeyNotWork,
+                    l10n.faqHotkeyNotWorkAnswerMac,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFaqItem(
+                    l10n.faqDylibMissing,
+                    l10n.faqDylibMissingAnswer,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFaqItem(
+                    l10n.faqPermissionRequired,
+                    l10n.faqPermissionRequiredAnswer,
+                  ),
+                ] else ...[
+                  _buildFaqItem(l10n.faqHotkeyNotWork, l10n.faqHotkeyNotWorkAnswer),
+                  const SizedBox(height: 12),
+                  _buildFaqItem(l10n.faqDllMissing, l10n.faqDllMissingAnswer),
+                  const SizedBox(height: 12),
+                  _buildFaqItem(l10n.faqAdminRequired, l10n.faqAdminRequiredAnswer),
+                ],
                 const SizedBox(height: 12),
                 _buildFaqItem(l10n.faqSwitchMode, l10n.faqSwitchModeAnswer),
               ],
@@ -662,31 +724,69 @@ class _MouseControlPageState extends State<MouseControlPage> {
           width: 300,
           child: ListView(
             shrinkWrap: true,
-            children: AppLocalizations.supportedLocales.map((locale) {
-              final isSelected = LanguagePreference.instance.currentLocale == locale;
-              return ListTile(
-                leading: Radio<Locale>(
-                  value: locale,
-                  groupValue: LanguagePreference.instance.currentLocale,
-                  onChanged: (Locale? value) {
-                    if (value != null) {
-                      widget.onLanguageChanged(value);
-                      Navigator.pop(context);
+            children: [
+              // Follow System option
+              ListTile(
+                leading: Radio<bool>(
+                  value: true,
+                  groupValue: LanguagePreference.instance.isFollowingSystem,
+                  onChanged: (bool? value) async {
+                    if (value == true) {
+                      await LanguagePreference.instance.setFollowSystem();
+                      widget.onLanguageChanged(LanguagePreference.instance.currentLocale);
+                      if (context.mounted) Navigator.pop(context);
                     }
                   },
                 ),
-                title: Text(
-                  LanguagePreference.instance.getLanguageName(locale, l10n),
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
+                title: Row(
+                  children: [
+                    Icon(Icons.phone_android, size: 16, color: Colors.grey.shade600),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.langFollowSystem,
+                      style: TextStyle(
+                        fontWeight: LanguagePreference.instance.isFollowingSystem ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
-                onTap: () {
-                  widget.onLanguageChanged(locale);
-                  Navigator.pop(context);
+                onTap: () async {
+                  await LanguagePreference.instance.setFollowSystem();
+                  widget.onLanguageChanged(LanguagePreference.instance.currentLocale);
+                  if (context.mounted) Navigator.pop(context);
                 },
-              );
-            }).toList(),
+              ),
+              const Divider(height: 1),
+              // Language options
+              ...AppLocalizations.supportedLocales.map((locale) {
+                final isSelected = !LanguagePreference.instance.isFollowingSystem && 
+                    LanguagePreference.instance.currentLocale == locale;
+                return ListTile(
+                  leading: Radio<Locale>(
+                    value: locale,
+                    groupValue: LanguagePreference.instance.isFollowingSystem 
+                        ? null 
+                        : LanguagePreference.instance.currentLocale,
+                    onChanged: (Locale? value) {
+                      if (value != null) {
+                        widget.onLanguageChanged(value);
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                  title: Text(
+                    LanguagePreference.instance.getLanguageName(locale, l10n),
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  onTap: () {
+                    widget.onLanguageChanged(locale);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+            ],
           ),
         ),
         actions: [
@@ -699,6 +799,258 @@ class _MouseControlPageState extends State<MouseControlPage> {
     );
   }
 
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showAbout() {
+    final l10n = AppLocalizations.of(context);
+    
+    // Open source libraries with their URLs
+    final openSourceLibs = [
+      {'name': 'Flutter', 'desc': 'UI Framework', 'url': 'https://flutter.dev'},
+      {'name': 'window_manager', 'desc': 'Window Management', 'url': 'https://pub.dev/packages/window_manager'},
+      {'name': 'ffi', 'desc': 'Native Code Bridge', 'url': 'https://pub.dev/packages/ffi'},
+      {'name': 'shared_preferences', 'desc': 'Local Storage', 'url': 'https://pub.dev/packages/shared_preferences'},
+      {'name': 'url_launcher', 'desc': 'URL Launcher', 'url': 'https://pub.dev/packages/url_launcher'},
+    ];
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: 320,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with gradient background
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue.shade600,
+                      Colors.purple.shade600,
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // App Icon
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/icons/icon.png',
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // App Name
+                    const Text(
+                      'ClickMate',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    
+                    // Version badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'v$appVersion  •  ${Platform.isMacOS ? "macOS" : "Windows"}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Website link
+                    InkWell(
+                      onTap: () => _launchUrl('https://clickmate.xants.net'),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.language, size: 18, color: Colors.blue.shade700),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'clickmate.xants.net',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.open_in_new, size: 14, color: Colors.blue.shade400),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Open Source section
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.code, size: 14, color: Colors.grey.shade700),
+                              const SizedBox(width: 6),
+                              Text(
+                                l10n.aboutOpenSource,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          // Scrollable open source list
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 140),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: openSourceLibs.map((lib) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: InkWell(
+                                    onTap: () => _launchUrl(lib['url']!),
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.grey.shade200),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 5,
+                                            height: 5,
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.shade400,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text.rich(
+                                              TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text: lib['name']!,
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.grey.shade800,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '  ${lib['desc']!}',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.grey.shade500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Icon(Icons.open_in_new, size: 10, color: Colors.grey.shade400),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )).toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.btnOk),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _autoSaveCurrentConfig() async {
     print('Auto-saving current configuration...');
@@ -774,14 +1126,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
       print('✓ Parameter validation passed');
       print('Setting parameters to service...');
       
-      _service.setTargetPosition(x, y);
-      _service.setClickInterval(interval);
-      _service.setRandomInterval(intervalRandom);
-      _service.setRandomOffset(offset);
-      _service.setMouseButton(_selectedButton);
+      _service!.setTargetPosition(x, y);
+      _service!.setClickInterval(interval);
+      _service!.setRandomInterval(intervalRandom);
+      _service!.setRandomOffset(offset);
+      _service!.setMouseButton(_selectedButton);
 
       print('Triggering toggle operation...');
-      _service.toggleAutoClick();
+      _service!.toggleAutoClick();
       
       print('========================================');
     } catch (e) {
@@ -794,7 +1146,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
   @override
   void dispose() {
     _uiUpdateTimer?.cancel();
-    _service.dispose();
+    _service?.dispose();
     _xController.dispose();
     _yController.dispose();
     _intervalController.dispose();
@@ -835,10 +1187,88 @@ class _MouseControlPageState extends State<MouseControlPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     
+    // Show error page if service initialization failed
+    if (!_serviceInitialized || _service == null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.red.shade100,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.asset(
+                  'assets/icons/icon.png',
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(l10n.appTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.errorInitFailed,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _initError ?? 'Unknown error',
+                    style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'macOS: Please ensure libmouse_controller.dylib is compiled and accessible.\n'
+                  'Run: clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics '
+                  '-o libmouse_controller.dylib mouse_controller_macos.mm',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('${l10n.appTitle} v$appVersion', style: const TextStyle(fontSize: 15)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'assets/icons/icon.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(l10n.appTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          ],
+        ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.menu, size: 22),
@@ -860,6 +1290,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   break;
                 case 'help':
                   _showHelp();
+                  break;
+                case 'about':
+                  _showAbout();
                   break;
               }
             },
@@ -916,6 +1349,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   ],
                 ),
               ),
+              PopupMenuItem(
+                value: 'about',
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, size: 18, color: Colors.teal),
+                    const SizedBox(width: 12),
+                    Text(l10n.aboutTitle, style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -956,7 +1399,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                          '${_service.clickCount}${l10n.statusClickCount}',
+                          '${_service!.clickCount}${l10n.statusClickCount}',
                                 style: const TextStyle(
                                   color: Colors.white, 
                                   fontSize: 12,
@@ -994,11 +1437,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                   color: Colors.grey.shade700,
                                 ),
                               ),
-                              _buildHotkeyDisplay('Ctrl', Colors.green),
+                              _buildHotkeyDisplay(_modifierKey, Colors.green),
                               const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay('Shift', Colors.green),
+                              _buildHotkeyDisplay('⇧', Colors.green),
                               const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay(_getKeyName(_service.currentToggleHotkeyCode), Colors.green),
+                              _buildHotkeyDisplay(_getKeyName(_service!.currentToggleHotkeyCode), Colors.green),
                             ],
                           ),
                         ),
@@ -1022,11 +1465,11 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                   color: Colors.grey.shade700,
                                 ),
                               ),
-                              _buildHotkeyDisplay('Ctrl', Colors.blue),
+                              _buildHotkeyDisplay(_modifierKey, Colors.blue),
                               const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay('Shift', Colors.blue),
+                              _buildHotkeyDisplay('⇧', Colors.blue),
                               const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay(_getKeyName(_service.currentCaptureHotkeyCode), Colors.blue),
+                              _buildHotkeyDisplay(_getKeyName(_service!.currentCaptureHotkeyCode), Colors.blue),
                             ],
                         ),
                       ),
@@ -1266,7 +1709,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     ),
                   ),
                   Expanded(
-                      child: _service.clickHistory.isEmpty
+                      child: _service!.clickHistory.isEmpty
                           ? Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1285,9 +1728,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             )
                           : ListView.builder(
                               padding: EdgeInsets.zero,
-                      itemCount: _service.clickHistory.length,
+                      itemCount: _service!.clickHistory.length,
                       itemBuilder: (context, index) {
-                        final record = _service.clickHistory[index];
+                        final record = _service!.clickHistory[index];
                                 final isEven = index % 2 == 0;
                         return Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -1400,6 +1843,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
     };
     return keyMap[vkCode] ?? '?';
   }
+
+  // Get modifier key name based on platform (Cmd for macOS, Ctrl for Windows)
+  String get _modifierKey => Platform.isMacOS ? '⌘' : 'Ctrl';
 
   Color _getButtonColor(MouseButton button) {
     switch (button) {
@@ -1557,7 +2003,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '${l10n.hotkeySetFor} [$tabTitle] (Ctrl+Shift+Key)',
+                      '${l10n.hotkeySetFor} [$tabTitle] (${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+Key)',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -1646,9 +2092,9 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildKeyChip('Ctrl'),
+                      _buildKeyChip(Platform.isMacOS ? '⌘' : 'Ctrl'),
                       const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      _buildKeyChip('Shift'),
+                      _buildKeyChip(Platform.isMacOS ? '⇧' : 'Shift'),
                       const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                       _buildKeyChip(keyName),
                     ],
@@ -1681,7 +2127,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                   children: [
                     const Icon(Icons.check_circle, color: Colors.white, size: 20),
                     const SizedBox(width: 8),
-                    Text('[$tabTitle] ${l10n.msgHotkeySaved}: Ctrl+Shift+$keyName'),
+                    Text('[$tabTitle] ${l10n.msgHotkeySaved}: ${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+$keyName'),
                   ],
                 ),
                 backgroundColor: Colors.green,

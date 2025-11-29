@@ -27,12 +27,14 @@ Desktop.ini
 
 # 构建产物
 *.dll
+*.dylib
 *.exe
 *.zip
 *.tar.gz
 
-# 但保留源代码的 DLL
+# 但保留源代码的原生库
 !native/src/mouse_controller.dll
+!native/src/libmouse_controller.dylib
 
 # 临时文件和日志
 *.tmp

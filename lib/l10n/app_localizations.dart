@@ -148,6 +148,7 @@ class AppLocalizations {
   String get langItalian => get('lang_italian');
   String get langJapanese => get('lang_japanese');
   String get langKorean => get('lang_korean');
+  String get langFollowSystem => get('lang_follow_system');
 
   // Menu
   String get menuTitle => get('menu_title');
@@ -197,6 +198,22 @@ class AppLocalizations {
   String get faqAdminRequiredAnswer => get('faq_admin_required_answer');
   String get faqSwitchMode => get('faq_switch_mode');
   String get faqSwitchModeAnswer => get('faq_switch_mode_answer');
+  
+  // macOS specific FAQ
+  String get faqHotkeyNotWorkAnswerMac => get('faq_hotkey_not_work_answer_mac');
+  String get faqDylibMissing => get('faq_dylib_missing');
+  String get faqDylibMissingAnswer => get('faq_dylib_missing_answer');
+  String get faqPermissionRequired => get('faq_permission_required');
+  String get faqPermissionRequiredAnswer => get('faq_permission_required_answer');
+  String get msgPermissionRequired => get('msg_permission_required');
+  String get msgAdminRequired => get('msg_admin_required');
+  
+  // About dialog
+  String get aboutTitle => get('about_title');
+  String get aboutVersion => get('about_version');
+  String get aboutWebsite => get('about_website');
+  String get aboutOpenSource => get('about_open_source');
+  String get aboutOpenSourceLibs => get('about_open_source_libs');
 
   Map<String, String> _getLocalizedStrings(String languageCode) {
     switch (languageCode) {
@@ -307,6 +324,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Follow System',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Settings',
@@ -353,6 +371,20 @@ class AppLocalizations {
     'faq_admin_required_answer': 'A: Global hotkeys (Ctrl+Shift+Keys) require administrator privileges to register system-wide hooks.',
     'faq_switch_mode': 'Q: How to switch modes?',
     'faq_switch_mode_answer': 'A: Click the swap icon (⇄) or click any coordinate input field to switch between auto-tracking and manual input mode.',
+    // macOS specific
+    'faq_hotkey_not_work_answer_mac': 'A: Open System Settings > Privacy & Security > Accessibility, and enable access for ClickMate.',
+    'faq_dylib_missing': 'Q: Library file missing?',
+    'faq_dylib_missing_answer': 'A: Ensure libmouse_controller.dylib is compiled and placed in the app container or /usr/local/lib directory.',
+    'faq_permission_required': 'Q: Why are permissions required?',
+    'faq_permission_required_answer': 'A: macOS requires Accessibility permission to control the mouse and register global hotkeys.',
+    'msg_permission_required': 'Note: Requires Accessibility permission',
+    'msg_admin_required': 'Note: Requires administrator privileges',
+    // About
+    'about_title': 'About',
+    'about_version': 'Version',
+    'about_website': 'Website',
+    'about_open_source': 'Open Source',
+    'about_open_source_libs': 'This app uses the following open source libraries:\n• Flutter - UI Framework\n• window_manager - Window Management\n• ffi - Native Code Bridge\n• shared_preferences - Local Storage',
   };
 
   // Simplified Chinese
@@ -437,6 +469,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': '跟随系统',
     // Menu
     'menu_title': '菜单',
     'menu_settings': '设置',
@@ -483,6 +516,20 @@ class AppLocalizations {
     'faq_admin_required_answer': '答：全局快捷键（Ctrl+Shift+按键）需要管理员权限来注册系统级挂钩。',
     'faq_switch_mode': '问：如何切换模式？',
     'faq_switch_mode_answer': '答：点击交换图标（⇄）或点击任何坐标输入框，即可在自动跟踪和手动输入模式之间切换。',
+    // macOS specific
+    'faq_hotkey_not_work_answer_mac': '答：打开系统设置 > 隐私与安全 > 辅助功能，为 ClickMate 启用访问权限。',
+    'faq_dylib_missing': '问：库文件缺失？',
+    'faq_dylib_missing_answer': '答：确保 libmouse_controller.dylib 已编译并放置在应用容器或 /usr/local/lib 目录中。',
+    'faq_permission_required': '问：为什么需要权限？',
+    'faq_permission_required_answer': '答：macOS 需要辅助功能权限来控制鼠标和注册全局热键。',
+    'msg_permission_required': '注意：需要辅助功能权限',
+    'msg_admin_required': '注意：需要管理员权限',
+    // About
+    'about_title': '关于',
+    'about_version': '版本',
+    'about_website': '网站',
+    'about_open_source': '开源软件',
+    'about_open_source_libs': '本应用使用以下开源库：\n• Flutter - UI 框架\n• window_manager - 窗口管理\n• ffi - 原生代码桥接\n• shared_preferences - 本地存储',
   };
 
   // Traditional Chinese
@@ -567,6 +614,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': '跟隨系統',
     // Menu
     'menu_title': '菜單',
     'menu_settings': '設置',
@@ -613,6 +661,18 @@ class AppLocalizations {
     'faq_admin_required_answer': '答：全局快捷鍵（Ctrl+Shift+按鍵）需要管理員權限來註冊系統級掛鉤。',
     'faq_switch_mode': '問：如何切換模式？',
     'faq_switch_mode_answer': '答：點擊交換圖標（⇄）或點擊任何坐標輸入框，即可在自動跟隨和手動輸入模式之間切換。',
+    'faq_hotkey_not_work_answer_mac': '答：打開系統設置 > 隱私與安全 > 輔助功能，為 ClickMate 啟用訪問權限。',
+    'faq_dylib_missing': '問：庫文件缺失？',
+    'faq_dylib_missing_answer': '答：確保 libmouse_controller.dylib 已編譯並放置在應用容器或 /usr/local/lib 目錄中。',
+    'faq_permission_required': '問：為什麼需要權限？',
+    'faq_permission_required_answer': '答：macOS 需要輔助功能權限來控制滑鼠和註冊全局熱鍵。',
+    'msg_permission_required': '注意：需要輔助功能權限',
+    'msg_admin_required': '注意：需要管理員權限',
+    'about_title': '關於',
+    'about_version': '版本',
+    'about_website': '網站',
+    'about_open_source': '開源軟體',
+    'about_open_source_libs': '本應用使用以下開源庫：\n• Flutter - UI 框架\n• window_manager - 窗口管理\n• ffi - 原生代碼橋接\n• shared_preferences - 本地存儲',
   };
 
   // French
@@ -697,6 +757,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Suivre le Système',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Paramètres',
@@ -743,6 +804,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'R: Les raccourcis globaux (Ctrl+Shift+Touches) nécessitent des privilèges administrateur pour enregistrer des hooks système.',
     'faq_switch_mode': 'Q: Comment changer de mode?',
     'faq_switch_mode_answer': 'R: Cliquez sur l\'icône d\'échange (⇄) ou cliquez sur n\'importe quel champ de saisie de coordonnées pour basculer entre le mode de suivi automatique et le mode de saisie manuelle.',
+    'faq_hotkey_not_work_answer_mac': 'R: Ouvrez Paramètres Système > Confidentialité et Sécurité > Accessibilité, et activez l\'accès pour ClickMate.',
+    'faq_dylib_missing': 'Q: Fichier bibliothèque manquant?',
+    'faq_dylib_missing_answer': 'R: Assurez-vous que libmouse_controller.dylib est compilé et placé dans le conteneur de l\'app ou le répertoire /usr/local/lib.',
+    'faq_permission_required': 'Q: Pourquoi des permissions sont-elles requises?',
+    'faq_permission_required_answer': 'R: macOS nécessite la permission d\'accessibilité pour contrôler la souris et enregistrer les raccourcis globaux.',
+    'msg_permission_required': 'Note: Nécessite la permission d\'accessibilité',
+    'msg_admin_required': 'Note: Nécessite des privilèges administrateur',
+    'about_title': 'À propos',
+    'about_version': 'Version',
+    'about_website': 'Site web',
+    'about_open_source': 'Open Source',
+    'about_open_source_libs': 'Cette app utilise les bibliothèques open source suivantes:\n• Flutter - Framework UI\n• window_manager - Gestion des fenêtres\n• ffi - Pont de code natif\n• shared_preferences - Stockage local',
   };
 
   // Spanish
@@ -827,6 +900,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Seguir Sistema',
     // Menu
     'menu_title': 'Menú',
     'menu_settings': 'Configuración',
@@ -873,6 +947,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'R: Los atajos globales (Ctrl+Shift+Teclas) requieren privilegios de administrador para registrar hooks del sistema.',
     'faq_switch_mode': 'P: ¿Cómo cambiar de modo?',
     'faq_switch_mode_answer': 'R: Haga clic en el icono de intercambio (⇄) o haga clic en cualquier campo de entrada de coordenadas para cambiar entre el modo de seguimiento automático y el modo de entrada manual.',
+    'faq_hotkey_not_work_answer_mac': 'R: Abra Configuración del Sistema > Privacidad y Seguridad > Accesibilidad, y habilite el acceso para ClickMate.',
+    'faq_dylib_missing': 'P: ¿Falta el archivo de biblioteca?',
+    'faq_dylib_missing_answer': 'R: Asegúrese de que libmouse_controller.dylib esté compilado y ubicado en el contenedor de la app o el directorio /usr/local/lib.',
+    'faq_permission_required': 'P: ¿Por qué se requieren permisos?',
+    'faq_permission_required_answer': 'R: macOS requiere permiso de accesibilidad para controlar el ratón y registrar atajos globales.',
+    'msg_permission_required': 'Nota: Requiere permiso de accesibilidad',
+    'msg_admin_required': 'Nota: Requiere privilegios de administrador',
+    'about_title': 'Acerca de',
+    'about_version': 'Versión',
+    'about_website': 'Sitio web',
+    'about_open_source': 'Código Abierto',
+    'about_open_source_libs': 'Esta app utiliza las siguientes bibliotecas de código abierto:\n• Flutter - Framework UI\n• window_manager - Gestión de ventanas\n• ffi - Puente de código nativo\n• shared_preferences - Almacenamiento local',
   };
 
   // Portuguese
@@ -957,6 +1043,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Seguir Sistema',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Configurações',
@@ -1003,6 +1090,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'R: Atalhos globais (Ctrl+Shift+Teclas) requerem privilégios de administrador para registrar hooks do sistema.',
     'faq_switch_mode': 'P: Como mudar de modo?',
     'faq_switch_mode_answer': 'R: Clique no ícone de troca (⇄) ou clique em qualquer campo de entrada de coordenadas para alternar entre o modo de rastreamento automático e o modo de entrada manual.',
+    'faq_hotkey_not_work_answer_mac': 'R: Abra Configurações do Sistema > Privacidade e Segurança > Acessibilidade, e habilite o acesso para ClickMate.',
+    'faq_dylib_missing': 'P: Arquivo de biblioteca ausente?',
+    'faq_dylib_missing_answer': 'R: Certifique-se de que libmouse_controller.dylib está compilado e colocado no container do app ou no diretório /usr/local/lib.',
+    'faq_permission_required': 'P: Por que são necessárias permissões?',
+    'faq_permission_required_answer': 'R: O macOS requer permissão de acessibilidade para controlar o mouse e registrar atalhos globais.',
+    'msg_permission_required': 'Nota: Requer permissão de acessibilidade',
+    'msg_admin_required': 'Nota: Requer privilégios de administrador',
+    'about_title': 'Sobre',
+    'about_version': 'Versão',
+    'about_website': 'Site',
+    'about_open_source': 'Código Aberto',
+    'about_open_source_libs': 'Este app usa as seguintes bibliotecas de código aberto:\n• Flutter - Framework UI\n• window_manager - Gerenciamento de janelas\n• ffi - Ponte de código nativo\n• shared_preferences - Armazenamento local',
   };
 
   // German
@@ -1087,6 +1186,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'System folgen',
     // Menu
     'menu_title': 'Menü',
     'menu_settings': 'Einstellungen',
@@ -1133,6 +1233,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'A: Globale Tastenkürzel (Ctrl+Shift+Tasten) benötigen Administratorrechte, um systemweite Hooks zu registrieren.',
     'faq_switch_mode': 'F: Wie wechselt man den Modus?',
     'faq_switch_mode_answer': 'A: Klicken Sie auf das Tausch-Symbol (⇄) oder klicken Sie auf ein beliebiges Koordinaten-Eingabefeld, um zwischen automatischem Tracking-Modus und manuellem Eingabemodus zu wechseln.',
+    'faq_hotkey_not_work_answer_mac': 'A: Öffnen Sie Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen und aktivieren Sie den Zugriff für ClickMate.',
+    'faq_dylib_missing': 'F: Bibliotheksdatei fehlt?',
+    'faq_dylib_missing_answer': 'A: Stellen Sie sicher, dass libmouse_controller.dylib kompiliert und im App-Container oder /usr/local/lib-Verzeichnis abgelegt ist.',
+    'faq_permission_required': 'F: Warum werden Berechtigungen benötigt?',
+    'faq_permission_required_answer': 'A: macOS benötigt Bedienungshilfen-Berechtigung, um die Maus zu steuern und globale Tastenkürzel zu registrieren.',
+    'msg_permission_required': 'Hinweis: Erfordert Bedienungshilfen-Berechtigung',
+    'msg_admin_required': 'Hinweis: Erfordert Administratorrechte',
+    'about_title': 'Über',
+    'about_version': 'Version',
+    'about_website': 'Webseite',
+    'about_open_source': 'Open Source',
+    'about_open_source_libs': 'Diese App verwendet folgende Open-Source-Bibliotheken:\n• Flutter - UI-Framework\n• window_manager - Fensterverwaltung\n• ffi - Native Code-Brücke\n• shared_preferences - Lokale Speicherung',
   };
 
   // Russian
@@ -1217,6 +1329,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Следовать Системе',
     // Menu
     'menu_title': 'Меню',
     'menu_settings': 'Настройки',
@@ -1263,6 +1376,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'О: Глобальные горячие клавиши (Ctrl+Shift+Клавиши) требуют прав администратора для регистрации системных хуков.',
     'faq_switch_mode': 'В: Как переключить режим?',
     'faq_switch_mode_answer': 'О: Нажмите на значок обмена (⇄) или нажмите на любое поле ввода координат, чтобы переключаться между режимом автоотслеживания и режимом ручного ввода.',
+    'faq_hotkey_not_work_answer_mac': 'О: Откройте Настройки системы > Конфиденциальность и безопасность > Универсальный доступ и включите доступ для ClickMate.',
+    'faq_dylib_missing': 'В: Отсутствует файл библиотеки?',
+    'faq_dylib_missing_answer': 'О: Убедитесь, что libmouse_controller.dylib скомпилирован и размещён в контейнере приложения или каталоге /usr/local/lib.',
+    'faq_permission_required': 'В: Почему требуются разрешения?',
+    'faq_permission_required_answer': 'О: macOS требует разрешение универсального доступа для управления мышью и регистрации глобальных горячих клавиш.',
+    'msg_permission_required': 'Примечание: Требуется разрешение универсального доступа',
+    'msg_admin_required': 'Примечание: Требуются права администратора',
+    'about_title': 'О программе',
+    'about_version': 'Версия',
+    'about_website': 'Веб-сайт',
+    'about_open_source': 'Открытый исходный код',
+    'about_open_source_libs': 'Это приложение использует следующие библиотеки с открытым исходным кодом:\n• Flutter - UI-фреймворк\n• window_manager - Управление окнами\n• ffi - Мост для нативного кода\n• shared_preferences - Локальное хранилище',
   };
 
   // Italian
@@ -1347,6 +1472,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'Segui Sistema',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Impostazioni',
@@ -1393,6 +1519,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'R: Le scorciatoie globali (Ctrl+Shift+Tasti) richiedono privilegi di amministratore per registrare hook di sistema.',
     'faq_switch_mode': 'D: Come cambiare modalità?',
     'faq_switch_mode_answer': 'R: Fare clic sull\'icona di scambio (⇄) o fare clic su qualsiasi campo di input delle coordinate per passare tra la modalità di tracciamento automatico e la modalità di inserimento manuale.',
+    'faq_hotkey_not_work_answer_mac': 'R: Aprire Impostazioni di Sistema > Privacy e Sicurezza > Accessibilità e abilitare l\'accesso per ClickMate.',
+    'faq_dylib_missing': 'D: File libreria mancante?',
+    'faq_dylib_missing_answer': 'R: Assicurarsi che libmouse_controller.dylib sia compilato e posizionato nel container dell\'app o nella directory /usr/local/lib.',
+    'faq_permission_required': 'D: Perché sono necessari i permessi?',
+    'faq_permission_required_answer': 'R: macOS richiede il permesso di accessibilità per controllare il mouse e registrare le scorciatoie globali.',
+    'msg_permission_required': 'Nota: Richiede permesso di accessibilità',
+    'msg_admin_required': 'Nota: Richiede privilegi di amministratore',
+    'about_title': 'Informazioni',
+    'about_version': 'Versione',
+    'about_website': 'Sito web',
+    'about_open_source': 'Open Source',
+    'about_open_source_libs': 'Questa app utilizza le seguenti librerie open source:\n• Flutter - Framework UI\n• window_manager - Gestione finestre\n• ffi - Ponte codice nativo\n• shared_preferences - Archiviazione locale',
   };
 
   // Japanese
@@ -1477,6 +1615,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': 'システムに従う',
     // Menu
     'menu_title': 'メニュー',
     'menu_settings': '設定',
@@ -1523,6 +1662,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'A: グローバルホットキー（Ctrl+Shift+キー）はシステムワイドフックを登録するために管理者権限が必要です。',
     'faq_switch_mode': 'Q: モードを切り替えるには？',
     'faq_switch_mode_answer': 'A: スワップアイコン（⇄）をクリックするか、任意の座標入力フィールドをクリックして、自動追跡モードと手動入力モードを切り替えます。',
+    'faq_hotkey_not_work_answer_mac': 'A: システム設定 > プライバシーとセキュリティ > アクセシビリティを開き、ClickMateのアクセスを有効にしてください。',
+    'faq_dylib_missing': 'Q: ライブラリファイルが見つかりませんか？',
+    'faq_dylib_missing_answer': 'A: libmouse_controller.dylibがコンパイルされ、アプリコンテナまたは/usr/local/libディレクトリに配置されていることを確認してください。',
+    'faq_permission_required': 'Q: なぜ権限が必要ですか？',
+    'faq_permission_required_answer': 'A: macOSでは、マウスを制御しグローバルホットキーを登録するためにアクセシビリティ権限が必要です。',
+    'msg_permission_required': '注意: アクセシビリティ権限が必要です',
+    'msg_admin_required': '注意: 管理者権限が必要です',
+    'about_title': 'について',
+    'about_version': 'バージョン',
+    'about_website': 'ウェブサイト',
+    'about_open_source': 'オープンソース',
+    'about_open_source_libs': 'このアプリは以下のオープンソースライブラリを使用しています：\n• Flutter - UIフレームワーク\n• window_manager - ウィンドウ管理\n• ffi - ネイティブコードブリッジ\n• shared_preferences - ローカルストレージ',
   };
 
   // Korean
@@ -1607,6 +1758,7 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
+    'lang_follow_system': '시스템 따르기',
     // Menu
     'menu_title': '메뉴',
     'menu_settings': '설정',
@@ -1653,6 +1805,18 @@ class AppLocalizations {
     'faq_admin_required_answer': 'A: 전역 단축키(Ctrl+Shift+키)는 시스템 전체 후크를 등록하기 위해 관리자 권한이 필요합니다.',
     'faq_switch_mode': 'Q: 모드를 전환하려면?',
     'faq_switch_mode_answer': 'A: 교환 아이콘(⇄)을 클릭하거나 아무 좌표 입력 필드를 클릭하여 자동 추적 모드와 수동 입력 모드를 전환합니다.',
+    'faq_hotkey_not_work_answer_mac': 'A: 시스템 설정 > 개인 정보 보호 및 보안 > 손쉬운 사용을 열고 ClickMate에 대한 접근을 활성화하세요.',
+    'faq_dylib_missing': 'Q: 라이브러리 파일이 없나요?',
+    'faq_dylib_missing_answer': 'A: libmouse_controller.dylib가 컴파일되어 앱 컨테이너 또는 /usr/local/lib 디렉토리에 있는지 확인하세요.',
+    'faq_permission_required': 'Q: 왜 권한이 필요한가요?',
+    'faq_permission_required_answer': 'A: macOS는 마우스를 제어하고 전역 단축키를 등록하기 위해 손쉬운 사용 권한이 필요합니다.',
+    'msg_permission_required': '참고: 손쉬운 사용 권한이 필요합니다',
+    'msg_admin_required': '참고: 관리자 권한이 필요합니다',
+    'about_title': '정보',
+    'about_version': '버전',
+    'about_website': '웹사이트',
+    'about_open_source': '오픈 소스',
+    'about_open_source_libs': '이 앱은 다음 오픈 소스 라이브러리를 사용합니다:\n• Flutter - UI 프레임워크\n• window_manager - 창 관리\n• ffi - 네이티브 코드 브리지\n• shared_preferences - 로컬 저장소',
   };
 }
 

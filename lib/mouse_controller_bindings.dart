@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
-// 鼠标按钮枚举
+// Mouse button enum
 enum MouseButton {
   left(0),
   right(1),
@@ -11,7 +11,7 @@ enum MouseButton {
   const MouseButton(this.value);
 }
 
-// C函数类型定义
+// C function type definitions
 typedef MoveMouseNative = Void Function(Int32 x, Int32 y);
 typedef MoveMouse = void Function(int x, int y);
 
@@ -48,14 +48,47 @@ class MouseControllerBindings {
   late final CleanupHotkeySystem cleanupHotkeySystem;
 
   MouseControllerBindings() {
-    // 加载动态库
+    // Load dynamic library based on platform
     if (Platform.isWindows) {
       _dylib = DynamicLibrary.open('mouse_controller.dll');
+    } else if (Platform.isMacOS) {
+      // Try multiple paths for macOS dylib
+      final home = Platform.environment['HOME'] ?? '/Users/${Platform.environment['USER']}';
+      final possiblePaths = [
+        'libmouse_controller.dylib',
+        'build/macos/Build/Products/Debug/libmouse_controller.dylib',
+        'build/macos/Build/Products/Release/libmouse_controller.dylib',
+        '${Directory.current.path}/libmouse_controller.dylib',
+        '$home/Library/Containers/com.xants.clickmate/Data/libmouse_controller.dylib',
+        '/usr/local/lib/libmouse_controller.dylib',
+        // Also try executable path
+        '${Platform.resolvedExecutable.substring(0, Platform.resolvedExecutable.lastIndexOf('/'))}/libmouse_controller.dylib',
+      ];
+      
+      DynamicLibrary? lib;
+      for (final path in possiblePaths) {
+        try {
+          lib = DynamicLibrary.open(path);
+          print('Loaded native library from: $path');
+          break;
+        } catch (e) {
+          // Try next path
+        }
+      }
+      
+      if (lib == null) {
+        throw UnsupportedError(
+          'Could not load libmouse_controller.dylib. '
+          'Please ensure the library is compiled and available in one of these locations:\n'
+          '${possiblePaths.join("\n")}'
+        );
+      }
+      _dylib = lib;
     } else {
-      throw UnsupportedError('This platform is not supported');
+      throw UnsupportedError('Platform ${Platform.operatingSystem} is not supported');
     }
 
-    // 绑定函数
+    // Bind functions
     moveMouse = _dylib
         .lookup<NativeFunction<MoveMouseNative>>('moveMouse')
         .asFunction<MoveMouse>();
