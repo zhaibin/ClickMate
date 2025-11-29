@@ -148,7 +148,6 @@ class AppLocalizations {
   String get langItalian => get('lang_italian');
   String get langJapanese => get('lang_japanese');
   String get langKorean => get('lang_korean');
-  String get langFollowSystem => get('lang_follow_system');
 
   // Menu
   String get menuTitle => get('menu_title');
@@ -324,7 +323,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Follow System',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Settings',
@@ -469,7 +467,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': '跟随系统',
     // Menu
     'menu_title': '菜单',
     'menu_settings': '设置',
@@ -614,7 +611,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': '跟隨系統',
     // Menu
     'menu_title': '菜單',
     'menu_settings': '設置',
@@ -757,7 +753,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Suivre le Système',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Paramètres',
@@ -900,7 +895,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Seguir Sistema',
     // Menu
     'menu_title': 'Menú',
     'menu_settings': 'Configuración',
@@ -1043,7 +1037,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Seguir Sistema',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Configurações',
@@ -1186,7 +1179,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'System folgen',
     // Menu
     'menu_title': 'Menü',
     'menu_settings': 'Einstellungen',
@@ -1329,7 +1321,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Следовать Системе',
     // Menu
     'menu_title': 'Меню',
     'menu_settings': 'Настройки',
@@ -1472,7 +1463,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'Segui Sistema',
     // Menu
     'menu_title': 'Menu',
     'menu_settings': 'Impostazioni',
@@ -1615,7 +1605,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': 'システムに従う',
     // Menu
     'menu_title': 'メニュー',
     'menu_settings': '設定',
@@ -1758,7 +1747,6 @@ class AppLocalizations {
     'lang_italian': 'Italiano',
     'lang_japanese': '日本語',
     'lang_korean': '한국어',
-    'lang_follow_system': '시스템 따르기',
     // Menu
     'menu_title': '메뉴',
     'menu_settings': '설정',

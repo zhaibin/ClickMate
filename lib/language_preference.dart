@@ -11,14 +11,10 @@ class LanguagePreference {
   LanguagePreference._();
   
   Locale _currentLocale = const Locale('en', ''); // Default: English
-  bool _isFollowingSystem = true; // Default: follow system
   File? _prefsFile;
   
   /// Get current locale
   Locale get currentLocale => _currentLocale;
-  
-  /// Check if following system language
-  bool get isFollowingSystem => _isFollowingSystem;
   
   /// Initialize and load saved language preference
   Future<void> initialize() async {
@@ -29,26 +25,22 @@ class LanguagePreference {
       if (await _prefsFile!.exists()) {
         // Load saved language preference
         final savedLang = (await _prefsFile!.readAsString()).trim();
-        if (savedLang == 'system' || savedLang.isEmpty) {
-          // Follow system language
-          _isFollowingSystem = true;
-          _currentLocale = _detectSystemLanguage();
-          print('Language preference: follow system -> $_currentLocale');
-        } else {
-          // Use saved language
-          _isFollowingSystem = false;
+        if (savedLang.isNotEmpty) {
           _currentLocale = _parseLocale(savedLang);
           print('Language preference loaded from file: $_currentLocale');
+        } else {
+          // Empty file, detect system language
+          _currentLocale = _detectSystemLanguage();
+          print('Empty language preference, using system: $_currentLocale');
         }
       } else {
-        // No saved preference, follow system language
-        _isFollowingSystem = true;
+        // No saved preference, detect system language for first launch
         _currentLocale = _detectSystemLanguage();
-        print('No saved language preference, follow system: $_currentLocale');
+        await _savePreference(); // Save the detected language
+        print('First launch, detected system language: $_currentLocale');
       }
     } catch (e) {
       print('Failed to load language preference: $e');
-      _isFollowingSystem = true;
       _currentLocale = _detectSystemLanguage();
     }
   }
@@ -93,18 +85,9 @@ class LanguagePreference {
   
   /// Change language
   Future<void> changeLanguage(Locale locale) async {
-    _isFollowingSystem = false;
     _currentLocale = locale;
     await _savePreference();
     print('Language changed to: $locale');
-  }
-  
-  /// Set to follow system language
-  Future<void> setFollowSystem() async {
-    _isFollowingSystem = true;
-    _currentLocale = _detectSystemLanguage();
-    await _savePreference();
-    print('Language set to follow system: $_currentLocale');
   }
   
   /// Save language preference to file
@@ -115,14 +98,10 @@ class LanguagePreference {
         _prefsFile = File('${dir.path}/language.txt');
       }
       
-      if (_isFollowingSystem) {
-        await _prefsFile!.writeAsString('system');
-      } else {
-        final localeString = _currentLocale.countryCode != null && _currentLocale.countryCode!.isNotEmpty
-            ? '${_currentLocale.languageCode}_${_currentLocale.countryCode}'
-            : _currentLocale.languageCode;
-        await _prefsFile!.writeAsString(localeString);
-      }
+      final localeString = _currentLocale.countryCode != null && _currentLocale.countryCode!.isNotEmpty
+          ? '${_currentLocale.languageCode}_${_currentLocale.countryCode}'
+          : _currentLocale.languageCode;
+      await _prefsFile!.writeAsString(localeString);
     } catch (e) {
       print('Failed to save language preference: $e');
     }

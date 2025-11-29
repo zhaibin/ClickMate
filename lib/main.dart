@@ -725,48 +725,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              // Follow System option
-              ListTile(
-                leading: Radio<bool>(
-                  value: true,
-                  groupValue: LanguagePreference.instance.isFollowingSystem,
-                  onChanged: (bool? value) async {
-                    if (value == true) {
-                      await LanguagePreference.instance.setFollowSystem();
-                      widget.onLanguageChanged(LanguagePreference.instance.currentLocale);
-                      if (context.mounted) Navigator.pop(context);
-                    }
-                  },
-                ),
-                title: Row(
-                  children: [
-                    Icon(Icons.phone_android, size: 16, color: Colors.grey.shade600),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.langFollowSystem,
-                      style: TextStyle(
-                        fontWeight: LanguagePreference.instance.isFollowingSystem ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () async {
-                  await LanguagePreference.instance.setFollowSystem();
-                  widget.onLanguageChanged(LanguagePreference.instance.currentLocale);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              ),
-              const Divider(height: 1),
               // Language options
               ...AppLocalizations.supportedLocales.map((locale) {
-                final isSelected = !LanguagePreference.instance.isFollowingSystem && 
-                    LanguagePreference.instance.currentLocale == locale;
+                final isSelected = LanguagePreference.instance.currentLocale == locale;
                 return ListTile(
                   leading: Radio<Locale>(
                     value: locale,
-                    groupValue: LanguagePreference.instance.isFollowingSystem 
-                        ? null 
-                        : LanguagePreference.instance.currentLocale,
+                    groupValue: LanguagePreference.instance.currentLocale,
                     onChanged: (Locale? value) {
                       if (value != null) {
                         widget.onLanguageChanged(value);
