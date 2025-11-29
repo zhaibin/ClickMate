@@ -33,7 +33,7 @@ void main() async {
   // Initialize window manager
   await windowManager.ensureInitialized();
   
-  // Set window properties
+  // Set window properties - hide window initially to prevent flicker
   WindowOptions windowOptions = const WindowOptions(
     size: Size(400, 640),
     minimumSize: Size(400, 640),
@@ -41,14 +41,19 @@ void main() async {
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.normal,
+    titleBarStyle: TitleBarStyle.hidden,
     title: 'ClickMate',
   );
   
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
+  // Wait until window is ready before showing
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    // Set all properties before showing
+    await windowManager.setResizable(false);
+    await windowManager.setSize(const Size(400, 640));
+    await windowManager.center();
+    // Now show and focus
     await windowManager.show();
     await windowManager.focus();
-    await windowManager.setResizable(false);
   });
   
   runApp(const MyApp());
@@ -1416,6 +1421,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
           onPanStart: (_) => windowManager.startDragging(),
           child: Container(
             height: 48,
+            padding: EdgeInsets.only(left: Platform.isMacOS ? 0 : 12),
             alignment: Alignment.centerLeft,
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1585,6 +1591,20 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ],
           ),
           const SizedBox(width: 8),
+          // Windows window control buttons (right side)
+          if (!Platform.isMacOS) ...[
+            _WindowsControlButton(
+              icon: Icons.remove,
+              onTap: () => windowManager.minimize(),
+              hoverColor: Colors.white.withOpacity(0.1),
+            ),
+            _WindowsControlButton(
+              icon: Icons.close,
+              onTap: () => windowManager.close(),
+              hoverColor: const Color(0xFFE81123),
+              isClose: true,
+            ),
+          ],
         ],
       ),
       body: Padding(
@@ -2546,5 +2566,50 @@ class _MinimizeIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Windows style window control button
+class _WindowsControlButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color hoverColor;
+  final bool isClose;
+
+  const _WindowsControlButton({
+    required this.icon,
+    required this.onTap,
+    required this.hoverColor,
+    this.isClose = false,
+  });
+
+  @override
+  State<_WindowsControlButton> createState() => _WindowsControlButtonState();
+}
+
+class _WindowsControlButtonState extends State<_WindowsControlButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 46,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _isHovered ? widget.hoverColor : Colors.transparent,
+          ),
+          child: Icon(
+            widget.icon,
+            size: 18,
+            color: _isHovered && widget.isClose ? Colors.white : Colors.white.withOpacity(0.9),
+          ),
+        ),
+      ),
+    );
+  }
 }
 

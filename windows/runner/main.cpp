@@ -25,8 +25,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
-  Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
+  
+  // Calculate center position for the window
+  int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+  int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+  int windowWidth = 400;
+  int windowHeight = 640;
+  int posX = (screenWidth - windowWidth) / 2;
+  int posY = (screenHeight - windowHeight) / 2;
+  
+  Win32Window::Point origin(posX, posY);
+  Win32Window::Size size(windowWidth, windowHeight);
   if (!window.Create(L"ClickMate", origin, size)) {
     return EXIT_FAILURE;
   }
