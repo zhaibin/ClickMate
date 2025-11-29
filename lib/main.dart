@@ -73,11 +73,57 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Unified design theme
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
+    
     return MaterialApp(
       title: 'ClickMate',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          primary: primaryColor,
+          secondary: accentColor,
+          surface: const Color(0xFFF8FAFC),
+          surfaceContainerHighest: Colors.white,
+        ),
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
+          color: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        dialogTheme: DialogThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 8,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        ),
       ),
       locale: _locale,
       localizationsDelegates: const [
@@ -491,6 +537,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
   void _showHelp() {
     final l10n = AppLocalizations.of(context);
     final isMac = Platform.isMacOS;
+    const primaryColor = Color(0xFF1E3A5F);
     
     // Platform-specific hotkey content
     final hotkeyContent = isMac 
@@ -500,168 +547,232 @@ class _MouseControlPageState extends State<MouseControlPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.help_outline, size: 20, color: Colors.blue),
-            const SizedBox(width: 8),
-            Text(l10n.helpTitle, style: const TextStyle(fontSize: 16)),
-          ],
-        ),
-        content: SizedBox(
-          width: 400,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Platform indicator
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isMac ? Colors.grey.shade800 : Colors.blue.shade700,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isMac ? Icons.laptop_mac : Icons.laptop_windows,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isMac ? 'macOS' : 'Windows',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: 360,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
                 ),
-                const SizedBox(height: 16),
-                
-                // Quick Start
-                _buildHelpSection(
-                  Icons.rocket_launch,
-                  l10n.helpQuickStart,
-                  l10n.helpQuickStartContent,
-                  Colors.green,
-                ),
-                const SizedBox(height: 16),
-                
-                // Auto Mode
-                _buildHelpSection(
-                  Icons.gps_fixed,
-                  l10n.helpAutoMode,
-                  l10n.helpAutoModeContent,
-                  Colors.blue,
-                ),
-                const SizedBox(height: 16),
-                
-                // Manual Mode
-                _buildHelpSection(
-                  Icons.edit_location,
-                  l10n.helpManualMode,
-                  l10n.helpManualModeContent,
-                  Colors.orange,
-                ),
-                const SizedBox(height: 16),
-                
-                // Hotkeys (platform-specific)
-                _buildHelpSection(
-                  Icons.keyboard,
-                  l10n.helpHotkeys,
-                  hotkeyContent,
-                  Colors.purple,
-                ),
-                const SizedBox(height: 20),
-                
-                // FAQ Title
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade300, width: 2),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.help_outline, size: 20, color: Colors.white),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.quiz, size: 18, color: Colors.red.shade700),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.faqTitle,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        l10n.helpTitle,
                         style: const TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
+                    ),
+                    // Platform badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isMac ? Icons.laptop_mac : Icons.laptop_windows,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isMac ? 'macOS' : 'Windows',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Quick Start
+                      _buildHelpSection(
+                        Icons.rocket_launch,
+                        l10n.helpQuickStart,
+                        l10n.helpQuickStartContent,
+                        const Color(0xFF10B981),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Auto Mode
+                      _buildHelpSection(
+                        Icons.gps_fixed,
+                        l10n.helpAutoMode,
+                        l10n.helpAutoModeContent,
+                        const Color(0xFF3B82F6),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Manual Mode
+                      _buildHelpSection(
+                        Icons.edit_location_alt,
+                        l10n.helpManualMode,
+                        l10n.helpManualModeContent,
+                        const Color(0xFFF59E0B),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Hotkeys (platform-specific)
+                      _buildHelpSection(
+                        Icons.keyboard,
+                        l10n.helpHotkeys,
+                        hotkeyContent,
+                        const Color(0xFF8B5CF6),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // FAQ Title
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(Icons.quiz, size: 14, color: Colors.red.shade600),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.faqTitle,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // FAQ Items (platform-specific)
+                      if (isMac) ...[
+                        _buildFaqItem(
+                          l10n.faqHotkeyNotWork,
+                          l10n.faqHotkeyNotWorkAnswerMac,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildFaqItem(
+                          l10n.faqDylibMissing,
+                          l10n.faqDylibMissingAnswer,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildFaqItem(
+                          l10n.faqPermissionRequired,
+                          l10n.faqPermissionRequiredAnswer,
+                        ),
+                      ] else ...[
+                        _buildFaqItem(l10n.faqHotkeyNotWork, l10n.faqHotkeyNotWorkAnswer),
+                        const SizedBox(height: 8),
+                        _buildFaqItem(l10n.faqDllMissing, l10n.faqDllMissingAnswer),
+                        const SizedBox(height: 8),
+                        _buildFaqItem(l10n.faqAdminRequired, l10n.faqAdminRequiredAnswer),
+                      ],
+                      const SizedBox(height: 8),
+                      _buildFaqItem(l10n.faqSwitchMode, l10n.faqSwitchModeAnswer),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                
-                // FAQ Items (platform-specific)
-                if (isMac) ...[
-                  _buildFaqItem(
-                    l10n.faqHotkeyNotWork,
-                    l10n.faqHotkeyNotWorkAnswerMac,
+              ),
+              // Footer
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
                   ),
-                  const SizedBox(height: 12),
-                  _buildFaqItem(
-                    l10n.faqDylibMissing,
-                    l10n.faqDylibMissingAnswer,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildFaqItem(
-                    l10n.faqPermissionRequired,
-                    l10n.faqPermissionRequiredAnswer,
-                  ),
-                ] else ...[
-                  _buildFaqItem(l10n.faqHotkeyNotWork, l10n.faqHotkeyNotWorkAnswer),
-                  const SizedBox(height: 12),
-                  _buildFaqItem(l10n.faqDllMissing, l10n.faqDllMissingAnswer),
-                  const SizedBox(height: 12),
-                  _buildFaqItem(l10n.faqAdminRequired, l10n.faqAdminRequiredAnswer),
-                ],
-                const SizedBox(height: 12),
-                _buildFaqItem(l10n.faqSwitchMode, l10n.faqSwitchModeAnswer),
-              ],
-            ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(l10n.btnOk),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.btnOk),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildHelpSection(IconData icon, String title, String content, MaterialColor color) {
+  Widget _buildHelpSection(IconData icon, String title, String content, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.shade200),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: color.shade700),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(icon, size: 14, color: color),
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: color.shade700,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
                 ),
               ),
             ],
@@ -669,7 +780,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
           const SizedBox(height: 8),
           Text(
             content,
-            style: const TextStyle(fontSize: 12, height: 1.5),
+            style: TextStyle(fontSize: 12, height: 1.5, color: Colors.grey.shade700),
           ),
         ],
       ),
@@ -681,8 +792,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -710,56 +820,121 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   void _showLanguageSettings() {
     final l10n = AppLocalizations.of(context);
+    const primaryColor = Color(0xFF1E3A5F);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.language, size: 20, color: Colors.blue),
-            const SizedBox(width: 8),
-            Text(l10n.labelLanguage, style: const TextStyle(fontSize: 16)),
-          ],
-        ),
-        content: SizedBox(
-          width: 300,
-          child: ListView(
-            shrinkWrap: true,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Language options
-              ...AppLocalizations.supportedLocales.map((locale) {
-                final isSelected = LanguagePreference.instance.currentLocale == locale;
-                return ListTile(
-                  leading: Radio<Locale>(
-                    value: locale,
-                    groupValue: LanguagePreference.instance.currentLocale,
-                    onChanged: (Locale? value) {
-                      if (value != null) {
-                        widget.onLanguageChanged(value);
-                        Navigator.pop(context);
-                      }
-                    },
+              // Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
-                  title: Text(
-                    LanguagePreference.instance.getLanguageName(locale, l10n),
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.translate, size: 20, color: Colors.white),
                     ),
+                    const SizedBox(width: 12),
+                    Text(
+                      l10n.labelLanguage,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Language list
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 350),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  children: AppLocalizations.supportedLocales.map((locale) {
+                    final isSelected = LanguagePreference.instance.currentLocale == locale;
+                    return InkWell(
+                      onTap: () {
+                        widget.onLanguageChanged(locale);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? primaryColor.withOpacity(0.08) : Colors.transparent,
+                          border: Border(
+                            left: BorderSide(
+                              color: isSelected ? primaryColor : Colors.transparent,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                LanguagePreference.instance.getLanguageName(locale, l10n),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  color: isSelected ? primaryColor : Colors.grey.shade700,
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(Icons.check_circle, size: 18, color: primaryColor),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              // Footer
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
                   ),
-                  onTap: () {
-                    widget.onLanguageChanged(locale);
-                    Navigator.pop(context);
-                  },
-                );
-              }),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.btnCancel, style: TextStyle(color: Colors.grey.shade600)),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.btnCancel),
-          ),
-        ],
       ),
     );
   }
@@ -773,6 +948,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   void _showAbout() {
     final l10n = AppLocalizations.of(context);
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
     
     // Open source libraries with their URLs
     final openSourceLibs = [
@@ -788,27 +965,20 @@ class _MouseControlPageState extends State<MouseControlPage> {
       builder: (context) => AlertDialog(
         contentPadding: EdgeInsets.zero,
         content: Container(
-          width: 320,
+          width: 300,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with gradient background
+              // Header with solid color background
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.shade600,
-                      Colors.purple.shade600,
-                    ],
-                  ),
-                  borderRadius: const BorderRadius.only(
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                decoration: const BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
@@ -817,52 +987,53 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   children: [
                     // App Icon
                     Container(
-                      width: 64,
-                      height: 64,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.25),
+                            blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.asset(
                           'assets/icons/icon.png',
-                          width: 64,
-                          height: 64,
+                          width: 72,
+                          height: 72,
                           fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     
                     // App Name
                     const Text(
                       'ClickMate',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     
                     // Version badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'v$appVersion  •  ${Platform.isMacOS ? "macOS" : "Windows"}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -880,35 +1051,35 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     // Website link
                     InkWell(
                       onTap: () => _launchUrl('https://clickmate.xants.net'),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue.shade200),
+                          color: primaryColor.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: primaryColor.withOpacity(0.15)),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.language, size: 18, color: Colors.blue.shade700),
+                            const Icon(Icons.language, size: 18, color: primaryColor),
                             const SizedBox(width: 10),
-                            Expanded(
+                            const Expanded(
                               child: Text(
                                 'clickmate.xants.net',
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.blue.shade700,
+                                  color: primaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
-                            Icon(Icons.open_in_new, size: 14, color: Colors.blue.shade400),
+                            Icon(Icons.open_in_new, size: 14, color: primaryColor.withOpacity(0.5)),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     
                     // Open Source section
                     Container(
@@ -916,21 +1087,27 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.code, size: 14, color: Colors.grey.shade700),
-                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Icon(Icons.code, size: 12, color: Colors.grey.shade600),
+                              ),
+                              const SizedBox(width: 8),
                               Text(
                                 l10n.aboutOpenSource,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                   color: Colors.grey.shade700,
                                 ),
                               ),
@@ -939,7 +1116,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           const SizedBox(height: 10),
                           // Scrollable open source list
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 140),
+                            constraints: const BoxConstraints(maxHeight: 130),
                             child: SingleChildScrollView(
                               child: Column(
                                 children: openSourceLibs.map((lib) => Padding(
@@ -948,23 +1125,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                     onTap: () => _launchUrl(lib['url']!),
                                     borderRadius: BorderRadius.circular(6),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: Colors.grey.shade200),
                                       ),
                                       child: Row(
                                         children: [
                                           Container(
-                                            width: 5,
-                                            height: 5,
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade400,
+                                            width: 4,
+                                            height: 4,
+                                            decoration: const BoxDecoration(
+                                              color: accentColor,
                                               shape: BoxShape.circle,
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
+                                          const SizedBox(width: 10),
                                           Expanded(
                                             child: Text.rich(
                                               TextSpan(
@@ -1215,30 +1391,70 @@ class _MouseControlPageState extends State<MouseControlPage> {
       );
     }
     
-    return Scaffold(
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
+    
+    // Wrap with ClipRRect for consistent corner radius on macOS
+    return ClipRRect(
+      borderRadius: Platform.isMacOS 
+          ? const BorderRadius.all(Radius.circular(10))
+          : BorderRadius.zero,
+      child: Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.asset(
-                'assets/icons/icon.png',
-                width: 28,
-                height: 28,
-                fit: BoxFit.cover,
-              ),
+        toolbarHeight: Platform.isMacOS ? 48 : 48,
+        leadingWidth: Platform.isMacOS ? 70 : 0,
+        leading: Platform.isMacOS ? Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: _WindowButtonsGroup(
+            onClose: () => windowManager.close(),
+            onMinimize: () => windowManager.minimize(),
+          ),
+        ) : null,
+        titleSpacing: 0,
+        title: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (_) => windowManager.startDragging(),
+          child: Container(
+            height: 48,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.asset(
+                      'assets/icons/icon.png',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(l10n.appTitle, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.3)),
+              ],
             ),
-            const SizedBox(width: 10),
-            Text(l10n.appTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ],
+          ),
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.menu, size: 22),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.more_horiz, size: 20),
+            ),
             tooltip: l10n.menuTitle,
-            offset: const Offset(0, 45),
+            offset: const Offset(0, 48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) {
               switch (value) {
                 case 'save':
@@ -1266,9 +1482,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 value: 'save',
                 child: Row(
                   children: [
-                    const Icon(Icons.save, size: 18, color: Colors.blue),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(Icons.save_outlined, size: 16, color: accentColor),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.configSave, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.configSave, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
@@ -1276,20 +1499,34 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 value: 'manage',
                 child: Row(
                   children: [
-                    const Icon(Icons.folder_special, size: 18, color: Colors.orange),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(Icons.folder_outlined, size: 16, color: Colors.amber.shade700),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.configManage, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.configManage, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
-              const PopupMenuDivider(),
+              const PopupMenuDivider(height: 8),
               PopupMenuItem(
                 value: 'hotkey',
                 child: Row(
                   children: [
-                    const Icon(Icons.keyboard, size: 18, color: Colors.purple),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(Icons.keyboard_outlined, size: 16, color: Colors.purple.shade600),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.hotkeySettings, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.hotkeySettings, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
@@ -1297,20 +1534,34 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 value: 'language',
                 child: Row(
                   children: [
-                    const Icon(Icons.language, size: 18, color: Colors.green),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(Icons.translate, size: 16, color: Colors.teal.shade600),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.labelLanguage, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.labelLanguage, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
-              const PopupMenuDivider(),
+              const PopupMenuDivider(height: 8),
               PopupMenuItem(
                 value: 'help',
                 child: Row(
                   children: [
-                    const Icon(Icons.help_outline, size: 18, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(Icons.help_outline, size: 16, color: Colors.grey.shade600),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.helpTitle, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.helpTitle, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
@@ -1318,14 +1569,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 value: 'about',
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 18, color: Colors.teal),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(Icons.info_outline, size: 16, color: primaryColor),
+                    ),
                     const SizedBox(width: 12),
-                    Text(l10n.aboutTitle, style: const TextStyle(fontSize: 14)),
+                    Text(l10n.aboutTitle, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),
             ],
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Padding(
@@ -1333,9 +1592,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Current position and status card
+            // Status header card - light style
             Card(
-              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
@@ -1343,32 +1601,50 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     // First row: Position and count
                   Row(
                     children: [
-                        const Icon(Icons.mouse, size: 18, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text('${l10n.labelCurrentPosition}: $_currentPosition', 
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(Icons.mouse, size: 14, color: primaryColor),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(l10n.labelCurrentPosition, 
+                              style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                            const SizedBox(height: 1),
+                            Text(_currentPosition, 
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: primaryColor)),
+                          ],
+                        ),
                       const Spacer(),
                       Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _isRunning ? Colors.green : Colors.grey,
-                            borderRadius: BorderRadius.circular(12),
+                          color: _isRunning ? const Color(0xFF10B981) : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(16),
                         ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                _isRunning ? Icons.play_circle : Icons.pause_circle,
-                                size: 14,
-                                color: Colors.white,
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: _isRunning ? Colors.white : Colors.grey.shade500,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 5),
                               Text(
                           '${_service!.clickCount}${l10n.statusClickCount}',
-                                style: const TextStyle(
-                                  color: Colors.white, 
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                                style: TextStyle(
+                                  color: _isRunning ? Colors.white : Colors.grey.shade600, 
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -1376,79 +1652,59 @@ class _MouseControlPageState extends State<MouseControlPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     // Second row: Current hotkeys
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      children: [
-                        // Start/Stop hotkey
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.green.shade300),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.play_arrow, size: 12, color: Colors.green.shade700),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${l10n.hotkeyToggle}: ',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                              _buildHotkeyDisplay(_modifierKey, Colors.green),
-                              const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay('⇧', Colors.green),
-                              const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay(_getKeyName(_service!.currentToggleHotkeyCode), Colors.green),
-                            ],
-                          ),
-                        ),
-                        // Capture position hotkey
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.blue.shade300),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.my_location, size: 12, color: Colors.blue.shade700),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${l10n.hotkeyCapture}: ',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                              _buildHotkeyDisplay(_modifierKey, Colors.blue),
-                              const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay('⇧', Colors.blue),
-                              const Text(' + ', style: TextStyle(fontSize: 9)),
-                              _buildHotkeyDisplay(_getKeyName(_service!.currentCaptureHotkeyCode), Colors.blue),
-                            ],
-                        ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                    ],
+                      child: Row(
+                        children: [
+                          // Start/Stop hotkey
+                          Expanded(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.play_arrow, size: 12, color: const Color(0xFF10B981)),
+                                const SizedBox(width: 4),
+                                _buildHotkeyBadgeLight(_modifierKey),
+                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
+                                _buildHotkeyBadgeLight('⇧'),
+                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
+                                _buildHotkeyBadgeLight(_getKeyName(_service!.currentToggleHotkeyCode)),
+                              ],
+                            ),
+                          ),
+                          Container(width: 1, height: 16, color: Colors.grey.shade300),
+                          // Capture position hotkey
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.my_location, size: 12, color: accentColor),
+                                const SizedBox(width: 4),
+                                _buildHotkeyBadgeLight(_modifierKey),
+                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
+                                _buildHotkeyBadgeLight('⇧'),
+                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
+                                _buildHotkeyBadgeLight(_getKeyName(_service!.currentCaptureHotkeyCode)),
+                              ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             // Target position settings
             Card(
-              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
@@ -1456,40 +1712,20 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   children: [
                   Row(
                     children: [
-                        Text(l10n.labelTargetPosition, 
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: _autoCapture ? Colors.green.shade50 : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _autoCapture ? Colors.green.shade300 : Colors.grey.shade300,
-                            ),
+                            color: accentColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _autoCapture ? Icons.gps_fixed : Icons.gps_off,
-                                size: 12,
-                                color: _autoCapture ? Colors.green.shade700 : Colors.grey.shade600,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _autoCapture ? l10n.modeAuto : l10n.modeManual,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: _autoCapture ? Colors.green.shade700 : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: const Icon(Icons.location_on, size: 14, color: accentColor),
                         ),
-                        const SizedBox(width: 4),
-                        InkWell(
+                        const SizedBox(width: 8),
+                        Text(l10n.labelTargetPosition, 
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                        const Spacer(),
+                        // Mode toggle
+                        GestureDetector(
                           onTap: () {
                             setState(() {
                               _autoCapture = !_autoCapture;
@@ -1497,21 +1733,44 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             print('Toggle mode: ${_autoCapture ? "Auto-track" : "Manual input"}');
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Icon(
-                              Icons.swap_horiz,
-                              size: 16,
-                              color: Colors.blue.shade700,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _autoCapture ? const Color(0xFF10B981).withOpacity(0.1) : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: _autoCapture ? const Color(0xFF10B981) : Colors.grey.shade300,
                             ),
                           ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _autoCapture ? Icons.gps_fixed : Icons.edit_location_alt,
+                                size: 12,
+                                color: _autoCapture ? const Color(0xFF10B981) : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _autoCapture ? l10n.modeAuto : l10n.modeManual,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: _autoCapture ? const Color(0xFF10B981) : Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.swap_horiz,
+                                size: 12,
+                                color: _autoCapture ? const Color(0xFF10B981) : Colors.grey.shade500,
+                              ),
+                            ],
+                          ),
+                        ),
                         ),
                       ],
-                        ),
-                    const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(child: _buildCompactField(l10n.labelXCoordinate, _xController, width: double.infinity)),
@@ -1523,11 +1782,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 ),
               ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
 
             // Click settings
             Card(
-              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
@@ -1535,13 +1793,22 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   children: [
                     Row(
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(Icons.settings, size: 14, color: Colors.purple.shade600),
+                        ),
+                        const SizedBox(width: 8),
                         Text(l10n.labelClickSettings, 
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                         const Spacer(),
                         TextButton.icon(
                           onPressed: _resetToDefaults,
-                          icon: const Icon(Icons.refresh, size: 14),
-                          label: Text(l10n.btnResetDefaults, style: const TextStyle(fontSize: 11)),
+                          icon: Icon(Icons.refresh, size: 14, color: Colors.grey.shade600),
+                          label: Text(l10n.btnResetDefaults, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             minimumSize: Size.zero,
@@ -1554,14 +1821,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
                   Row(
                     children: [
                         Expanded(child: _buildCompactField(l10n.labelIntervalMs, _intervalController, width: double.infinity)),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Expanded(child: _buildCompactField(l10n.labelRandomMs, _intervalRandomController, width: double.infinity)),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Expanded(child: _buildCompactField(l10n.labelOffsetPx, _offsetController, width: double.infinity)),
                     ],
                   ),
                   const SizedBox(height: 8),
-                    Text(l10n.labelMouseButton, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(l10n.labelMouseButton, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
                     const SizedBox(height: 4),
                     SizedBox(
                       width: double.infinity,
@@ -1569,18 +1836,18 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     segments: [
                           ButtonSegment(
                             value: MouseButton.left, 
-                            label: Text(l10n.labelLeftButton, style: const TextStyle(fontSize: 12)),
-                            icon: const Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelLeftButton, style: const TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.mouse, size: 14),
                           ),
                           ButtonSegment(
                             value: MouseButton.right, 
-                            label: Text(l10n.labelRightButton, style: const TextStyle(fontSize: 12)),
-                            icon: const Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelRightButton, style: const TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.mouse, size: 14),
                           ),
                           ButtonSegment(
                             value: MouseButton.middle, 
-                            label: Text(l10n.labelMiddleButton, style: const TextStyle(fontSize: 12)),
-                            icon: const Icon(Icons.mouse, size: 16),
+                            label: Text(l10n.labelMiddleButton, style: const TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.mouse, size: 14),
                           ),
                     ],
                     selected: {_selectedButton},
@@ -1595,25 +1862,24 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
                   // Control buttons
                   Row(
                     children: [
                       // Move mouse button
                       SizedBox(
-                        height: 44,
+                        height: 40,
                         child: ElevatedButton.icon(
                           onPressed: _moveMouseToTarget,
-                          icon: const Icon(Icons.near_me, size: 16),
+                          icon: const Icon(Icons.near_me, size: 14),
                           label: Text(
                             l10n.btnMoveMouse,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: accentColor,
                             foregroundColor: Colors.white,
-                            elevation: 2,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                           ),
                         ),
@@ -1622,18 +1888,17 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       // Start/Stop button
                       Expanded(
                         child: SizedBox(
-                          height: 44,
+                          height: 40,
                           child: ElevatedButton.icon(
                             onPressed: _toggleAutoClick,
-                            icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow, size: 20),
+                            icon: Icon(_isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded, size: 20),
                             label: Text(
                               _isRunning ? l10n.btnStop : l10n.btnStart,
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isRunning ? Colors.red : Colors.green,
+                              backgroundColor: _isRunning ? const Color(0xFFEF4444) : const Color(0xFF10B981),
                               foregroundColor: Colors.white,
-                              elevation: 4,
                             ),
                           ),
                         ),
@@ -1645,28 +1910,35 @@ class _MouseControlPageState extends State<MouseControlPage> {
             // Click history
           Expanded(
               child: Card(
-                elevation: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: Colors.grey.shade50,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(12),
                           topRight: Radius.circular(12),
                         ),
+                        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.history, size: 16, color: Colors.grey.shade700),
-                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(Icons.history, size: 14, color: Colors.grey.shade700),
+                          ),
+                          const SizedBox(width: 8),
                           Text(
                             l10n.historyRecentClicks,
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: Colors.grey.shade700,
                       ),
                           ),
@@ -1677,16 +1949,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: _service!.clickHistory.isEmpty
                           ? Center(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.inbox, size: 40, color: Colors.grey.shade300),
-                                  const SizedBox(height: 8),
+                                  Icon(Icons.inbox_outlined, size: 32, color: Colors.grey.shade300),
+                                  const SizedBox(height: 6),
                                   Text(
                                     l10n.msgNoClickHistory,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade500,
-                                    ),
+                                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
                                   ),
                                 ],
                               ),
@@ -1698,25 +1967,19 @@ class _MouseControlPageState extends State<MouseControlPage> {
                         final record = _service!.clickHistory[index];
                                 final isEven = index % 2 == 0;
                         return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                                     color: isEven ? Colors.white : Colors.grey.shade50,
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Colors.grey.shade200,
-                                        width: 0.5,
-                                      ),
-                                    ),
                           ),
                                   child: Row(
                             children: [
                                       // Index
                                       Container(
-                                        width: 24,
-                                        height: 24,
+                                        width: 22,
+                                        height: 22,
                                         decoration: BoxDecoration(
-                                          color: Colors.blue.shade100,
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: accentColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(11),
                                         ),
                                         alignment: Alignment.center,
                                         child: Text(
@@ -1724,7 +1987,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.blue.shade700,
+                                            color: accentColor,
                                           ),
                                         ),
                                       ),
@@ -1734,13 +1997,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                         flex: 2,
                                         child: Row(
                                 children: [
-                                            Icon(Icons.access_time, size: 12, color: Colors.grey.shade600),
+                                            Icon(Icons.schedule, size: 12, color: Colors.grey.shade500),
                                             const SizedBox(width: 4),
                                   Text(
                                     record.timeString,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
+                                                color: Colors.grey.shade700,
                                   ),
                                   ),
                                 ],
@@ -1751,13 +2015,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                         flex: 2,
                                         child: Row(
                                           children: [
-                                            Icon(Icons.location_on, size: 12, color: Colors.grey.shade600),
+                                            Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
                                             const SizedBox(width: 4),
                               Text(
                                 '(${record.position.x}, ${record.position.y})',
                                               style: TextStyle(
                                                 fontSize: 11,
-                                                color: Colors.grey.shade700,
+                                                color: Colors.grey.shade600,
                                               ),
                                             ),
                                           ],
@@ -1765,16 +2029,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                       ),
                                       // Button
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: _getButtonColor(record.button),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: _getButtonColor(record.button).withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Text(
                                           record.buttonString,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 10,
-                                            color: Colors.white,
+                                            color: _getButtonColor(record.button),
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -1790,6 +2054,27 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ),
           ),
         ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  Widget _buildHotkeyBadgeLight(String key) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 1),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(3),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Text(
+        key,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade700,
         ),
       ),
     );
@@ -1909,159 +2194,207 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
     final currentKey = _activeTab == 0 ? _selectedToggleKey : _selectedCaptureKey;
     final keyName = _getKeyName(currentKey);
     final tabTitle = _activeTab == 0 ? l10n.hotkeyStartStop : l10n.hotkeyCapturePosition;
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
+    const greenColor = Color(0xFF10B981);
+    
+    final activeColor = _activeTab == 0 ? greenColor : accentColor;
     
     return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.keyboard, size: 20, color: Colors.blue.shade700),
-          const SizedBox(width: 8),
-          Text(l10n.hotkeySettingsTitle, style: const TextStyle(fontSize: 16)),
-        ],
-      ),
-      content: SizedBox(
-        width: 340,
+      contentPadding: EdgeInsets.zero,
+      content: Container(
+        width: 300,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tab buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => setState(() => _activeTab = 0),
-                    icon: const Icon(Icons.play_arrow, size: 16),
-                    label: Text(l10n.hotkeyStartStop, style: const TextStyle(fontSize: 12)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _activeTab == 0 ? Colors.green : Colors.grey.shade300,
-                      foregroundColor: _activeTab == 0 ? Colors.white : Colors.black87,
-                      elevation: _activeTab == 0 ? 2 : 0,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => setState(() => _activeTab = 1),
-                    icon: const Icon(Icons.my_location, size: 16),
-                    label: Text(l10n.hotkeyCapturePosition, style: const TextStyle(fontSize: 12)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _activeTab == 1 ? Colors.blue : Colors.grey.shade300,
-                      foregroundColor: _activeTab == 1 ? Colors.white : Colors.black87,
-                      elevation: _activeTab == 1 ? 2 : 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            // Header with tabs integrated
             Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.amber.shade200),
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+              decoration: const BoxDecoration(
+                color: primaryColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: Colors.amber.shade900),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${l10n.hotkeySetFor} [$tabTitle] (${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+Key)',
-                      style: const TextStyle(fontSize: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.keyboard, size: 18, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.hotkeySettingsTitle,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Tabs
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _activeTab = 0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _activeTab == 0 ? Colors.white : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.play_arrow_rounded, size: 14,
+                                    color: _activeTab == 0 ? greenColor : Colors.white70),
+                                  const SizedBox(width: 4),
+                                  Text(l10n.hotkeyStartStop,
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                      color: _activeTab == 0 ? greenColor : Colors.white70)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _activeTab = 1),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _activeTab == 1 ? Colors.white : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.my_location, size: 14,
+                                    color: _activeTab == 1 ? accentColor : Colors.white70),
+                                  const SizedBox(width: 4),
+                                  Text(l10n.hotkeyCapturePosition,
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                      color: _activeTab == 1 ? accentColor : Colors.white70)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.hotkeySelectKey,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
+            // Key grid
+            Padding(
+              padding: const EdgeInsets.all(12),
               child: Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: keyMap.entries.map((entry) {
+                spacing: 5,
+                runSpacing: 5,
+                children: keyMap.entries.map((entry) {
                   final isSelected = currentKey == entry.value;
-                return InkWell(
-                  onTap: () {
-                    setState(() {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
                         if (_activeTab == 0) {
                           _selectedToggleKey = entry.value;
                         } else {
                           _selectedCaptureKey = entry.value;
                         }
-                    });
-                  },
-                    borderRadius: BorderRadius.circular(4),
-                  child: Container(
-                      width: 34,
-                      height: 34,
-                    decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue : Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                          color: isSelected ? Colors.blue.shade700 : Colors.grey.shade300,
-                          width: isSelected ? 2 : 1,
+                      });
+                    },
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: isSelected ? activeColor : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                        border: isSelected ? null : Border.all(color: Colors.grey.shade300),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        entry.key,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : Colors.grey.shade700,
                         ),
-                        boxShadow: isSelected ? [
-                          BoxShadow(
-                            color: Colors.blue.shade200,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ] : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      entry.key,
-                      style: TextStyle(
-                          fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : Colors.black87,
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade50, Colors.blue.shade100],
-                ),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.blue.shade300),
+                  );
+                }).toList(),
               ),
+            ),
+            // Preview & Actions
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Column(
                 children: [
-                  Text(
-                    '[$tabTitle] ${l10n.hotkeyPreview}',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                  // Preview
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: activeColor.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildKeyChip(Platform.isMacOS ? '⌘' : 'Ctrl', activeColor),
+                        Text(' + ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
+                        _buildKeyChip(Platform.isMacOS ? '⇧' : 'Shift', activeColor),
+                        Text(' + ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
+                        _buildKeyChip(keyName, activeColor),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
+                  // Actions
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildKeyChip(Platform.isMacOS ? '⌘' : 'Ctrl'),
-                      const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      _buildKeyChip(Platform.isMacOS ? '⇧' : 'Shift'),
-                      const Text(' + ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      _buildKeyChip(keyName),
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(l10n.btnCancel, style: TextStyle(color: Colors.grey.shade600)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_activeTab == 0) {
+                              widget.onToggleHotkeyChanged(_selectedToggleKey);
+                            } else {
+                              widget.onCaptureHotkeyChanged(_selectedCaptureKey);
+                            }
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+$keyName'),
+                                backgroundColor: activeColor,
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: activeColor,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text(l10n.btnSave),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -2070,71 +2403,148 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.btnCancel, style: const TextStyle(fontSize: 13)),
-        ),
-        ElevatedButton.icon(
-          onPressed: () {
-            // Call different callbacks based on current tab
-            if (_activeTab == 0) {
-              widget.onToggleHotkeyChanged(_selectedToggleKey);
-            } else {
-              widget.onCaptureHotkeyChanged(_selectedCaptureKey);
-            }
-            
-            Navigator.pop(context);
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text('[$tabTitle] ${l10n.msgHotkeySaved}: ${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+$keyName'),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-          icon: const Icon(Icons.check, size: 16),
-          label: Text(l10n.btnSave, style: const TextStyle(fontSize: 13)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _activeTab == 0 ? Colors.green : Colors.blue,
-            foregroundColor: Colors.white,
-          ),
-        ),
-      ],
     );
   }
 
-  Widget _buildKeyChip(String label) {
+  Widget _buildKeyChip(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.blue.shade700, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.blue.shade700,
-        ),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
       ),
     );
   }
 }
+
+// macOS style window control buttons group
+class _WindowButtonsGroup extends StatefulWidget {
+  final VoidCallback onClose;
+  final VoidCallback onMinimize;
+
+  const _WindowButtonsGroup({
+    required this.onClose,
+    required this.onMinimize,
+  });
+
+  @override
+  State<_WindowButtonsGroup> createState() => _WindowButtonsGroupState();
+}
+
+class _WindowButtonsGroupState extends State<_WindowButtonsGroup> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Close button
+          GestureDetector(
+            onTap: widget.onClose,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF5F57),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFE14942),
+                  width: 0.5,
+                ),
+              ),
+              child: _isHovered
+                  ? CustomPaint(
+                      size: const Size(12, 12),
+                      painter: _CloseIconPainter(),
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Minimize button
+          GestureDetector(
+            onTap: widget.onMinimize,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEBC2E),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFE0A123),
+                  width: 0.5,
+                ),
+              ),
+              child: _isHovered
+                  ? CustomPaint(
+                      size: const Size(12, 12),
+                      painter: _MinimizeIconPainter(),
+                    )
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Custom painter for close icon (X)
+class _CloseIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF4D0000)
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+    
+    final center = size.width / 2;
+    final offset = 3.0;
+    
+    canvas.drawLine(
+      Offset(center - offset, center - offset),
+      Offset(center + offset, center + offset),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(center + offset, center - offset),
+      Offset(center - offset, center + offset),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for minimize icon (-)
+class _MinimizeIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF995700)
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    
+    final center = size.height / 2;
+    final offset = 3.0;
+    
+    canvas.drawLine(
+      Offset(size.width / 2 - offset, center),
+      Offset(size.width / 2 + offset, center),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+

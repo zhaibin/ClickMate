@@ -248,85 +248,121 @@ class _ConfigManagementDialogState extends State<ConfigManagementDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
 
     return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.folder_special, size: 20, color: Colors.blue.shade700),
-          const SizedBox(width: 8),
-          Text(l10n.configManage, style: const TextStyle(fontSize: 16)),
-        ],
-      ),
-      content: SizedBox(
-        width: 500,
-        height: 400,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _configs.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.inbox, size: 60, color: Colors.grey.shade300),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.configNoConfigs,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
+      contentPadding: EdgeInsets.zero,
+      content: Container(
+        width: 380,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: primaryColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: _configs.length,
-                    itemBuilder: (context, index) {
-                      final config = _configs[index];
-                      final isSelected = config.id == widget.currentConfigId;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        elevation: isSelected ? 4 : 2,
-                        color: isSelected ? Colors.blue.shade50 : null,
-                        child: InkWell(
-                          onTap: () => _loadConfig(config),
-                          borderRadius: BorderRadius.circular(4),
-                          child: Container(
-                            decoration: isSelected ? BoxDecoration(
-                              border: Border.all(color: Colors.blue.shade300, width: 2),
-                              borderRadius: BorderRadius.circular(4),
-                            ) : null,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      isSelected ? Icons.bookmark : Icons.bookmark_border,
-                                      size: 16,
-                                      color: isSelected ? Colors.blue.shade700 : Colors.grey.shade600,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Row(
+                    child: const Icon(Icons.folder_outlined, size: 20, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.configManage,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            SizedBox(
+              height: 350,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: primaryColor))
+                  : _configs.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.configNoConfigs,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _configs.length,
+                          itemBuilder: (context, index) {
+                            final config = _configs[index];
+                            final isSelected = config.id == widget.currentConfigId;
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? primaryColor.withOpacity(0.06) : Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected ? primaryColor.withOpacity(0.3) : Colors.grey.shade200,
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: InkWell(
+                                onTap: () => _loadConfig(config),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         children: [
+                                          Icon(
+                                            isSelected ? Icons.bookmark : Icons.bookmark_outline,
+                                            size: 16,
+                                            color: isSelected ? primaryColor : Colors.grey.shade500,
+                                          ),
+                                          const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
                                               config.name,
                                               style: TextStyle(
                                                 fontSize: 14,
-                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                                color: isSelected ? Colors.blue.shade700 : Colors.black87,
+                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                                color: isSelected ? primaryColor : Colors.grey.shade800,
                                               ),
                                             ),
                                           ),
                                           if (isSelected)
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                               decoration: BoxDecoration(
-                                                color: Colors.green,
+                                                color: const Color(0xFF10B981),
                                                 borderRadius: BorderRadius.circular(10),
                                               ),
                                               child: Text(
@@ -334,121 +370,111 @@ class _ConfigManagementDialogState extends State<ConfigManagementDialog> {
                                                 style: const TextStyle(
                                                   fontSize: 9,
                                                   color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
                                             ),
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: _getButtonColor(config.mouseButton).withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              _getButtonName(config.mouseButton),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: _getButtonColor(config.mouseButton),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          IconButton(
+                                            icon: Icon(Icons.edit_outlined, size: 16, color: Colors.grey.shade500),
+                                            onPressed: () => _renameConfig(config),
+                                            tooltip: l10n.configRename,
+                                            padding: const EdgeInsets.all(4),
+                                            constraints: const BoxConstraints(),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete_outline, size: 16, color: Colors.red.shade400),
+                                            onPressed: () => _deleteConfig(config),
+                                            tooltip: l10n.configDelete,
+                                            padding: const EdgeInsets.all(4),
+                                            constraints: const BoxConstraints(),
+                                          ),
                                         ],
                                       ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          _buildConfigBadge(Icons.location_on_outlined, '(${config.x}, ${config.y})'),
+                                          const SizedBox(width: 8),
+                                          _buildConfigBadge(Icons.timer_outlined, '${config.interval}ms'),
+                                          if (config.randomInterval > 0) ...[
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '±${config.randomInterval}',
+                                              style: TextStyle(fontSize: 10, color: Colors.orange.shade600),
+                                            ),
+                                          ],
+                                          if (config.offset > 0) ...[
+                                            const SizedBox(width: 8),
+                                            _buildConfigBadge(Icons.open_in_full, '±${config.offset}px'),
+                                          ],
+                                        ],
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: _getButtonColor(config.mouseButton),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        _getButtonName(config.mouseButton),
-                                        style: const TextStyle(
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${l10n.configUpdatedAt}: ${_formatDateTime(config.updatedAt)}',
+                                        style: TextStyle(
                                           fontSize: 10,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, size: 18),
-                                      onPressed: () => _renameConfig(config),
-                                      tooltip: l10n.configRename,
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, size: 18),
-                                      color: Colors.red,
-                                      onPressed: () => _deleteConfig(config),
-                                      tooltip: l10n.configDelete,
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on,
-                                        size: 12, color: Colors.grey.shade600),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '(${config.x}, ${config.y})',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Icon(Icons.timer,
-                                        size: 12, color: Colors.grey.shade600),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${config.interval}ms',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                    if (config.randomInterval > 0) ...[
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '±${config.randomInterval}ms',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.orange.shade700,
+                                          color: Colors.grey.shade400,
                                         ),
                                       ),
                                     ],
-                                    if (config.offset > 0) ...[
-                                      const SizedBox(width: 12),
-                                      Icon(Icons.open_in_full,
-                                          size: 12, color: Colors.grey.shade600),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '±${config.offset}px',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${l10n.configUpdatedAt}: ${_formatDateTime(config.updatedAt)}',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade500,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                        ),
-                      );
-                    },
+            ),
+            // Footer
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.btnCancel, style: TextStyle(color: Colors.grey.shade600)),
                   ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.btnCancel),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+  
+  Widget _buildConfigBadge(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 11, color: Colors.grey.shade500),
+        const SizedBox(width: 3),
+        Text(text, style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
       ],
     );
   }
