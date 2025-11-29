@@ -2,7 +2,71 @@
 
 All notable changes to ClickMate will be documented in this file.
 
-## [1.1.0] - 2025-11-24
+## [2.0.0] - 2024-11-29
+
+### 🎉 Major Release - Cross-Platform Support
+
+This release introduces full macOS support, making ClickMate a true cross-platform application.
+
+### ✨ New Features
+
+**macOS Support**
+- Full macOS platform support (10.14+)
+- Native Objective-C++ implementation using CoreGraphics and Carbon APIs
+- macOS-specific hotkey system with Command key support
+- Native mouse control (click, move, position capture)
+- Accessibility permission handling
+- macOS-style Traffic Lights window buttons (close/minimize)
+
+**Custom Titlebar**
+- Frameless window design (removed default Windows titlebar)
+- Custom window control buttons
+  - Windows: Right-aligned minimize/close buttons with hover effects
+  - macOS: Left-aligned Traffic Lights style buttons
+- Draggable titlebar area
+- Platform-adaptive button styling
+
+**Startup Optimization**
+- Fixed window startup flicker on Windows
+- Window now appears at correct size and position immediately
+- Synchronized native window size with Flutter window options
+- Centered window on screen at startup
+
+### 🔧 Technical Changes
+
+- Added `macos/` directory with complete platform configuration
+- New `native/src/mouse_controller_macos.mm` - macOS native implementation
+- New `native/src/libmouse_controller.dylib` - macOS dynamic library
+- Updated `windows/runner/main.cpp` for proper window initialization
+- Added `_WindowsControlButton` widget for Windows titlebar
+- Modified `WindowOptions` with `TitleBarStyle.hidden`
+- Platform-conditional UI rendering for window controls
+
+### 📁 New Files
+
+```
+macos/                              # macOS platform configuration
+├── Runner/
+│   ├── MainFlutterWindow.swift    # Custom window with rounded corners
+│   ├── AppDelegate.swift
+│   └── Assets.xcassets/           # macOS app icons
+├── Podfile                        # CocoaPods dependencies
+└── Runner.xcodeproj/
+
+native/src/
+├── mouse_controller_macos.mm      # macOS native code
+└── libmouse_controller.dylib      # macOS dynamic library
+```
+
+### 🐛 Bug Fixes
+
+- Fixed window appearing at wrong size then resizing on Windows
+- Fixed window appearing at (10, 10) then moving to center
+- Fixed app icon being too close to left edge on Windows
+
+---
+
+## [1.1.0] - 2024-11-24
 
 ### ✨ New Features
 
@@ -62,7 +126,9 @@ All notable changes to ClickMate will be documented in this file.
 - Fixed configuration service crash on initialization failure
 - Ensured consistent behavior between button and hotkey start
 
-## [1.0.0] - 2025-11-24
+---
+
+## [1.0.0] - 2024-11-24
 
 ### 🎉 Initial Release
 
@@ -133,23 +199,39 @@ ClickMate - A professional mouse auto-clicker for Windows with global hotkey sup
 
 ## System Requirements
 
+### Windows
 - Windows 10 version 1809 or higher
 - Windows 11 (all versions)
 - Visual C++ Redistributable 2022
 - Administrator privileges (for hotkey functionality)
 
+### macOS
+- macOS 10.14 (Mojave) or higher
+- Accessibility permission required
+- Apple Silicon (M1/M2) and Intel supported
+
+---
+
 ## Installation
 
+### Windows
 1. Extract the portable package
 2. Right-click `START.bat` and select "Run as administrator"
 3. Application launches automatically
+
+### macOS
+1. Build from source: `flutter build macos`
+2. Open `ClickMate.app` from build folder
+3. Grant Accessibility permission when prompted
+
+---
 
 ## Usage
 
 1. **Auto Mode (Default)**: Position follows mouse in real-time
 2. **Manual Mode**: Click X/Y input fields or toggle button
-3. **Start Clicking**: Press `Ctrl+Shift+1` or click Start button
-4. **Capture Position**: Press `Ctrl+Shift+2`
+3. **Start Clicking**: Press `Ctrl+Shift+1` (Win) or `⌘+Shift+1` (Mac)
+4. **Capture Position**: Press `Ctrl+Shift+2` (Win) or `⌘+Shift+2` (Mac)
 
 ---
 

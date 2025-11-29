@@ -1,135 +1,324 @@
-# 详细构建指南
+# Build Guide / 构建指南
 
-## 环境准备
+Complete guide for building ClickMate on Windows and macOS.
 
-### 1. 安装 CMake
+完整的 ClickMate 构建指南，支持 Windows 和 macOS 平台。
 
-从官网下载并安装 CMake：https://cmake.org/download/
+---
 
-或使用 winget 安装：
-```cmd
-winget install Kitware.CMake
-```
+## 📋 Prerequisites / 环境准备
 
-### 2. 安装编译器（选择其一）
+### Common Requirements / 通用要求
 
-#### 选项 A: MinGW（推荐）
+1. **Flutter SDK** (3.10+)
+   - Download: https://flutter.dev/docs/get-started/install
+   - Add to system PATH
+   - Run `flutter doctor` to verify
 
-1. 下载 MinGW-w64：https://www.mingw-w64.org/downloads/
-2. 或使用 MSYS2 安装：
+2. **Git**
+   - Download: https://git-scm.com/downloads
+
+---
+
+## 🪟 Windows Build / Windows 构建
+
+### Requirements / 环境要求
+
+1. **CMake**
    ```cmd
-   # 安装 MSYS2 后运行
+   winget install Kitware.CMake
+   ```
+   Or download from: https://cmake.org/download/
+
+2. **C++ Compiler** (choose one)
+
+   **Option A: Visual Studio (Recommended)**
+   - Download Visual Studio 2019 or later
+   - Select "Desktop development with C++" workload
+
+   **Option B: MinGW**
+   ```cmd
+   # Using MSYS2
    pacman -S mingw-w64-x86_64-gcc
    pacman -S mingw-w64-x86_64-cmake
    ```
-3. 将 MinGW 的 bin 目录添加到系统 PATH
 
-#### 选项 B: Visual Studio
+### Build Steps / 构建步骤
 
-1. 下载并安装 Visual Studio 2019 或更高版本
-2. 在安装时选择"使用 C++ 的桌面开发"工作负载
-
-### 3. 安装 Flutter
-
-1. 从官网下载 Flutter SDK：https://flutter.dev/docs/get-started/install/windows
-2. 解压到合适的位置（如 C:\flutter）
-3. 将 Flutter 的 bin 目录添加到系统 PATH
-4. 运行 `flutter doctor` 检查环境
-
-## 构建步骤
-
-### 方法 1: 使用自动构建脚本（推荐）
+#### Method 1: Auto Script (Recommended) / 自动脚本（推荐）
 
 ```cmd
-cd mouse_control
-build_native.bat
+# Debug build and run
+scripts\quick_start.bat
+
+# Release build
+scripts\build_release.bat
 ```
 
-### 方法 2: 手动构建
-
-#### 使用 MinGW
+#### Method 2: Manual Build / 手动构建
 
 ```cmd
-cd mouse_control\native
-mkdir build
-cd build
-cmake .. -G "MinGW Makefiles"
-cmake --build . --config Release
+# 1. Get dependencies
+flutter pub get
 
-# 复制 DLL 到 Flutter 构建目录
-mkdir ..\..\build\windows\x64\runner\Release
-copy mouse_controller.dll ..\..\build\windows\x64\runner\Release\
-
-mkdir ..\..\build\windows\x64\runner\Debug
-copy mouse_controller.dll ..\..\build\windows\x64\runner\Debug\
-```
-
-#### 使用 Visual Studio
-
-```cmd
-cd mouse_control\native
-mkdir build
-cd build
+# 2. Build C++ DLL (if needed)
+cd native
+mkdir build && cd build
 cmake .. -G "Visual Studio 17 2022" -A x64
 cmake --build . --config Release
+copy Release\mouse_controller.dll ..\src\
 
-# 复制 DLL 到 Flutter 构建目录
-mkdir ..\..\build\windows\x64\runner\Release
-copy Release\mouse_controller.dll ..\..\build\windows\x64\runner\Release\
+# 3. Build Flutter app
+cd ..\..
+flutter build windows --debug
+# or
+flutter build windows --release
 
-mkdir ..\..\build\windows\x64\runner\Debug
-copy Release\mouse_controller.dll ..\..\build\windows\x64\runner\Debug\
+# 4. Run
+build\windows\x64\runner\Debug\clickmate.exe
 ```
 
-### 运行应用
+### Output Files / 输出文件
+
+```
+build\windows\x64\runner\
+├── Debug\
+│   ├── clickmate.exe
+│   ├── flutter_windows.dll
+│   ├── mouse_controller.dll
+│   └── data\
+└── Release\
+    └── (same structure)
+```
+
+---
+
+## 🍎 macOS Build / macOS 构建
+
+### Requirements / 环境要求
+
+1. **Xcode** (12.0+)
+   ```bash
+   xcode-select --install
+   ```
+
+2. **CocoaPods**
+   ```bash
+   sudo gem install cocoapods
+   ```
+
+3. **Clang** (included with Xcode)
+
+### Build Steps / 构建步骤
+
+#### Method 1: Flutter Command (Recommended) / Flutter 命令（推荐）
+
+```bash
+# 1. Get dependencies
+flutter pub get
+cd macos && pod install && cd ..
+
+# 2. Build native library (if needed)
+cd native/src
+clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics \
+  -o libmouse_controller.dylib mouse_controller_macos.mm
+cd ../..
+
+# 3. Build and run
+flutter run -d macos
+
+# Or build release
+flutter build macos --release
+```
+
+#### Method 2: Xcode Build / Xcode 构建
+
+```bash
+# Open in Xcode
+open macos/Runner.xcworkspace
+
+# Build from Xcode (⌘+B)
+```
+
+### Output Files / 输出文件
+
+```
+build/macos/Build/Products/
+├── Debug/
+│   └── ClickMate.app
+└── Release/
+    └── ClickMate.app
+```
+
+### macOS Permissions / macOS 权限
+
+ClickMate requires **Accessibility** permission for:
+- Global hotkey registration
+- Mouse control
+
+To grant permission:
+1. Open **System Preferences** → **Security & Privacy** → **Privacy**
+2. Select **Accessibility** in the left panel
+3. Click the lock icon and authenticate
+4. Add ClickMate.app to the list
+
+---
+
+## 🔧 Native Library Build / 原生库构建
+
+### Windows DLL
 
 ```cmd
-cd mouse_control
-flutter pub get
-flutter run -d windows
+cd native/src
+
+# Using cl.exe (MSVC)
+cl /LD mouse_controller.cpp /Fe:mouse_controller.dll user32.lib
+
+# Using g++ (MinGW)
+g++ -shared -o mouse_controller.dll mouse_controller.cpp -luser32
 ```
 
-## 常见问题
+### macOS Dynamic Library
 
-### Q: CMake 找不到编译器
-A: 确保已将编译器的 bin 目录添加到系统 PATH，重启命令提示符后重试。
+```bash
+cd native/src
 
-### Q: 找不到 mouse_controller.dll
-A: 确保已成功编译 C++ 库并将 DLL 复制到正确的位置。
+clang++ -shared -fPIC \
+  -framework Cocoa \
+  -framework Carbon \
+  -framework CoreGraphics \
+  -o libmouse_controller.dylib \
+  mouse_controller_macos.mm
+```
 
-### Q: Flutter 应用启动时报错
-A: 检查是否已运行 `flutter pub get`，并确保 DLL 文件在正确的位置。
+---
 
-### Q: 热键不工作
-A: 确保以管理员权限运行应用，某些系统上全局热键需要管理员权限。
+## 🐛 Troubleshooting / 故障排查
 
-## 调试技巧
+### Common Issues / 常见问题
 
-### 检查 DLL 是否正确加载
+#### Q: Flutter doctor shows issues
+```bash
+flutter doctor -v
+# Follow the suggestions to fix
+```
 
-在 [main.dart](lib/main.dart) 的 `initState` 方法中查看错误信息。
+#### Q: CMake can't find compiler (Windows)
+- Ensure Visual Studio or MinGW is in PATH
+- Restart terminal after installation
 
-### 启用详细日志
+#### Q: Pod install fails (macOS)
+```bash
+cd macos
+pod deintegrate
+pod install --repo-update
+```
+
+#### Q: DLL/dylib not found
+```bash
+# Windows - check DLL location
+dir native\src\mouse_controller.dll
+
+# macOS - check dylib location
+ls -la native/src/libmouse_controller.dylib
+```
+
+#### Q: Hotkeys not working
+
+**Windows:**
+- Run as Administrator
+- Check if another app uses the same hotkey
+
+**macOS:**
+- Grant Accessibility permission
+- Restart the app after granting permission
+
+#### Q: App crashes on startup
+
+**Windows:**
+```cmd
+scripts\diagnose.bat
+```
+
+**macOS:**
+```bash
+# Check console for errors
+flutter run -d macos --verbose
+```
+
+---
+
+## 📁 Project Structure / 项目结构
+
+```
+ClickMate/
+├── lib/                          # Flutter source code
+│   ├── main.dart                # Main application
+│   ├── mouse_controller_bindings.dart  # FFI bindings
+│   ├── mouse_controller_service.dart   # Business logic
+│   └── l10n/                    # Localization
+│
+├── native/src/                   # Native code
+│   ├── mouse_controller.cpp     # Windows implementation
+│   ├── mouse_controller.h       # Header file
+│   ├── mouse_controller.dll     # Windows binary
+│   ├── mouse_controller_macos.mm  # macOS implementation
+│   └── libmouse_controller.dylib  # macOS binary
+│
+├── windows/                      # Windows platform
+│   ├── CMakeLists.txt
+│   └── runner/
+│       └── main.cpp             # Windows entry point
+│
+├── macos/                        # macOS platform
+│   ├── Podfile
+│   └── Runner/
+│       ├── MainFlutterWindow.swift
+│       └── AppDelegate.swift
+│
+└── scripts/                      # Build scripts (Windows)
+    ├── build_release.bat
+    ├── quick_start.bat
+    └── diagnose.bat
+```
+
+---
+
+## 🚀 Development Tips / 开发技巧
+
+### Hot Reload / 热重载
+
+```bash
+# Flutter hot reload works for UI changes
+flutter run -d windows  # or macos
+# Press 'r' for hot reload
+# Press 'R' for hot restart
+```
+
+### Debug Logging / 调试日志
 
 ```dart
-// 在 mouse_controller_service.dart 中添加打印语句
-print('Mouse position: $x, $y');
+// In Dart code
+print('Debug message');
+LoggerService.instance.info('Info message');
+LoggerService.instance.error('Error message');
 ```
 
-### 测试 C++ 库
+### Native Code Debugging / 原生代码调试
 
-创建一个简单的 C++ 测试程序：
+**Windows:** Use Visual Studio debugger
+**macOS:** Use Xcode debugger or lldb
 
-```cpp
-#include "mouse_controller.h"
-#include <iostream>
+---
 
-int main() {
-    int x, y;
-    getMousePosition(&x, &y);
-    std::cout << "Mouse position: " << x << ", " << y << std::endl;
-    return 0;
-}
-```
+## 📚 Resources / 相关资源
 
-编译并运行以验证 C++ 库是否正常工作。
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Flutter Desktop](https://docs.flutter.dev/desktop)
+- [Dart FFI](https://dart.dev/guides/libraries/c-interop)
+- [window_manager](https://pub.dev/packages/window_manager)
+
+---
+
+**Last Updated**: 2024-11-29  
+**Version**: 2.0.0
