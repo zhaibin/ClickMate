@@ -310,7 +310,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
     try {
       final config = ClickConfigService.instance.getLastUsedConfig();
       if (config != null) {
-        _loadConfig(config);
+        // Don't show notification during init (context not ready yet)
+        _loadConfig(config, showNotification: false);
         print('Loaded last used config: ${config.name}');
       }
     } catch (e) {
@@ -318,7 +319,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
     }
   }
 
-  void _loadConfig(ClickConfig config) {
+  void _loadConfig(ClickConfig config, {bool showNotification = true}) {
     setState(() {
       _xController.text = config.x.toString();
       _yController.text = config.y.toString();
@@ -332,10 +333,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
     print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms, Mode: Manual');
     
     // Auto-move mouse to config position
-    _moveMouseToTarget();
+    _moveMouseToTarget(showNotification: showNotification);
   }
 
-  void _moveMouseToTarget() {
+  void _moveMouseToTarget({bool showNotification = true}) {
     try {
       final x = int.tryParse(_xController.text);
       final y = int.tryParse(_yController.text);
@@ -346,22 +347,28 @@ class _MouseControlPageState extends State<MouseControlPage> {
         _service!.bindings.moveMouse(x, y);
         print('Mouse moved to: ($x, $y)');
         
-        // Show notification
-        final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.near_me, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Text('${l10n.btnMoveMouse}: ($x, $y)'),
-              ],
-            ),
-            backgroundColor: Colors.blue,
-            duration: const Duration(milliseconds: 800),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // Show notification only when requested and context is ready
+        if (showNotification && mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final l10n = AppLocalizations.of(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.near_me, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text('${l10n.btnMoveMouse}: ($x, $y)'),
+                    ],
+                  ),
+                  backgroundColor: Colors.blue,
+                  duration: const Duration(milliseconds: 800),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          });
+        }
       }
     } catch (e) {
       print('Failed to move mouse: $e');
