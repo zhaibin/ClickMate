@@ -99,62 +99,63 @@ class UpgradeService {
       final assets = data['assets'] as List<dynamic>? ?? [];
 
       // Determine platform-specific asset
-      // macOS: .dmg, Windows: .exe (installer) or .zip (portable)
-      final platform = Platform.isMacOS ? 'macOS' : 'Windows';
-      final primaryExtension = Platform.isMacOS ? '.dmg' : '.exe';
-      final fallbackExtension = Platform.isMacOS ? '.dmg' : '.zip';
+      // macOS: .dmg, Windows: .exe (installer like ClickMate_v2.0.0_Setup.exe)
       
       String? downloadUrl;
       int fileSize = 0;
       String fileName = '';
 
-      // First try: find platform-specific asset with primary extension (.exe for Windows)
-      for (final asset in assets) {
-        final assetName = asset['name'] as String? ?? '';
-        if (assetName.contains(platform) && assetName.endsWith(primaryExtension)) {
-          downloadUrl = asset['browser_download_url'] as String?;
-          fileSize = asset['size'] as int? ?? 0;
-          fileName = assetName;
-          break;
-        }
-      }
-
-      // Second try: find any asset with primary extension
-      if (downloadUrl == null) {
+      if (Platform.isMacOS) {
+        // macOS: find .dmg file
         for (final asset in assets) {
           final assetName = asset['name'] as String? ?? '';
-          if (assetName.endsWith(primaryExtension) && 
-              (Platform.isWindows ? assetName.toLowerCase().contains('setup') || assetName.toLowerCase().contains('installer') : true)) {
+          if (assetName.endsWith('.dmg')) {
             downloadUrl = asset['browser_download_url'] as String?;
             fileSize = asset['size'] as int? ?? 0;
             fileName = assetName;
             break;
           }
         }
-      }
-
-      // Third try: fallback to secondary extension (.zip for Windows portable)
-      if (downloadUrl == null && primaryExtension != fallbackExtension) {
+      } else {
+        // Windows: prioritize Setup.exe installer
+        // Example: ClickMate_v2.0.0_Setup.exe
+        
+        // First try: find *_Setup.exe or *_Installer.exe
         for (final asset in assets) {
           final assetName = asset['name'] as String? ?? '';
-          if (assetName.contains(platform) && assetName.endsWith(fallbackExtension)) {
+          final lowerName = assetName.toLowerCase();
+          if (assetName.endsWith('.exe') && 
+              (lowerName.contains('setup') || lowerName.contains('installer'))) {
             downloadUrl = asset['browser_download_url'] as String?;
             fileSize = asset['size'] as int? ?? 0;
             fileName = assetName;
             break;
           }
         }
-      }
 
-      // Last try: find any matching extension
-      if (downloadUrl == null) {
-        for (final asset in assets) {
-          final assetName = asset['name'] as String? ?? '';
-          if (assetName.endsWith(primaryExtension) || assetName.endsWith(fallbackExtension)) {
-            downloadUrl = asset['browser_download_url'] as String?;
-            fileSize = asset['size'] as int? ?? 0;
-            fileName = assetName;
-            break;
+        // Second try: find any .exe file
+        if (downloadUrl == null) {
+          for (final asset in assets) {
+            final assetName = asset['name'] as String? ?? '';
+            if (assetName.endsWith('.exe')) {
+              downloadUrl = asset['browser_download_url'] as String?;
+              fileSize = asset['size'] as int? ?? 0;
+              fileName = assetName;
+              break;
+            }
+          }
+        }
+
+        // Third try: fallback to .zip portable version
+        if (downloadUrl == null) {
+          for (final asset in assets) {
+            final assetName = asset['name'] as String? ?? '';
+            if (assetName.endsWith('.zip')) {
+              downloadUrl = asset['browser_download_url'] as String?;
+              fileSize = asset['size'] as int? ?? 0;
+              fileName = assetName;
+              break;
+            }
           }
         }
       }
