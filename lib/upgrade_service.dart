@@ -36,9 +36,9 @@ class UpgradeService {
   factory UpgradeService() => instance;
   UpgradeService._internal();
 
-  // GitHub releases API URL (update with your actual repo)
+  // GitHub releases API URL
   static const String _githubReleasesUrl =
-      'https://api.github.com/repos/xantsio/clickmate/releases/latest';
+      'https://api.github.com/repos/zhaibin/ClickMate/releases/latest';
   
   // Alternative: Custom update server URL
   // static const String _updateServerUrl = 'https://clickmate.xants.net/api/version';
