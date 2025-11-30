@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit;
 import 'package:window_manager/window_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,6 +13,7 @@ import 'l10n/app_localizations.dart';
 import 'language_preference.dart';
 import 'click_config.dart';
 import 'config_management_dialog.dart';
+import 'upgrade_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -167,6 +168,12 @@ class _MouseControlPageState extends State<MouseControlPage> {
   String _currentPosition = '';
   Timer? _uiUpdateTimer;
   bool _autoCapture = true; // Auto-capture mode enabled by default
+  
+  // Upgrade state
+  bool _isCheckingUpgrade = false;
+  bool _isDownloading = false;
+  double _downloadProgress = 0.0;
+  UpgradeInfo? _upgradeInfo;
 
   @override
   void initState() {
@@ -218,6 +225,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
           _checkHotkeyStatus();
         }
       });
+      
+      // Check for updates on startup (delayed to not block UI)
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          _checkForUpdatesOnStartup();
+        }
+      });
     } catch (e) {
       _initError = e.toString();
       print('Failed to initialize MouseControllerService: $e');
@@ -234,6 +248,510 @@ class _MouseControlPageState extends State<MouseControlPage> {
     // Additional status check can be added here
     print('Interface loaded, hotkey system status displayed in console');
     print('Tip: If hotkeys don\'t work, check initialization logs above');
+  }
+
+  /// Check for updates on startup (silent check)
+  Future<void> _checkForUpdatesOnStartup() async {
+    try {
+      print('Checking for updates on startup...');
+      final upgradeInfo = await UpgradeService.instance.checkForUpdates();
+      
+      if (upgradeInfo != null && upgradeInfo.hasUpdate && mounted) {
+        setState(() {
+          _upgradeInfo = upgradeInfo;
+        });
+        // Show update available dialog
+        _showUpgradeDialog(upgradeInfo);
+      }
+    } catch (e) {
+      print('Error checking for updates on startup: $e');
+    }
+  }
+
+  /// Manual check for updates
+  Future<void> _checkForUpdates() async {
+    if (_isCheckingUpgrade) return;
+    
+    final l10n = AppLocalizations.of(context);
+    
+    setState(() {
+      _isCheckingUpgrade = true;
+    });
+    
+    // Show checking indicator
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Text(l10n.upgradeCheckingUpdates),
+          ],
+        ),
+        duration: const Duration(seconds: 10),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    
+    try {
+      final upgradeInfo = await UpgradeService.instance.checkForUpdates();
+      
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      
+      if (upgradeInfo != null && upgradeInfo.hasUpdate) {
+        setState(() {
+          _upgradeInfo = upgradeInfo;
+        });
+        _showUpgradeDialog(upgradeInfo);
+      } else if (upgradeInfo != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.upgradeNoUpdates),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.warning, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.upgradeCheckFailed),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.upgradeCheckFailed),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckingUpgrade = false;
+        });
+      }
+    }
+  }
+
+  /// Show upgrade dialog
+  void _showUpgradeDialog(UpgradeInfo info) {
+    final l10n = AppLocalizations.of(context);
+    const primaryColor = Color(0xFF1E3A5F);
+    const accentColor = Color(0xFF3B82F6);
+    const greenColor = Color(0xFF10B981);
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: 340,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.system_update, size: 24, color: Colors.white),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.upgradeAvailable,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'v${info.latestVersion}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: greenColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'NEW',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Content
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Version info
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(l10n.upgradeCurrentVersion, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  Text('v${info.currentVersion}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(l10n.upgradeNewVersion, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  Text('v${info.latestVersion}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: greenColor)),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(l10n.upgradeDownloadSize, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                  Text(UpgradeService.instance.formatFileSize(info.fileSize), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Release notes
+                        if (info.releaseNotes.isNotEmpty) ...[
+                          Text(l10n.upgradeReleaseNotes, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+                          const SizedBox(height: 6),
+                          Container(
+                            constraints: const BoxConstraints(maxHeight: 100),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: SingleChildScrollView(
+                              child: Text(
+                                info.releaseNotes,
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade700, height: 1.4),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        // Download progress (if downloading)
+                        if (_isDownloading) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: accentColor.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: accentColor.withOpacity(0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.downloading, size: 16, color: accentColor),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.upgradeDownloading, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: accentColor)),
+                                    const Spacer(),
+                                    Text('${(_downloadProgress * 100).toStringAsFixed(0)}%', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: accentColor)),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: _downloadProgress,
+                                    backgroundColor: Colors.grey.shade200,
+                                    valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Actions
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: _isDownloading ? null : () => Navigator.pop(context),
+                            child: Text(l10n.upgradeLater, style: TextStyle(color: Colors.grey.shade600)),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isDownloading
+                                ? null
+                                : () async {
+                                    await _downloadAndInstall(info, setDialogState);
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isDownloading ? Colors.grey : greenColor,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text(_isDownloading ? l10n.upgradeDownloading : l10n.upgradeInstallNow),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Download and install update
+  Future<void> _downloadAndInstall(UpgradeInfo info, StateSetter setDialogState) async {
+    final l10n = AppLocalizations.of(context);
+    
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0.0;
+    });
+    setDialogState(() {});
+    
+    try {
+      final downloadPath = await UpgradeService.instance.downloadUpdate(
+        info,
+        onProgress: (received, total) {
+          final progress = total > 0 ? received / total : 0.0;
+          setState(() {
+            _downloadProgress = progress;
+          });
+          setDialogState(() {});
+        },
+      );
+      
+      if (downloadPath != null && mounted) {
+        // Download complete, show install confirmation
+        setState(() {
+          _isDownloading = false;
+        });
+        setDialogState(() {});
+        
+        Navigator.pop(context); // Close download dialog
+        
+        // Show install confirmation dialog
+        final confirmed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 24),
+                const SizedBox(width: 8),
+                Text(l10n.upgradeDownloadComplete, style: const TextStyle(fontSize: 16)),
+              ],
+            ),
+            content: Text(l10n.upgradeInstallConfirmMsg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.upgradeLater),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(l10n.upgradeInstallNow),
+              ),
+            ],
+          ),
+        );
+        
+        if (confirmed == true && mounted) {
+          // Start upgrade process
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(l10n.upgradeRestarting),
+                ],
+              ),
+              duration: const Duration(seconds: 5),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          
+          // Start upgrade and exit
+          final success = await UpgradeService.instance.startUpgrade();
+          if (success) {
+            // Wait a moment for user to see the message
+            await Future.delayed(const Duration(milliseconds: 500));
+            exit(0);
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(l10n.errorOperationFailed),
+                    ],
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        // Download failed
+        setState(() {
+          _isDownloading = false;
+        });
+        setDialogState(() {});
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(l10n.upgradeDownloadFailed),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error downloading update: $e');
+      setState(() {
+        _isDownloading = false;
+      });
+      setDialogState(() {});
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.upgradeDownloadFailed),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _startUiUpdate() {
@@ -1488,6 +2006,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                 case 'about':
                   _showAbout();
                   break;
+                case 'upgrade':
+                  _checkForUpdates();
+                  break;
               }
             },
             itemBuilder: (context) => [
@@ -1592,6 +2113,30 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     ),
                     const SizedBox(width: 12),
                     Text(l10n.aboutTitle, style: const TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(height: 8),
+              PopupMenuItem(
+                value: 'upgrade',
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: _isCheckingUpgrade
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF10B981)),
+                            )
+                          : const Icon(Icons.system_update, size: 16, color: Color(0xFF10B981)),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.upgradeCheckNow, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
               ),

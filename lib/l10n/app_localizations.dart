@@ -214,6 +214,26 @@ class AppLocalizations {
   String get aboutOpenSource => get('about_open_source');
   String get aboutOpenSourceLibs => get('about_open_source_libs');
 
+  // Upgrade
+  String get upgradeTitle => get('upgrade_title');
+  String get upgradeAvailable => get('upgrade_available');
+  String get upgradeNewVersion => get('upgrade_new_version');
+  String get upgradeCurrentVersion => get('upgrade_current_version');
+  String get upgradeDownloadSize => get('upgrade_download_size');
+  String get upgradeReleaseNotes => get('upgrade_release_notes');
+  String get upgradeDownloading => get('upgrade_downloading');
+  String get upgradeDownloadComplete => get('upgrade_download_complete');
+  String get upgradeInstallNow => get('upgrade_install_now');
+  String get upgradeLater => get('upgrade_later');
+  String get upgradeCheckingUpdates => get('upgrade_checking_updates');
+  String get upgradeNoUpdates => get('upgrade_no_updates');
+  String get upgradeCheckFailed => get('upgrade_check_failed');
+  String get upgradeDownloadFailed => get('upgrade_download_failed');
+  String get upgradeInstallConfirm => get('upgrade_install_confirm');
+  String get upgradeInstallConfirmMsg => get('upgrade_install_confirm_msg');
+  String get upgradeRestarting => get('upgrade_restarting');
+  String get upgradeCheckNow => get('upgrade_check_now');
+
   Map<String, String> _getLocalizedStrings(String languageCode) {
     switch (languageCode) {
       case 'en':
@@ -383,6 +403,25 @@ class AppLocalizations {
     'about_website': 'Website',
     'about_open_source': 'Open Source',
     'about_open_source_libs': 'This app uses the following open source libraries:\n• Flutter - UI Framework\n• window_manager - Window Management\n• ffi - Native Code Bridge\n• shared_preferences - Local Storage',
+    // Upgrade
+    'upgrade_title': 'Software Update',
+    'upgrade_available': 'Update Available',
+    'upgrade_new_version': 'New Version',
+    'upgrade_current_version': 'Current Version',
+    'upgrade_download_size': 'Download Size',
+    'upgrade_release_notes': 'Release Notes',
+    'upgrade_downloading': 'Downloading...',
+    'upgrade_download_complete': 'Download Complete',
+    'upgrade_install_now': 'Install Now',
+    'upgrade_later': 'Later',
+    'upgrade_checking_updates': 'Checking for updates...',
+    'upgrade_no_updates': 'You are running the latest version',
+    'upgrade_check_failed': 'Failed to check for updates',
+    'upgrade_download_failed': 'Download failed',
+    'upgrade_install_confirm': 'Install Update',
+    'upgrade_install_confirm_msg': 'The application will close and restart to complete the installation. Continue?',
+    'upgrade_restarting': 'Restarting to complete update...',
+    'upgrade_check_now': 'Check for Updates',
   };
 
   // Simplified Chinese
@@ -527,6 +566,25 @@ class AppLocalizations {
     'about_website': '网站',
     'about_open_source': '开源软件',
     'about_open_source_libs': '本应用使用以下开源库：\n• Flutter - UI 框架\n• window_manager - 窗口管理\n• ffi - 原生代码桥接\n• shared_preferences - 本地存储',
+    // Upgrade
+    'upgrade_title': '软件更新',
+    'upgrade_available': '发现新版本',
+    'upgrade_new_version': '新版本',
+    'upgrade_current_version': '当前版本',
+    'upgrade_download_size': '下载大小',
+    'upgrade_release_notes': '更新说明',
+    'upgrade_downloading': '正在下载...',
+    'upgrade_download_complete': '下载完成',
+    'upgrade_install_now': '立即安装',
+    'upgrade_later': '稍后',
+    'upgrade_checking_updates': '正在检查更新...',
+    'upgrade_no_updates': '已是最新版本',
+    'upgrade_check_failed': '检查更新失败',
+    'upgrade_download_failed': '下载失败',
+    'upgrade_install_confirm': '安装更新',
+    'upgrade_install_confirm_msg': '应用将关闭并重启以完成安装。是否继续？',
+    'upgrade_restarting': '正在重启以完成更新...',
+    'upgrade_check_now': '检查更新',
   };
 
   // Traditional Chinese
@@ -669,6 +727,25 @@ class AppLocalizations {
     'about_website': '網站',
     'about_open_source': '開源軟體',
     'about_open_source_libs': '本應用使用以下開源庫：\n• Flutter - UI 框架\n• window_manager - 窗口管理\n• ffi - 原生代碼橋接\n• shared_preferences - 本地存儲',
+    // Upgrade
+    'upgrade_title': '軟體更新',
+    'upgrade_available': '發現新版本',
+    'upgrade_new_version': '新版本',
+    'upgrade_current_version': '當前版本',
+    'upgrade_download_size': '下載大小',
+    'upgrade_release_notes': '更新說明',
+    'upgrade_downloading': '正在下載...',
+    'upgrade_download_complete': '下載完成',
+    'upgrade_install_now': '立即安裝',
+    'upgrade_later': '稍後',
+    'upgrade_checking_updates': '正在檢查更新...',
+    'upgrade_no_updates': '已是最新版本',
+    'upgrade_check_failed': '檢查更新失敗',
+    'upgrade_download_failed': '下載失敗',
+    'upgrade_install_confirm': '安裝更新',
+    'upgrade_install_confirm_msg': '應用將關閉並重啟以完成安裝。是否繼續？',
+    'upgrade_restarting': '正在重啟以完成更新...',
+    'upgrade_check_now': '檢查更新',
   };
 
   // French
@@ -811,6 +888,25 @@ class AppLocalizations {
     'about_website': 'Site web',
     'about_open_source': 'Open Source',
     'about_open_source_libs': 'Cette app utilise les bibliothèques open source suivantes:\n• Flutter - Framework UI\n• window_manager - Gestion des fenêtres\n• ffi - Pont de code natif\n• shared_preferences - Stockage local',
+    // Upgrade
+    'upgrade_title': 'Mise à jour logicielle',
+    'upgrade_available': 'Mise à jour disponible',
+    'upgrade_new_version': 'Nouvelle version',
+    'upgrade_current_version': 'Version actuelle',
+    'upgrade_download_size': 'Taille du téléchargement',
+    'upgrade_release_notes': 'Notes de version',
+    'upgrade_downloading': 'Téléchargement en cours...',
+    'upgrade_download_complete': 'Téléchargement terminé',
+    'upgrade_install_now': 'Installer maintenant',
+    'upgrade_later': 'Plus tard',
+    'upgrade_checking_updates': 'Recherche de mises à jour...',
+    'upgrade_no_updates': 'Vous utilisez la dernière version',
+    'upgrade_check_failed': 'Échec de la vérification des mises à jour',
+    'upgrade_download_failed': 'Échec du téléchargement',
+    'upgrade_install_confirm': 'Installer la mise à jour',
+    'upgrade_install_confirm_msg': 'L\'application va se fermer et redémarrer pour terminer l\'installation. Continuer?',
+    'upgrade_restarting': 'Redémarrage pour terminer la mise à jour...',
+    'upgrade_check_now': 'Rechercher des mises à jour',
   };
 
   // Spanish
@@ -953,6 +1049,25 @@ class AppLocalizations {
     'about_website': 'Sitio web',
     'about_open_source': 'Código Abierto',
     'about_open_source_libs': 'Esta app utiliza las siguientes bibliotecas de código abierto:\n• Flutter - Framework UI\n• window_manager - Gestión de ventanas\n• ffi - Puente de código nativo\n• shared_preferences - Almacenamiento local',
+    // Upgrade
+    'upgrade_title': 'Actualización de software',
+    'upgrade_available': 'Actualización disponible',
+    'upgrade_new_version': 'Nueva versión',
+    'upgrade_current_version': 'Versión actual',
+    'upgrade_download_size': 'Tamaño de descarga',
+    'upgrade_release_notes': 'Notas de la versión',
+    'upgrade_downloading': 'Descargando...',
+    'upgrade_download_complete': 'Descarga completa',
+    'upgrade_install_now': 'Instalar ahora',
+    'upgrade_later': 'Más tarde',
+    'upgrade_checking_updates': 'Buscando actualizaciones...',
+    'upgrade_no_updates': 'Está utilizando la última versión',
+    'upgrade_check_failed': 'Error al buscar actualizaciones',
+    'upgrade_download_failed': 'Descarga fallida',
+    'upgrade_install_confirm': 'Instalar actualización',
+    'upgrade_install_confirm_msg': 'La aplicación se cerrará y reiniciará para completar la instalación. ¿Continuar?',
+    'upgrade_restarting': 'Reiniciando para completar la actualización...',
+    'upgrade_check_now': 'Buscar actualizaciones',
   };
 
   // Portuguese
@@ -1095,6 +1210,25 @@ class AppLocalizations {
     'about_website': 'Site',
     'about_open_source': 'Código Aberto',
     'about_open_source_libs': 'Este app usa as seguintes bibliotecas de código aberto:\n• Flutter - Framework UI\n• window_manager - Gerenciamento de janelas\n• ffi - Ponte de código nativo\n• shared_preferences - Armazenamento local',
+    // Upgrade
+    'upgrade_title': 'Atualização de software',
+    'upgrade_available': 'Atualização disponível',
+    'upgrade_new_version': 'Nova versão',
+    'upgrade_current_version': 'Versão atual',
+    'upgrade_download_size': 'Tamanho do download',
+    'upgrade_release_notes': 'Notas de versão',
+    'upgrade_downloading': 'Baixando...',
+    'upgrade_download_complete': 'Download concluído',
+    'upgrade_install_now': 'Instalar agora',
+    'upgrade_later': 'Mais tarde',
+    'upgrade_checking_updates': 'Verificando atualizações...',
+    'upgrade_no_updates': 'Você está usando a versão mais recente',
+    'upgrade_check_failed': 'Falha ao verificar atualizações',
+    'upgrade_download_failed': 'Falha no download',
+    'upgrade_install_confirm': 'Instalar atualização',
+    'upgrade_install_confirm_msg': 'O aplicativo será fechado e reiniciado para concluir a instalação. Continuar?',
+    'upgrade_restarting': 'Reiniciando para concluir a atualização...',
+    'upgrade_check_now': 'Verificar atualizações',
   };
 
   // German
@@ -1237,6 +1371,25 @@ class AppLocalizations {
     'about_website': 'Webseite',
     'about_open_source': 'Open Source',
     'about_open_source_libs': 'Diese App verwendet folgende Open-Source-Bibliotheken:\n• Flutter - UI-Framework\n• window_manager - Fensterverwaltung\n• ffi - Native Code-Brücke\n• shared_preferences - Lokale Speicherung',
+    // Upgrade
+    'upgrade_title': 'Software-Update',
+    'upgrade_available': 'Update verfügbar',
+    'upgrade_new_version': 'Neue Version',
+    'upgrade_current_version': 'Aktuelle Version',
+    'upgrade_download_size': 'Download-Größe',
+    'upgrade_release_notes': 'Versionshinweise',
+    'upgrade_downloading': 'Wird heruntergeladen...',
+    'upgrade_download_complete': 'Download abgeschlossen',
+    'upgrade_install_now': 'Jetzt installieren',
+    'upgrade_later': 'Später',
+    'upgrade_checking_updates': 'Suche nach Updates...',
+    'upgrade_no_updates': 'Sie verwenden die neueste Version',
+    'upgrade_check_failed': 'Update-Prüfung fehlgeschlagen',
+    'upgrade_download_failed': 'Download fehlgeschlagen',
+    'upgrade_install_confirm': 'Update installieren',
+    'upgrade_install_confirm_msg': 'Die Anwendung wird geschlossen und neu gestartet, um die Installation abzuschließen. Fortfahren?',
+    'upgrade_restarting': 'Neustart zum Abschluss des Updates...',
+    'upgrade_check_now': 'Nach Updates suchen',
   };
 
   // Russian
@@ -1379,6 +1532,25 @@ class AppLocalizations {
     'about_website': 'Веб-сайт',
     'about_open_source': 'Открытый исходный код',
     'about_open_source_libs': 'Это приложение использует следующие библиотеки с открытым исходным кодом:\n• Flutter - UI-фреймворк\n• window_manager - Управление окнами\n• ffi - Мост для нативного кода\n• shared_preferences - Локальное хранилище',
+    // Upgrade
+    'upgrade_title': 'Обновление программы',
+    'upgrade_available': 'Доступно обновление',
+    'upgrade_new_version': 'Новая версия',
+    'upgrade_current_version': 'Текущая версия',
+    'upgrade_download_size': 'Размер загрузки',
+    'upgrade_release_notes': 'Примечания к выпуску',
+    'upgrade_downloading': 'Загрузка...',
+    'upgrade_download_complete': 'Загрузка завершена',
+    'upgrade_install_now': 'Установить сейчас',
+    'upgrade_later': 'Позже',
+    'upgrade_checking_updates': 'Проверка обновлений...',
+    'upgrade_no_updates': 'Вы используете последнюю версию',
+    'upgrade_check_failed': 'Не удалось проверить обновления',
+    'upgrade_download_failed': 'Загрузка не удалась',
+    'upgrade_install_confirm': 'Установить обновление',
+    'upgrade_install_confirm_msg': 'Приложение закроется и перезапустится для завершения установки. Продолжить?',
+    'upgrade_restarting': 'Перезапуск для завершения обновления...',
+    'upgrade_check_now': 'Проверить обновления',
   };
 
   // Italian
@@ -1521,6 +1693,25 @@ class AppLocalizations {
     'about_website': 'Sito web',
     'about_open_source': 'Open Source',
     'about_open_source_libs': 'Questa app utilizza le seguenti librerie open source:\n• Flutter - Framework UI\n• window_manager - Gestione finestre\n• ffi - Ponte codice nativo\n• shared_preferences - Archiviazione locale',
+    // Upgrade
+    'upgrade_title': 'Aggiornamento software',
+    'upgrade_available': 'Aggiornamento disponibile',
+    'upgrade_new_version': 'Nuova versione',
+    'upgrade_current_version': 'Versione attuale',
+    'upgrade_download_size': 'Dimensione download',
+    'upgrade_release_notes': 'Note di rilascio',
+    'upgrade_downloading': 'Download in corso...',
+    'upgrade_download_complete': 'Download completato',
+    'upgrade_install_now': 'Installa ora',
+    'upgrade_later': 'Più tardi',
+    'upgrade_checking_updates': 'Ricerca aggiornamenti...',
+    'upgrade_no_updates': 'Stai utilizzando l\'ultima versione',
+    'upgrade_check_failed': 'Verifica aggiornamenti fallita',
+    'upgrade_download_failed': 'Download fallito',
+    'upgrade_install_confirm': 'Installa aggiornamento',
+    'upgrade_install_confirm_msg': 'L\'applicazione verrà chiusa e riavviata per completare l\'installazione. Continuare?',
+    'upgrade_restarting': 'Riavvio per completare l\'aggiornamento...',
+    'upgrade_check_now': 'Cerca aggiornamenti',
   };
 
   // Japanese
@@ -1663,6 +1854,25 @@ class AppLocalizations {
     'about_website': 'ウェブサイト',
     'about_open_source': 'オープンソース',
     'about_open_source_libs': 'このアプリは以下のオープンソースライブラリを使用しています：\n• Flutter - UIフレームワーク\n• window_manager - ウィンドウ管理\n• ffi - ネイティブコードブリッジ\n• shared_preferences - ローカルストレージ',
+    // Upgrade
+    'upgrade_title': 'ソフトウェアアップデート',
+    'upgrade_available': 'アップデートが利用可能',
+    'upgrade_new_version': '新バージョン',
+    'upgrade_current_version': '現在のバージョン',
+    'upgrade_download_size': 'ダウンロードサイズ',
+    'upgrade_release_notes': 'リリースノート',
+    'upgrade_downloading': 'ダウンロード中...',
+    'upgrade_download_complete': 'ダウンロード完了',
+    'upgrade_install_now': '今すぐインストール',
+    'upgrade_later': '後で',
+    'upgrade_checking_updates': 'アップデートを確認中...',
+    'upgrade_no_updates': '最新バージョンを使用しています',
+    'upgrade_check_failed': 'アップデートの確認に失敗しました',
+    'upgrade_download_failed': 'ダウンロードに失敗しました',
+    'upgrade_install_confirm': 'アップデートをインストール',
+    'upgrade_install_confirm_msg': 'インストールを完了するためにアプリケーションを閉じて再起動します。続行しますか？',
+    'upgrade_restarting': 'アップデートを完了するために再起動中...',
+    'upgrade_check_now': 'アップデートを確認',
   };
 
   // Korean
@@ -1805,6 +2015,25 @@ class AppLocalizations {
     'about_website': '웹사이트',
     'about_open_source': '오픈 소스',
     'about_open_source_libs': '이 앱은 다음 오픈 소스 라이브러리를 사용합니다:\n• Flutter - UI 프레임워크\n• window_manager - 창 관리\n• ffi - 네이티브 코드 브리지\n• shared_preferences - 로컬 저장소',
+    // Upgrade
+    'upgrade_title': '소프트웨어 업데이트',
+    'upgrade_available': '업데이트 사용 가능',
+    'upgrade_new_version': '새 버전',
+    'upgrade_current_version': '현재 버전',
+    'upgrade_download_size': '다운로드 크기',
+    'upgrade_release_notes': '릴리스 노트',
+    'upgrade_downloading': '다운로드 중...',
+    'upgrade_download_complete': '다운로드 완료',
+    'upgrade_install_now': '지금 설치',
+    'upgrade_later': '나중에',
+    'upgrade_checking_updates': '업데이트 확인 중...',
+    'upgrade_no_updates': '최신 버전을 사용 중입니다',
+    'upgrade_check_failed': '업데이트 확인 실패',
+    'upgrade_download_failed': '다운로드 실패',
+    'upgrade_install_confirm': '업데이트 설치',
+    'upgrade_install_confirm_msg': '설치를 완료하기 위해 응용 프로그램을 닫고 다시 시작합니다. 계속하시겠습니까?',
+    'upgrade_restarting': '업데이트 완료를 위해 다시 시작 중...',
+    'upgrade_check_now': '업데이트 확인',
   };
 }
 
