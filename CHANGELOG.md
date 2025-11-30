@@ -2,6 +2,51 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [2.0.0] - 2025-11-30
+
+### 🎉 Major Release - Cross-Platform Support
+
+**macOS Support**
+- Full macOS native integration with Objective-C
+- Native mouse control via Quartz Event Services
+- DMG installer packaging with custom background
+- Code signing support for macOS distribution
+- macOS-specific window styling and behavior
+
+**Windows Enhancements**
+- Self-signed code signing for Windows releases
+- Auto-detect signtool from Windows SDK
+- Installer-based distribution (Inno Setup)
+- Improved window corner consistency
+
+**UI/UX Improvements**
+- Unified design language across platforms
+- Consistent window corners (rounded on both platforms)
+- Simplified language selection (removed "Follow System" option)
+- Direct language picker in title bar
+- Refined visual appearance
+
+**Technical Changes**
+- Cross-platform architecture with platform-specific native code
+- Separate native implementations: C++ (Windows) / Objective-C (macOS)
+- Platform-conditional code paths in Flutter
+- New signing scripts for both platforms
+- DMG packaging script for macOS
+
+### 📦 Distribution
+
+**Windows**
+- Installer: `ClickMate_v2.0.0_Setup.exe` (signed)
+- Built with Inno Setup
+- Self-signed certificate for reduced SmartScreen warnings
+
+**macOS**
+- DMG: `ClickMate_v2.0.0.dmg`
+- Drag-and-drop installation
+- Code signed for Gatekeeper compatibility
+
+---
+
 ## [1.1.0] - 2025-11-24
 
 ### ✨ New Features
