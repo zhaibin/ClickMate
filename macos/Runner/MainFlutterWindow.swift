@@ -44,6 +44,13 @@ class MainFlutterWindow: NSWindow {
       titlebarView.alphaValue = 0
     }
     
+    // Ensure consistent corner radius (macOS default is ~10)
+    if let contentView = self.contentView {
+      contentView.wantsLayer = true
+      contentView.layer?.cornerRadius = 10
+      contentView.layer?.masksToBounds = true
+    }
+    
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()

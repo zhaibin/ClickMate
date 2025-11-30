@@ -34,14 +34,15 @@ void main() async {
   await windowManager.ensureInitialized();
   
   // Set window properties
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(400, 640),
-    minimumSize: Size(400, 640),
-    maximumSize: Size(400, 640),
+  WindowOptions windowOptions = WindowOptions(
+    size: const Size(400, 640),
+    minimumSize: const Size(400, 640),
+    maximumSize: const Size(400, 640),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.normal,
+    // Use hidden titlebar on macOS for custom window chrome
+    titleBarStyle: Platform.isMacOS ? TitleBarStyle.hidden : TitleBarStyle.normal,
     title: 'ClickMate',
   );
   
