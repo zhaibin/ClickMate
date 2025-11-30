@@ -41,6 +41,7 @@
 - `scripts/run_debug.bat` - 调试模式（显示详细日志）
 - `scripts/run_as_admin.bat` - 管理员模式（快捷键必需）
 - `scripts/build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
+- `scripts/sign_release.bat` - 代码签名（Windows 发布签名）
 - `scripts/diagnose.bat` - 诊断工具（检查环境和配置）
 - `scripts/test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
 - `scripts/generate_icons.py` - 图标生成（从源图标生成多尺寸）
@@ -299,6 +300,7 @@ mouse_control/
 │   ├── run_debug.bat     # 调试模式
 │   ├── run_as_admin.bat  # 管理员模式
 │   ├── build_release.bat # 发布打包
+│   ├── sign_release.bat  # 代码签名
 │   ├── diagnose.bat      # 诊断工具
 │   └── test_hotkey.bat   # 快捷键测试
 ├── docs/                  # 文档
