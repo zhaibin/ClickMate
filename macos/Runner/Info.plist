@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>ClickMate needs accessibility access to perform automatic mouse clicks.</string>
 </dict>
 </plist>

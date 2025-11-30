@@ -33,7 +33,7 @@ void main() async {
   // Initialize window manager
   await windowManager.ensureInitialized();
   
-  // Set window properties - hide window initially to prevent flicker
+  // Set window properties - Use hidden titlebar on both macOS and Windows for custom window chrome
   WindowOptions windowOptions = const WindowOptions(
     size: Size(400, 640),
     minimumSize: Size(400, 640),
@@ -1406,15 +1406,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
           : BorderRadius.zero,
       child: Scaffold(
       appBar: AppBar(
-        toolbarHeight: Platform.isMacOS ? 48 : 48,
-        leadingWidth: Platform.isMacOS ? 70 : 0,
+        toolbarHeight: 48,
+        leadingWidth: Platform.isMacOS ? 70 : 8,
         leading: Platform.isMacOS ? Padding(
           padding: const EdgeInsets.only(left: 12),
-          child: _WindowButtonsGroup(
+          child: _MacWindowButtonsGroup(
             onClose: () => windowManager.close(),
             onMinimize: () => windowManager.minimize(),
           ),
-        ) : null,
+        ) : const SizedBox(width: 8),
         titleSpacing: 0,
         title: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -1591,8 +1591,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ],
           ),
           const SizedBox(width: 8),
-          // Windows window control buttons (right side)
-          if (!Platform.isMacOS) ...[
+          // Windows window control buttons (minimize and close)
+          if (Platform.isWindows) ...[
             _WindowsControlButton(
               icon: Icons.remove,
               onTap: () => windowManager.minimize(),
@@ -2441,21 +2441,21 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   }
 }
 
-// macOS style window control buttons group
-class _WindowButtonsGroup extends StatefulWidget {
+// macOS style window control buttons group (traffic light style)
+class _MacWindowButtonsGroup extends StatefulWidget {
   final VoidCallback onClose;
   final VoidCallback onMinimize;
 
-  const _WindowButtonsGroup({
+  const _MacWindowButtonsGroup({
     required this.onClose,
     required this.onMinimize,
   });
 
   @override
-  State<_WindowButtonsGroup> createState() => _WindowButtonsGroupState();
+  State<_MacWindowButtonsGroup> createState() => _MacWindowButtonsGroupState();
 }
 
-class _WindowButtonsGroupState extends State<_WindowButtonsGroup> {
+class _MacWindowButtonsGroupState extends State<_MacWindowButtonsGroup> {
   bool _isHovered = false;
 
   @override
@@ -2545,7 +2545,7 @@ class _CloseIconPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Custom painter for minimize icon (-)
+// Custom painter for minimize icon (-) - macOS style
 class _MinimizeIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -2568,7 +2568,7 @@ class _MinimizeIconPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Windows style window control button
+// Windows style window control button with hover effect
 class _WindowsControlButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;

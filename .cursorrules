@@ -36,13 +36,21 @@
 
 ### 保留的核心脚本（禁止删除）
 所有脚本位于 `scripts/` 目录：
+
+**Windows 脚本 (.bat)：**
 - `scripts/START.bat` - 主启动脚本（检查DLL + 管理员提示 + 运行）
 - `scripts/quick_start.bat` - 智能启动（检查Debug exe，不存在则构建）
 - `scripts/run_debug.bat` - 调试模式（显示详细日志）
 - `scripts/run_as_admin.bat` - 管理员模式（快捷键必需）
 - `scripts/build_release.bat` - 发布打包（构建 + 创建便携版 + ZIP）
+- `scripts/sign_release.bat` - 代码签名（Windows 发布签名）
 - `scripts/diagnose.bat` - 诊断工具（检查环境和配置）
 - `scripts/test_hotkey.bat` - 快捷键测试（专门测试快捷键功能）
+
+**macOS 脚本 (.sh)：**
+- `scripts/build_dmg.sh` - DMG打包（构建 + 创建DMG安装包）
+
+**跨平台脚本：**
 - `scripts/generate_icons.py` - 图标生成（从源图标生成多尺寸）
 
 根目录保留：
@@ -290,17 +298,19 @@ String buttonText = '开始';           // 界面文本不能硬编码
 ## 📂 目录结构说明
 
 ```
-mouse_control/
-├── START.bat              # 快捷启动入口
+ClickMate/
+├── START.bat              # 快捷启动入口 (Windows)
 ├── README.md              # 项目说明
 ├── CHANGELOG.md           # 更新日志
 ├── scripts/               # 所有脚本
-│   ├── START.bat         # 主启动脚本
-│   ├── run_debug.bat     # 调试模式
-│   ├── run_as_admin.bat  # 管理员模式
-│   ├── build_release.bat # 发布打包
-│   ├── diagnose.bat      # 诊断工具
-│   └── test_hotkey.bat   # 快捷键测试
+│   ├── START.bat         # 主启动脚本 (Windows)
+│   ├── run_debug.bat     # 调试模式 (Windows)
+│   ├── run_as_admin.bat  # 管理员模式 (Windows)
+│   ├── build_release.bat # 发布打包 (Windows)
+│   ├── sign_release.bat  # 代码签名 (Windows)
+│   ├── diagnose.bat      # 诊断工具 (Windows)
+│   ├── test_hotkey.bat   # 快捷键测试 (Windows)
+│   └── build_dmg.sh      # DMG打包 (macOS)
 ├── docs/                  # 文档
 │   ├── BUILD_GUIDE.md    # 构建指南
 │   ├── 打包发布指南.md    # 打包说明
@@ -309,9 +319,11 @@ mouse_control/
 ├── lib/                   # Flutter源码
 │   ├── main.dart         # 主应用（集成多语言）
 │   ├── l10n/             # 多语言翻译
-│   │   └── app_localizations.dart  # 9种语言翻译
+│   │   └── app_localizations.dart  # 11种语言翻译
 │   └── language_preference.dart    # 语言偏好管理
-├── native/                # C++源码
+├── native/                # C++/ObjC源码
+├── macos/                 # macOS平台配置
+├── windows/               # Windows平台配置
 └── ...其他配置文件
 ```
 
