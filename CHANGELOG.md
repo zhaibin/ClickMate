@@ -2,6 +2,43 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [2.1.0] - 2025-12-01
+
+### ✨ New Features
+
+**Auto-Upgrade System**
+- Automatic version check on startup (3 seconds after launch)
+- Manual "Check for Updates" option in menu
+- Download progress indicator with percentage
+- One-click upgrade with automatic restart
+- Cross-platform support (Windows installer & macOS DMG)
+
+**Windows Upgrade**
+- Download and run `.exe` installer automatically
+- Inno Setup compatible with silent installation
+- Auto-detect installed application path
+- Automatic restart after upgrade
+
+**macOS Upgrade**
+- Download and mount `.dmg` automatically
+- Replace application in `/Applications`
+- Automatic restart after upgrade
+
+### 🔧 Technical Changes
+
+- New `UpgradeService` class for version management
+- GitHub Releases API integration for version checking
+- Platform-specific upgrade scripts (batch for Windows, shell for macOS)
+- HTTP package added for network requests
+- Multi-language support for upgrade UI (11 languages)
+
+### 📦 Distribution
+
+- Windows: `ClickMate_v2.1.0_Setup.exe`
+- macOS: `ClickMate_v2.1.0_macOS.dmg`
+
+---
+
 ## [2.0.0] - 2025-11-30
 
 ### 🎉 Major Release - Cross-Platform Support
