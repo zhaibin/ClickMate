@@ -154,7 +154,10 @@ scripts\build_release.bat
 
 自动完成：检查 DLL → 构建 Release → 创建便携版 → 打包 ZIP
 
-输出：`releases\v2.0.0\ClickMate_v2.0.0_Portable.zip`
+输出文件：
+- 便携版: `releases\v2.0.0\ClickMate_v2.0.0_Portable.zip`
+- Windows 安装包: `ClickMate-Installer\Output\ClickMate_v2.0.0_Setup.exe`
+- macOS DMG: `ClickMate_v2.0.0.dmg`
 
 ### macOS
 
@@ -311,15 +314,17 @@ clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics
 ## 📊 版本信息
 
 **当前版本**: v2.0.0  
-**发布日期**: 2024-11-29  
+**发布日期**: 2025-11-30  
 **支持系统**: Windows 10/11, macOS 10.14+
 
 ### v2.0.0 新功能 🎉
 
-- 🍎 **macOS 支持** - 完整的 macOS 平台支持
+- 🍎 **macOS 支持** - 完整的 macOS 原生集成
 - 🎨 **自定义标题栏** - 无边框窗口，Windows/macOS 原生风格按钮
+- 🔐 **Windows 自签名** - 减少 SmartScreen 警告
+- 📦 **安装包分发** - Windows 使用安装程序，macOS 使用 DMG
 - 🚀 **启动优化** - 修复窗口启动闪烁问题
-- 🔧 **架构优化** - 跨平台代码重构
+- 🌍 **简化语言选择** - 直接选择语言
 
 ### v1.1.0 功能
 

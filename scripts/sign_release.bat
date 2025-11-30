@@ -6,6 +6,8 @@ setlocal enabledelayedexpansion
 :: ========================================
 :: ClickMate - Code Signing Script
 :: ========================================
+:: Signs the installer EXE in ClickMate-Installer\Output
+:: ========================================
 
 echo ========================================
 echo   ClickMate - Code Signing
@@ -19,19 +21,26 @@ if not exist "VERSION" (
 )
 set /p VERSION=<VERSION
 
-set "PORTABLE_DIR=releases\v%VERSION%\ClickMate_v%VERSION%_Portable"
+:: Installer output directory
+set "INSTALLER_DIR=E:\Projects\xants\ClickMate-Installer\Output"
+set "INSTALLER_EXE=%INSTALLER_DIR%\ClickMate_v%VERSION%_Setup.exe"
+
+:: Certificate settings
 set "CERT_DIR=%USERPROFILE%\.clickmate_certs"
 set "SELF_SIGN_CERT=%CERT_DIR%\clickmate_selfsign.pfx"
 set "SELF_SIGN_PASS=ClickMate2024"
 
 echo Version: %VERSION%
-echo Target: %PORTABLE_DIR%
+echo Installer: %INSTALLER_EXE%
 echo.
 
-:: Check if portable directory exists
-if not exist "%PORTABLE_DIR%" (
-    echo [ERROR] Portable directory not found: %PORTABLE_DIR%
-    echo Please run build_release.bat first
+:: Check if installer exists
+if not exist "%INSTALLER_EXE%" (
+    echo [ERROR] Installer not found: %INSTALLER_EXE%
+    echo.
+    echo Please build the installer first:
+    echo   cd E:\Projects\xants\ClickMate-Installer
+    echo   build.bat
     exit /b 1
 )
 
@@ -90,38 +99,30 @@ goto :do_sign
 :: Sign with EV certificate
 :: ========================================
 :sign_ev
-echo [1/3] Signing clickmate.exe...
-"!SIGNTOOL!" sign /n "%SIGN_CERT_NAME%" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "%PORTABLE_DIR%\clickmate.exe"
-echo [2/3] Signing mouse_controller.dll...
-"!SIGNTOOL!" sign /n "%SIGN_CERT_NAME%" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "%PORTABLE_DIR%\mouse_controller.dll"
-echo [3/3] Verifying...
-"!SIGNTOOL!" verify /pa "%PORTABLE_DIR%\clickmate.exe"
+echo [1/2] Signing installer...
+"!SIGNTOOL!" sign /n "%SIGN_CERT_NAME%" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "%INSTALLER_EXE%"
+if errorlevel 1 (
+    echo [ERROR] Failed to sign installer
+    exit /b 1
+)
+echo [2/2] Verifying...
+"!SIGNTOOL!" verify /pa "%INSTALLER_EXE%"
 goto :sign_complete
 
 :: ========================================
 :: Sign files with PFX
 :: ========================================
 :do_sign
-echo [1/4] Signing clickmate.exe...
-"!SIGNTOOL!" sign /f "%CERT_FILE%" /p "%CERT_PASS%" /fd SHA256 "%PORTABLE_DIR%\clickmate.exe"
+echo [1/2] Signing installer: %INSTALLER_EXE%
+"!SIGNTOOL!" sign /f "%CERT_FILE%" /p "%CERT_PASS%" /fd SHA256 "%INSTALLER_EXE%"
 if errorlevel 1 (
-    echo [ERROR] Failed to sign clickmate.exe
+    echo [ERROR] Failed to sign installer
     exit /b 1
 )
-echo [OK] clickmate.exe signed
+echo [OK] Installer signed successfully
 
-echo [2/4] Signing mouse_controller.dll...
-"!SIGNTOOL!" sign /f "%CERT_FILE%" /p "%CERT_PASS%" /fd SHA256 "%PORTABLE_DIR%\mouse_controller.dll"
-echo [OK] mouse_controller.dll signed
-
-echo [3/4] Signing other DLLs...
-for %%F in ("%PORTABLE_DIR%\*.dll") do (
-    "!SIGNTOOL!" sign /f "%CERT_FILE%" /p "%CERT_PASS%" /fd SHA256 "%%F" >nul 2>&1
-)
-echo [OK] All DLLs processed
-
-echo [4/4] Verifying signature...
-"!SIGNTOOL!" verify /pa "%PORTABLE_DIR%\clickmate.exe" >nul 2>&1
+echo [2/2] Verifying signature...
+"!SIGNTOOL!" verify /pa "%INSTALLER_EXE%" >nul 2>&1
 if errorlevel 1 (
     echo [WARN] Untrusted root - normal for self-signed certs
 ) else (
@@ -156,15 +157,7 @@ echo ========================================
 echo   Signing Complete!
 echo ========================================
 echo.
-
-:: Create ZIP
-echo Creating signed ZIP package...
-set "OUTPUT_DIR=releases\v%VERSION%"
-del "%OUTPUT_DIR%\ClickMate_v%VERSION%_Portable.zip" 2>nul
-powershell -NoProfile -Command "Compress-Archive -Path '%PORTABLE_DIR%\*' -DestinationPath '%OUTPUT_DIR%\ClickMate_v%VERSION%_Portable.zip' -Force"
-
-echo.
-echo [OK] Signed package: %OUTPUT_DIR%\ClickMate_v%VERSION%_Portable.zip
+echo Signed installer: %INSTALLER_EXE%
 echo.
 echo ========================================
 echo   Certificate Info

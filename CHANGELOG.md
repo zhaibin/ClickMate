@@ -2,7 +2,7 @@
 
 All notable changes to ClickMate will be documented in this file.
 
-## [2.0.0] - 2024-11-29
+## [2.0.0] - 2025-11-30
 
 ### 🎉 Major Release - Cross-Platform Support
 
@@ -17,6 +17,14 @@ This release introduces full macOS support, making ClickMate a true cross-platfo
 - Native mouse control (click, move, position capture)
 - Accessibility permission handling
 - macOS-style Traffic Lights window buttons (close/minimize)
+- DMG installer packaging with custom background
+- Code signing support for macOS distribution
+
+**Windows Enhancements**
+- Self-signed code signing for Windows releases
+- Auto-detect signtool from Windows SDK
+- Installer-based distribution (Inno Setup)
+- Improved window corner consistency
 
 **Custom Titlebar**
 - Frameless window design (removed default Windows titlebar)
@@ -25,6 +33,13 @@ This release introduces full macOS support, making ClickMate a true cross-platfo
   - macOS: Left-aligned Traffic Lights style buttons
 - Draggable titlebar area
 - Platform-adaptive button styling
+
+**UI/UX Improvements**
+- Unified design language across platforms
+- Consistent window corners (rounded on both platforms)
+- Simplified language selection (removed "Follow System" option)
+- Direct language picker in title bar
+- Refined visual appearance
 
 **Startup Optimization**
 - Fixed window startup flicker on Windows
@@ -41,32 +56,33 @@ This release introduces full macOS support, making ClickMate a true cross-platfo
 - Added `_WindowsControlButton` widget for Windows titlebar
 - Modified `WindowOptions` with `TitleBarStyle.hidden`
 - Platform-conditional UI rendering for window controls
+- Cross-platform architecture with platform-specific native code
+- New signing scripts for both platforms
+- DMG packaging script for macOS
 
-### 📁 New Files
+### 📦 Distribution
 
-```
-macos/                              # macOS platform configuration
-├── Runner/
-│   ├── MainFlutterWindow.swift    # Custom window with rounded corners
-│   ├── AppDelegate.swift
-│   └── Assets.xcassets/           # macOS app icons
-├── Podfile                        # CocoaPods dependencies
-└── Runner.xcodeproj/
+**Windows**
+- Installer: `ClickMate_v2.0.0_Setup.exe` (signed)
+- Portable: `ClickMate_v2.0.0_Portable.zip`
+- Built with Inno Setup
+- Self-signed certificate for reduced SmartScreen warnings
 
-native/src/
-├── mouse_controller_macos.mm      # macOS native code
-└── libmouse_controller.dylib      # macOS dynamic library
-```
+**macOS**
+- DMG: `ClickMate_v2.0.0.dmg`
+- Drag-and-drop installation
+- Code signed for Gatekeeper compatibility
 
 ### 🐛 Bug Fixes
 
 - Fixed window appearing at wrong size then resizing on Windows
 - Fixed window appearing at (10, 10) then moving to center
 - Fixed app icon being too close to left edge on Windows
+- Fixed initState context access crash during startup
 
 ---
 
-## [1.1.0] - 2024-11-24
+## [1.1.0] - 2025-11-24
 
 ### ✨ New Features
 
