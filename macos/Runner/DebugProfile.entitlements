@@ -2,11 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Disable sandbox for development (required for mouse control) -->
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
+	<!-- Allow JIT for Flutter debug mode -->
 	<key>com.apple.security.cs.allow-jit</key>
 	<true/>
-	<key>com.apple.security.network.server</key>
+	<!-- Allow unsigned executable memory (required for Flutter) -->
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+	<!-- Disable library validation (required for loading native dylib) -->
+	<key>com.apple.security.cs.disable-library-validation</key>
 	<true/>
 </dict>
 </plist>
+
