@@ -99,16 +99,19 @@ class UpgradeService {
       final assets = data['assets'] as List<dynamic>? ?? [];
 
       // Determine platform-specific asset
+      // macOS: .dmg, Windows: .exe (installer) or .zip (portable)
       final platform = Platform.isMacOS ? 'macOS' : 'Windows';
-      final extension = Platform.isMacOS ? '.dmg' : '.zip';
+      final primaryExtension = Platform.isMacOS ? '.dmg' : '.exe';
+      final fallbackExtension = Platform.isMacOS ? '.dmg' : '.zip';
       
       String? downloadUrl;
       int fileSize = 0;
       String fileName = '';
 
+      // First try: find platform-specific asset with primary extension (.exe for Windows)
       for (final asset in assets) {
         final assetName = asset['name'] as String? ?? '';
-        if (assetName.contains(platform) && assetName.endsWith(extension)) {
+        if (assetName.contains(platform) && assetName.endsWith(primaryExtension)) {
           downloadUrl = asset['browser_download_url'] as String?;
           fileSize = asset['size'] as int? ?? 0;
           fileName = assetName;
@@ -116,11 +119,38 @@ class UpgradeService {
         }
       }
 
-      // Fallback: try to find any matching extension
+      // Second try: find any asset with primary extension
       if (downloadUrl == null) {
         for (final asset in assets) {
           final assetName = asset['name'] as String? ?? '';
-          if (assetName.endsWith(extension)) {
+          if (assetName.endsWith(primaryExtension) && 
+              (Platform.isWindows ? assetName.toLowerCase().contains('setup') || assetName.toLowerCase().contains('installer') : true)) {
+            downloadUrl = asset['browser_download_url'] as String?;
+            fileSize = asset['size'] as int? ?? 0;
+            fileName = assetName;
+            break;
+          }
+        }
+      }
+
+      // Third try: fallback to secondary extension (.zip for Windows portable)
+      if (downloadUrl == null && primaryExtension != fallbackExtension) {
+        for (final asset in assets) {
+          final assetName = asset['name'] as String? ?? '';
+          if (assetName.contains(platform) && assetName.endsWith(fallbackExtension)) {
+            downloadUrl = asset['browser_download_url'] as String?;
+            fileSize = asset['size'] as int? ?? 0;
+            fileName = assetName;
+            break;
+          }
+        }
+      }
+
+      // Last try: find any matching extension
+      if (downloadUrl == null) {
+        for (final asset in assets) {
+          final assetName = asset['name'] as String? ?? '';
+          if (assetName.endsWith(primaryExtension) || assetName.endsWith(fallbackExtension)) {
             downloadUrl = asset['browser_download_url'] as String?;
             fileSize = asset['size'] as int? ?? 0;
             fileName = assetName;
@@ -276,11 +306,61 @@ class UpgradeService {
     try {
       final tempDir = await getTemporaryDirectory();
       final scriptPath = '${tempDir.path}/clickmate_upgrade.bat';
-      final exePath = Platform.resolvedExecutable;
-      final zipPath = _downloadedFilePath!;
+      final downloadedPath = _downloadedFilePath!;
+      final isInstaller = downloadedPath.toLowerCase().endsWith('.exe');
 
-      // Create upgrade batch script
-      final script = '''
+      String script;
+      
+      if (isInstaller) {
+        // For .exe installer: run the installer directly
+        script = '''
+@echo off
+chcp 65001 > nul
+setlocal
+
+echo ========================================
+echo ClickMate Upgrade Script
+echo ========================================
+echo.
+
+:: Wait for the application to close
+echo Waiting for application to close...
+:waitloop
+tasklist /FI "IMAGENAME eq clickmate.exe" 2>NUL | find /I /N "clickmate.exe">NUL
+if "%ERRORLEVEL%"=="0" (
+    timeout /t 1 /nobreak > nul
+    goto waitloop
+)
+echo Application closed.
+echo.
+
+:: Run the installer
+echo Running installer...
+start /wait "" "$downloadedPath" /SILENT /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS
+if %ERRORLEVEL% neq 0 (
+    echo ERROR: Installation failed!
+    pause
+    exit /b 1
+)
+echo Installation complete.
+echo.
+
+:: Clean up
+echo Cleaning up...
+del "$downloadedPath" > nul 2>&1
+del "$scriptPath" > nul 2>&1
+echo.
+
+echo ========================================
+echo Upgrade completed successfully!
+echo ========================================
+timeout /t 3 > nul
+exit
+''';
+      } else {
+        // For .zip portable: extract and replace
+        final exePath = Platform.resolvedExecutable;
+        script = '''
 @echo off
 chcp 65001 > nul
 setlocal
@@ -312,7 +392,7 @@ echo.
 :: Extract new version
 echo Extracting new version...
 cd /d "$appDir"
-powershell -Command "Expand-Archive -Path '$zipPath' -DestinationPath '$appDir' -Force"
+powershell -Command "Expand-Archive -Path '$downloadedPath' -DestinationPath '$appDir' -Force"
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Failed to extract update!
     echo Restoring backup...
@@ -325,7 +405,7 @@ echo.
 
 :: Clean up
 echo Cleaning up...
-del "$zipPath" > nul 2>&1
+del "$downloadedPath" > nul 2>&1
 del "$scriptPath" > nul 2>&1
 echo.
 
@@ -339,9 +419,10 @@ echo ========================================
 timeout /t 3 > nul
 exit
 ''';
+      }
 
       await File(scriptPath).writeAsString(script);
-      print('Created upgrade script: $scriptPath');
+      print('Created upgrade script: $scriptPath (installer: $isInstaller)');
 
       // Run the upgrade script
       await Process.start(
