@@ -313,11 +313,12 @@ class UpgradeService {
       String script;
       
       if (isInstaller) {
-        // For .exe installer: run the installer directly
+        // For .exe installer (Inno Setup): run the installer directly
+        // Get the install directory from registry or use default
         script = '''
 @echo off
 chcp 65001 > nul
-setlocal
+setlocal EnableDelayedExpansion
 
 echo ========================================
 echo ClickMate Upgrade Script
@@ -326,36 +327,71 @@ echo.
 
 :: Wait for the application to close
 echo Waiting for application to close...
+set RETRY=0
 :waitloop
-tasklist /FI "IMAGENAME eq clickmate.exe" 2>NUL | find /I /N "clickmate.exe">NUL
+tasklist /FI "IMAGENAME eq clickmate.exe" 2>NUL | find /I /N "clickmate">NUL
 if "%ERRORLEVEL%"=="0" (
+    set /a RETRY+=1
+    if !RETRY! gtr 30 (
+        echo Timeout waiting for application to close.
+        echo Please close ClickMate manually and press any key...
+        pause
+    )
     timeout /t 1 /nobreak > nul
     goto waitloop
 )
 echo Application closed.
 echo.
 
-:: Run the installer
+:: Run the installer with Inno Setup silent parameters
 echo Running installer...
-start /wait "" "$downloadedPath" /SILENT /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Installation failed!
+echo Please wait, installing new version...
+"$downloadedPath" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS /SP-
+set INSTALL_RESULT=%ERRORLEVEL%
+if %INSTALL_RESULT% neq 0 (
+    echo.
+    echo ERROR: Installation failed with code %INSTALL_RESULT%
+    echo Please try running the installer manually: $downloadedPath
     pause
     exit /b 1
 )
 echo Installation complete.
 echo.
 
-:: Clean up
+:: Clean up downloaded installer
 echo Cleaning up...
+timeout /t 2 /nobreak > nul
 del "$downloadedPath" > nul 2>&1
-del "$scriptPath" > nul 2>&1
 echo.
+
+:: Find and start the installed application
+echo Starting ClickMate...
+set "INSTALL_PATH="
+for /f "tokens=2*" %%a in ('reg query "HKCU\\Software\\ClickMate" /v "InstallPath" 2^>nul') do set "INSTALL_PATH=%%b"
+if not defined INSTALL_PATH (
+    for /f "tokens=2*" %%a in ('reg query "HKLM\\Software\\ClickMate" /v "InstallPath" 2^>nul') do set "INSTALL_PATH=%%b"
+)
+if not defined INSTALL_PATH (
+    set "INSTALL_PATH=%LOCALAPPDATA%\\Programs\\ClickMate"
+)
+if exist "!INSTALL_PATH!\\clickmate.exe" (
+    start "" "!INSTALL_PATH!\\clickmate.exe"
+) else if exist "%LOCALAPPDATA%\\Programs\\ClickMate\\clickmate.exe" (
+    start "" "%LOCALAPPDATA%\\Programs\\ClickMate\\clickmate.exe"
+) else if exist "%PROGRAMFILES%\\ClickMate\\clickmate.exe" (
+    start "" "%PROGRAMFILES%\\ClickMate\\clickmate.exe"
+) else (
+    echo Warning: Could not find ClickMate.exe to restart.
+    echo Please start the application manually.
+)
 
 echo ========================================
 echo Upgrade completed successfully!
 echo ========================================
-timeout /t 3 > nul
+timeout /t 2 /nobreak > nul
+
+:: Delete this script
+del "%~f0" > nul 2>&1
 exit
 ''';
       } else {
