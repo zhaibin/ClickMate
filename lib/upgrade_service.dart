@@ -161,7 +161,7 @@ class UpgradeService {
       }
 
       if (downloadUrl == null) {
-        print('No suitable asset found for $platform');
+        print('No suitable asset found for ${Platform.isMacOS ? "macOS" : "Windows"}');
         return null;
       }
 
