@@ -34,6 +34,7 @@ void main() async {
   await windowManager.ensureInitialized();
   
   // Set window properties
+  // Use hidden titlebar on both macOS and Windows for custom window chrome
   WindowOptions windowOptions = WindowOptions(
     size: const Size(400, 640),
     minimumSize: const Size(400, 640),
@@ -41,8 +42,7 @@ void main() async {
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
-    // Use hidden titlebar on macOS for custom window chrome
-    titleBarStyle: Platform.isMacOS ? TitleBarStyle.hidden : TitleBarStyle.normal,
+    titleBarStyle: TitleBarStyle.hidden,
     title: 'ClickMate',
   );
   
@@ -1402,15 +1402,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
           : BorderRadius.zero,
       child: Scaffold(
       appBar: AppBar(
-        toolbarHeight: Platform.isMacOS ? 48 : 48,
-        leadingWidth: Platform.isMacOS ? 70 : 0,
+        toolbarHeight: 48,
+        leadingWidth: Platform.isMacOS ? 70 : 8,
         leading: Platform.isMacOS ? Padding(
           padding: const EdgeInsets.only(left: 12),
-          child: _WindowButtonsGroup(
+          child: _MacWindowButtonsGroup(
             onClose: () => windowManager.close(),
             onMinimize: () => windowManager.minimize(),
           ),
-        ) : null,
+        ) : const SizedBox(width: 8),
         titleSpacing: 0,
         title: GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -1586,6 +1586,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
             ],
           ),
           const SizedBox(width: 8),
+          // Windows window control buttons (minimize and close)
+          if (Platform.isWindows) ...[
+            _WindowsControlButtons(
+              onMinimize: () => windowManager.minimize(),
+              onClose: () => windowManager.close(),
+            ),
+          ],
         ],
       ),
       body: Padding(
@@ -2422,21 +2429,21 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   }
 }
 
-// macOS style window control buttons group
-class _WindowButtonsGroup extends StatefulWidget {
+// macOS style window control buttons group (traffic light style)
+class _MacWindowButtonsGroup extends StatefulWidget {
   final VoidCallback onClose;
   final VoidCallback onMinimize;
 
-  const _WindowButtonsGroup({
+  const _MacWindowButtonsGroup({
     required this.onClose,
     required this.onMinimize,
   });
 
   @override
-  State<_WindowButtonsGroup> createState() => _WindowButtonsGroupState();
+  State<_MacWindowButtonsGroup> createState() => _MacWindowButtonsGroupState();
 }
 
-class _WindowButtonsGroupState extends State<_WindowButtonsGroup> {
+class _MacWindowButtonsGroupState extends State<_MacWindowButtonsGroup> {
   bool _isHovered = false;
 
   @override
@@ -2526,7 +2533,7 @@ class _CloseIconPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Custom painter for minimize icon (-)
+// Custom painter for minimize icon (-) - macOS style
 class _MinimizeIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -2547,5 +2554,83 @@ class _MinimizeIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Windows style window control buttons (minimize and close)
+class _WindowsControlButtons extends StatelessWidget {
+  final VoidCallback onMinimize;
+  final VoidCallback onClose;
+
+  const _WindowsControlButtons({
+    required this.onMinimize,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Minimize button
+        _WindowsControlButton(
+          onTap: onMinimize,
+          icon: Icons.remove,
+          hoverColor: Colors.white.withOpacity(0.1),
+        ),
+        // Close button
+        _WindowsControlButton(
+          onTap: onClose,
+          icon: Icons.close,
+          hoverColor: const Color(0xFFE81123),
+          isClose: true,
+        ),
+      ],
+    );
+  }
+}
+
+// Single Windows control button with hover effect
+class _WindowsControlButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final IconData icon;
+  final Color hoverColor;
+  final bool isClose;
+
+  const _WindowsControlButton({
+    required this.onTap,
+    required this.icon,
+    required this.hoverColor,
+    this.isClose = false,
+  });
+
+  @override
+  State<_WindowsControlButton> createState() => _WindowsControlButtonState();
+}
+
+class _WindowsControlButtonState extends State<_WindowsControlButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 46,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _isHovered ? widget.hoverColor : Colors.transparent,
+          ),
+          child: Icon(
+            widget.icon,
+            size: 18,
+            color: _isHovered && widget.isClose ? Colors.white : Colors.white.withOpacity(0.9),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
