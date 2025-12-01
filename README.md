@@ -77,6 +77,8 @@ open build/macos/Build/Products/Release/ClickMate.app
 
 > ⚠️ **macOS 权限提示**：首次运行需要在「系统偏好设置 → 安全性与隐私 → 辅助功能」中授权应用程序。
 
+> 📥 **下载安装包后显示"已损坏"？** 查看 [macOS 安装指南](docs/macOS_INSTALL_GUIDE.md) 了解解决方案。
+
 ---
 
 ## 📖 使用说明

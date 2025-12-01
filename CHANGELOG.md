@@ -33,6 +33,13 @@ All notable changes to ClickMate will be documented in this file.
 - Set correct install_name using `@executable_path/../Frameworks/` path
 - Updated `mouse_controller_bindings.dart` to prioritize Frameworks directory
 
+**macOS "Damaged App" Issue**
+- Added comprehensive installation guide for macOS users
+- Created `docs/macOS_INSTALL_GUIDE.md` with step-by-step solutions
+- Added installation instructions file (`macOS_安装说明.txt`) to releases
+- Updated README.md with link to troubleshooting guide
+- Documented `xattr -cr` command to remove quarantine attribute
+
 ### 🔧 Technical Changes
 
 - New `UpgradeService` class for version management

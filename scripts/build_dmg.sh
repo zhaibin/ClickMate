@@ -169,11 +169,78 @@ if [ -f "$DMG_PATH" ]; then
     echo -e "DMG Size: ${DMG_SIZE}"
 fi
 
+# Create installation guide
+GUIDE_FILE="$RELEASES_DIR/macOS_安装说明.txt"
+cat > "$GUIDE_FILE" << 'EOF'
+# ClickMate macOS 安装指南
+
+## 安装步骤
+
+1. 打开 DMG 文件
+2. 将 ClickMate.app 拖入「应用程序」文件夹
+3. 打开「应用程序」文件夹，找到 ClickMate
+
+## ⚠️ 如果显示"已损坏"或"无法打开"
+
+这是 macOS 安全机制导致的，请按以下步骤解决：
+
+### 方法1：终端命令（推荐，最简单）
+
+打开「终端」（在启动台或应用程序/实用工具中），复制粘贴以下命令：
+
+    xattr -cr /Applications/ClickMate.app
+
+然后按回车键执行。
+
+### 方法2：右键打开
+
+1. 右键点击（或按住 Control 点击）ClickMate.app
+2. 选择「打开」
+3. 在弹出对话框中点击「打开」
+
+### 方法3：系统设置允许
+
+1. 尝试打开 ClickMate（会显示错误）
+2. 打开「系统偏好设置」→「安全性与隐私」
+3. 点击「仍要打开」按钮
+
+## 辅助功能权限
+
+ClickMate 需要辅助功能权限才能控制鼠标：
+
+1. 打开「系统偏好设置」→「安全性与隐私」→「隐私」
+2. 选择左侧的「辅助功能」
+3. 点击锁图标解锁（需要输入密码）
+4. 点击「+」按钮，添加 ClickMate
+5. 勾选 ClickMate 旁边的复选框
+6. 重启 ClickMate
+
+## 为什么会出现"已损坏"？
+
+这是因为应用未经过 Apple 代码签名。这是正常的，上述解决方案是安全的。
+
+## 详细文档
+
+更多信息请访问：
+https://github.com/zhaibin/ClickMate/blob/master/docs/macOS_INSTALL_GUIDE.md
+
+---
+
+如有问题，请在 GitHub 提交 issue。
+EOF
+
+echo -e "${GREEN}✓ Installation guide created: $GUIDE_FILE${NC}"
+echo ""
+
 echo ""
 echo -e "${YELLOW}Next Steps:${NC}"
 echo "1. Test the DMG by opening it and running the app"
 echo "2. Verify mouse click functionality works"
 echo "3. Check accessibility permission prompt appears"
+echo "4. Read the installation guide: macOS_安装说明.txt"
+echo ""
+echo -e "${YELLOW}For users who see 'damaged' error:${NC}"
+echo "  Run: xattr -cr /Applications/ClickMate.app"
 echo ""
 echo -e "${YELLOW}For code signing (optional but recommended):${NC}"
 echo "  codesign --force --deep --sign \"Developer ID Application: YOUR_NAME\" \"$APP_PATH\""
