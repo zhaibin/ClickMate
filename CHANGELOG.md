@@ -24,6 +24,15 @@ All notable changes to ClickMate will be documented in this file.
 - Replace application in `/Applications`
 - Automatic restart after upgrade
 
+### 🐛 Bug Fixes
+
+**macOS Distribution Critical Fix**
+- Fixed: DMG-distributed app failed to load `libmouse_controller.dylib`
+- Solution: Dylib is now automatically copied to `ClickMate.app/Contents/Frameworks/`
+- Updated `build_dmg.sh` script to handle native library packaging
+- Set correct install_name using `@executable_path/../Frameworks/` path
+- Updated `mouse_controller_bindings.dart` to prioritize Frameworks directory
+
 ### 🔧 Technical Changes
 
 - New `UpgradeService` class for version management
@@ -31,6 +40,8 @@ All notable changes to ClickMate will be documented in this file.
 - Platform-specific upgrade scripts (batch for Windows, shell for macOS)
 - HTTP package added for network requests
 - Multi-language support for upgrade UI (11 languages)
+- Enhanced `build_dmg.sh` with native library packaging (6 steps)
+- Updated BUILD_GUIDE.md with dylib packaging instructions
 
 ### 📦 Distribution
 

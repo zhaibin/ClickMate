@@ -45,8 +45,33 @@ flutter pub get
 echo -e "${GREEN}✓ Dependencies ready${NC}"
 echo ""
 
-# Step 3: Build release
-echo -e "${YELLOW}[3/5] Building macOS release...${NC}"
+# Step 3: Build native library
+echo -e "${YELLOW}[3/6] Building native library...${NC}"
+cd "$PROJECT_ROOT/native/src"
+
+# Check if dylib already exists and is recent
+if [ -f "libmouse_controller.dylib" ]; then
+    echo "Found existing libmouse_controller.dylib"
+else
+    echo "Compiling libmouse_controller.dylib..."
+    clang++ -shared -fPIC \
+        -framework Cocoa \
+        -framework Carbon \
+        -framework CoreGraphics \
+        -o libmouse_controller.dylib \
+        mouse_controller_macos.mm
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}✗ Error: Failed to compile native library${NC}"
+        exit 1
+    fi
+fi
+echo -e "${GREEN}✓ Native library ready${NC}"
+echo ""
+
+# Step 4: Build release
+echo -e "${YELLOW}[4/6] Building macOS release...${NC}"
+cd "$PROJECT_ROOT"
 flutter build macos --release
 echo -e "${GREEN}✓ Build completed${NC}"
 echo ""
@@ -57,14 +82,29 @@ if [ ! -d "$APP_PATH" ]; then
     exit 1
 fi
 
-# Step 4: Create releases directory
-echo -e "${YELLOW}[4/5] Preparing release directory...${NC}"
+# Step 4.5: Copy dylib into app bundle
+echo -e "${YELLOW}[4.5/6] Copying native library into app bundle...${NC}"
+FRAMEWORKS_DIR="$APP_PATH/Contents/Frameworks"
+mkdir -p "$FRAMEWORKS_DIR"
+
+# Copy the dylib
+cp "$PROJECT_ROOT/native/src/libmouse_controller.dylib" "$FRAMEWORKS_DIR/"
+
+# Update dylib install name to use @executable_path
+install_name_tool -id "@executable_path/../Frameworks/libmouse_controller.dylib" \
+    "$FRAMEWORKS_DIR/libmouse_controller.dylib"
+
+echo -e "${GREEN}✓ Native library copied to app bundle${NC}"
+echo ""
+
+# Step 5: Create releases directory
+echo -e "${YELLOW}[5/6] Preparing release directory...${NC}"
 mkdir -p "$RELEASES_DIR"
 echo -e "${GREEN}✓ Directory ready: $RELEASES_DIR${NC}"
 echo ""
 
-# Step 5: Create DMG
-echo -e "${YELLOW}[5/5] Creating DMG...${NC}"
+# Step 6: Create DMG
+echo -e "${YELLOW}[6/6] Creating DMG...${NC}"
 
 DMG_PATH="$RELEASES_DIR/${DMG_NAME}.dmg"
 TEMP_DMG_PATH="$RELEASES_DIR/${DMG_NAME}_temp.dmg"

@@ -54,15 +54,21 @@ class MouseControllerBindings {
     } else if (Platform.isMacOS) {
       // Try multiple paths for macOS dylib
       final home = Platform.environment['HOME'] ?? '/Users/${Platform.environment['USER']}';
+      final executablePath = Platform.resolvedExecutable;
+      final executableDir = executablePath.substring(0, executablePath.lastIndexOf('/'));
+      
       final possiblePaths = [
+        // For packaged app: check Frameworks directory inside .app bundle
+        '$executableDir/../Frameworks/libmouse_controller.dylib',
+        // For development: check project root
         'libmouse_controller.dylib',
         'build/macos/Build/Products/Debug/libmouse_controller.dylib',
         'build/macos/Build/Products/Release/libmouse_controller.dylib',
         '${Directory.current.path}/libmouse_controller.dylib',
+        // Fallback paths
         '$home/Library/Containers/com.xants.clickmate/Data/libmouse_controller.dylib',
         '/usr/local/lib/libmouse_controller.dylib',
-        // Also try executable path
-        '${Platform.resolvedExecutable.substring(0, Platform.resolvedExecutable.lastIndexOf('/'))}/libmouse_controller.dylib',
+        '$executableDir/libmouse_controller.dylib',
       ];
       
       DynamicLibrary? lib;

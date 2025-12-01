@@ -191,6 +191,21 @@ clang++ -shared -fPIC \
   mouse_controller_macos.mm
 ```
 
+**Important for Distribution:**
+The dylib must be included in the app bundle's Frameworks directory:
+```bash
+# Copy dylib to app bundle
+FRAMEWORKS_DIR="YourApp.app/Contents/Frameworks"
+mkdir -p "$FRAMEWORKS_DIR"
+cp libmouse_controller.dylib "$FRAMEWORKS_DIR/"
+
+# Update install name for proper loading
+install_name_tool -id "@executable_path/../Frameworks/libmouse_controller.dylib" \
+    "$FRAMEWORKS_DIR/libmouse_controller.dylib"
+```
+
+This is automatically handled by the `scripts/build_dmg.sh` script.
+
 ---
 
 ## 🐛 Troubleshooting / 故障排查
