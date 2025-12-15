@@ -2,7 +2,7 @@
 
 All notable changes to ClickMate will be documented in this file.
 
-## [Unreleased]
+## [2.2.0] - 2025-12-15
 
 ### ✨ New Features
 

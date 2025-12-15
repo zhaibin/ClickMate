@@ -9,7 +9,7 @@
 智能鼠标自动点击工具，支持 Windows 和 macOS 双平台
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-blue.svg)](#)
-[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)](#)
+[![Version](https://img.shields.io/badge/Version-2.2.0-green.svg)](#)
 [![Languages](https://img.shields.io/badge/Languages-11-orange.svg)](#-多语言支持)
 [![License](https://img.shields.io/badge/License-Personal%20Use-lightgrey.svg)](#)
 

@@ -7,4 +7,4 @@
 /// 4. README.md (update version number)
 library;
 
-const String appVersion = '2.1.0';
+const String appVersion = '2.2.0';
