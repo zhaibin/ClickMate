@@ -50,6 +50,7 @@ Updated translations for auto-pause/resume feature:
 - Proper timer cleanup on resume/stop
 - Accurate idle time tracking with movement threshold
 - Fixed window height overflow causing Click History to be cut off (640px → 720px)
+- Fixed blurry icons on Windows high-DPI displays (ICO now includes 16-256px layers)
 
 ## [2.1.0] - 2025-12-01
 
