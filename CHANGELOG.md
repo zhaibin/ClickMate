@@ -49,6 +49,7 @@ Updated translations for auto-pause/resume feature:
 - Fixed race condition between mouse move and position detection
 - Proper timer cleanup on resume/stop
 - Accurate idle time tracking with movement threshold
+- Fixed window height overflow causing Click History to be cut off (640px → 720px)
 
 ## [2.1.0] - 2025-12-01
 

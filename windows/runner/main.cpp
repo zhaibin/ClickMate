@@ -30,7 +30,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   int screenWidth = GetSystemMetrics(SM_CXSCREEN);
   int screenHeight = GetSystemMetrics(SM_CYSCREEN);
   int windowWidth = 400;
-  int windowHeight = 640;
+  int windowHeight = 720;
   int posX = (screenWidth - windowWidth) / 2;
   int posY = (screenHeight - windowHeight) / 2;
   

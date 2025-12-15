@@ -36,9 +36,9 @@ void main() async {
   
   // Set window properties - Use hidden titlebar on both macOS and Windows for custom window chrome
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(400, 640),
-    minimumSize: Size(400, 640),
-    maximumSize: Size(400, 640),
+    size: Size(400, 720),
+    minimumSize: Size(400, 720),
+    maximumSize: Size(400, 720),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
@@ -50,7 +50,7 @@ void main() async {
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
     // Set all properties before showing
     await windowManager.setResizable(false);
-    await windowManager.setSize(const Size(400, 640));
+    await windowManager.setSize(const Size(400, 720));
     await windowManager.center();
     // Now show and focus
     await windowManager.show();
