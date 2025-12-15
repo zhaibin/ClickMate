@@ -39,4 +39,16 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
   end
+  
+  # Copy libmouse_controller.dylib to Frameworks directory
+  project_root = File.expand_path('..', __dir__)
+  dylib_source = File.join(project_root, 'native', 'src', 'libmouse_controller.dylib')
+  frameworks_dir = File.join(project_root, 'build', 'macos', 'Build', 'Products', 'Release', 'ClickMate.app', 'Contents', 'Frameworks')
+  
+  if File.exist?(dylib_source)
+    FileUtils.mkdir_p(frameworks_dir) rescue nil
+    dylib_dest = File.join(frameworks_dir, 'libmouse_controller.dylib')
+    FileUtils.cp(dylib_source, dylib_dest) rescue nil
+    puts "Copied libmouse_controller.dylib to Frameworks"
+  end
 end

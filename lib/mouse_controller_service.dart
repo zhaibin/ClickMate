@@ -49,7 +49,10 @@ class MouseControllerService {
   final MouseControllerBindings _bindings;
   Timer? _clickTimer;
   Timer? _hotkeyCheckTimer;
+  Timer? _positionMonitorTimer;
+  Timer? _resumeTimer;
   bool _isRunning = false;
+  bool _isPausedByDeviation = false;
   
   // Expose bindings for direct mouse movement
   MouseControllerBindings get bindings => _bindings;
@@ -77,6 +80,16 @@ class MouseControllerService {
   
   // Before start callback function - for auto-saving config
   Future<void> Function()? onBeforeStart;
+  
+  // Auto-pause and resume settings
+  int deviationThreshold = 100; // Default threshold in pixels
+  bool enableAutoPauseResume = true; // Enable auto-pause/resume feature
+  MousePosition? _lastMonitoredPosition; // Last monitored mouse position
+  DateTime? _lastMoveTime; // Last time mouse moved
+  static const int resumeDelaySeconds = 5; // Seconds to wait before auto-resume
+  
+  // Status callback for UI updates
+  Function(bool isPaused)? onPauseStatusChanged;
 
   MouseControllerService(this._bindings) {
     print('========================================');
@@ -206,6 +219,7 @@ class MouseControllerService {
   }
 
   bool get isRunning => _isRunning;
+  bool get isPausedByDeviation => _isPausedByDeviation;
 
   void _startHotkeyCheck() {
     _hotkeyCheckTimer?.cancel();
@@ -291,10 +305,20 @@ class MouseControllerService {
     print('✓ Random interval: ±${randomIntervalRange}ms');
     print('✓ Position offset: ±${randomOffsetRange}px');
     print('✓ Mouse button: ${selectedButton.name}');
+    if (enableAutoPauseResume) {
+      print('✓ Auto-pause enabled: deviation threshold ${deviationThreshold}px');
+    }
     print('>>> Start auto-clicking!');
 
     _isRunning = true;
+    _isPausedByDeviation = false;
     clickCount = 0; // Reset count
+    
+    // Start monitoring mouse position if auto-pause is enabled
+    if (enableAutoPauseResume) {
+      _startPositionMonitoring();
+    }
+    
     _performClick();
   }
 
@@ -302,12 +326,23 @@ class MouseControllerService {
     print('>>> Stopped clicking');
     print('    Total clicks: $clickCount times');
     _isRunning = false;
+    _isPausedByDeviation = false;
     _clickTimer?.cancel();
     _clickTimer = null;
+    _stopPositionMonitoring();
+    _resumeTimer?.cancel();
+    _resumeTimer = null;
   }
 
   void _performClick() {
     if (!_isRunning || targetPosition == null) return;
+    
+    // Skip click if paused by deviation
+    if (_isPausedByDeviation) {
+      // Schedule next check
+      _clickTimer = Timer(Duration(milliseconds: clickIntervalMs), _performClick);
+      return;
+    }
 
     // Calculate position with random offset
     final random = Random();
@@ -393,10 +428,189 @@ class MouseControllerService {
   void setMouseButton(MouseButton button) {
     selectedButton = button;
   }
+  
+  void setDeviationThreshold(int threshold) {
+    deviationThreshold = threshold;
+    print('Deviation threshold set to: ${threshold}px');
+  }
+  
+  void setEnableAutoPauseResume(bool enable) {
+    enableAutoPauseResume = enable;
+    print('Auto-pause/resume: ${enable ? "enabled" : "disabled"}');
+    
+    if (!enable) {
+      _stopPositionMonitoring();
+      _resumeTimer?.cancel();
+      _resumeTimer = null;
+      if (_isPausedByDeviation) {
+        _isPausedByDeviation = false;
+        onPauseStatusChanged?.call(false);
+      }
+    } else if (_isRunning) {
+      _startPositionMonitoring();
+    }
+  }
+  
+  // Calculate distance between two positions
+  double _calculateDistance(MousePosition pos1, MousePosition pos2) {
+    final dx = pos1.x - pos2.x;
+    final dy = pos1.y - pos2.y;
+    return sqrt(dx * dx + dy * dy);
+  }
+  
+  // Start monitoring mouse position
+  void _startPositionMonitoring() {
+    if (!enableAutoPauseResume || targetPosition == null) return;
+    
+    _stopPositionMonitoring();
+    _lastMonitoredPosition = getCurrentMousePosition();
+    _lastMoveTime = DateTime.now();
+    
+    print('Started position monitoring (threshold: ${deviationThreshold}px)');
+    
+    _positionMonitorTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (!_isRunning || targetPosition == null) {
+        _stopPositionMonitoring();
+        return;
+      }
+      
+      final currentPos = getCurrentMousePosition();
+      final distance = _calculateDistance(currentPos, targetPosition!);
+      
+      // Check if mouse moved significantly from last position
+      bool mouseJustMoved = false;
+      if (_lastMonitoredPosition != null) {
+        final moveDistance = _calculateDistance(currentPos, _lastMonitoredPosition!);
+        if (moveDistance > 5) { // Mouse moved more than 5 pixels
+          _lastMoveTime = DateTime.now();
+          _lastMonitoredPosition = currentPos;
+          mouseJustMoved = true;
+          
+          // If mouse moved while in paused state, restart the resume timer
+          if (_isPausedByDeviation && _resumeTimer != null) {
+            _resumeTimer?.cancel();
+            _resumeTimer = null;
+            print('Mouse moved, restarting idle timer...');
+          }
+        }
+      } else {
+        // Initialize on first run
+        _lastMonitoredPosition = currentPos;
+        _lastMoveTime = DateTime.now();
+      }
+      
+      // Check if mouse deviated too far from target
+      if (distance > deviationThreshold) {
+        // Mouse is outside threshold
+        if (!_isPausedByDeviation) {
+          _isPausedByDeviation = true;
+          print('⏸ Auto-paused: Mouse deviated ${distance.toInt()}px from target (threshold: ${deviationThreshold}px)');
+          LoggerService.instance.info('Auto-paused due to mouse deviation');
+          onPauseStatusChanged?.call(true);
+        }
+      }
+      
+      // Check for auto-resume if paused (works at ANY position)
+      if (_isPausedByDeviation) {
+        final timeSinceLastMove = DateTime.now().difference(_lastMoveTime!);
+        
+        print('[DEBUG] Paused - distance=${distance.toInt()}px, idleTime=${timeSinceLastMove.inSeconds}s, required=${resumeDelaySeconds}s');
+        
+        if (timeSinceLastMove.inSeconds >= resumeDelaySeconds) {
+          // Mouse has been idle long enough at ANY position
+          print('Mouse idle for ${timeSinceLastMove.inSeconds}s at any position, moving to target and resuming...');
+          print('[DEBUG] Target position: (${targetPosition!.x}, ${targetPosition!.y})');
+          print('[DEBUG] Current position before move: (${currentPos.x}, ${currentPos.y})');
+          
+          // Stop position monitoring before moving mouse
+          _stopPositionMonitoring();
+          
+          // Move mouse to target position
+          _bindings.moveMouse(targetPosition!.x, targetPosition!.y);
+          
+          // Wait for mouse move to complete, then resume
+          Future.delayed(const Duration(milliseconds: 200), () {
+            final posAfterMove = getCurrentMousePosition();
+            print('[DEBUG] Position after move: (${posAfterMove.x}, ${posAfterMove.y})');
+            final distanceAfterMove = _calculateDistance(posAfterMove, targetPosition!);
+            print('[DEBUG] Distance after move: ${distanceAfterMove.toInt()}px');
+            
+            _resumeFromDeviation();
+          });
+        } else if (_resumeTimer == null && !mouseJustMoved) {
+          // Start a timer to resume after idle period
+          final remainingSeconds = resumeDelaySeconds - timeSinceLastMove.inSeconds;
+          print('Mouse idle at (${currentPos.x}, ${currentPos.y}), will resume in ${remainingSeconds}s if no movement...');
+          
+          _resumeTimer = Timer(Duration(seconds: remainingSeconds), () {
+            // Double-check that mouse is still idle
+            final finalPos = getCurrentMousePosition();
+            final finalTimeSinceMove = DateTime.now().difference(_lastMoveTime!);
+            
+            if (finalTimeSinceMove.inSeconds >= resumeDelaySeconds && _isPausedByDeviation) {
+              print('Resume timer triggered: Mouse idle for ${finalTimeSinceMove.inSeconds}s');
+              print('[DEBUG] Target position: (${targetPosition!.x}, ${targetPosition!.y})');
+              print('[DEBUG] Current position before move: (${finalPos.x}, ${finalPos.y})');
+              
+              // Stop position monitoring before moving mouse
+              _stopPositionMonitoring();
+              
+              // Move mouse to target position
+              _bindings.moveMouse(targetPosition!.x, targetPosition!.y);
+              
+              // Wait for mouse move to complete, then resume
+              Future.delayed(const Duration(milliseconds: 200), () {
+                final posAfterMove = getCurrentMousePosition();
+                print('[DEBUG] Position after move: (${posAfterMove.x}, ${posAfterMove.y})');
+                final distanceAfterMove = _calculateDistance(posAfterMove, targetPosition!);
+                print('[DEBUG] Distance after move: ${distanceAfterMove.toInt()}px');
+                
+                _resumeFromDeviation();
+              });
+            } else {
+              // Conditions not met, clear timer
+              _resumeTimer = null;
+              print('Resume cancelled: mouse moved recently');
+            }
+          });
+        }
+      }
+    });
+  }
+  
+  // Stop monitoring mouse position
+  void _stopPositionMonitoring() {
+    _positionMonitorTimer?.cancel();
+    _positionMonitorTimer = null;
+    _lastMonitoredPosition = null;
+  }
+  
+  // Resume from deviation pause
+  void _resumeFromDeviation() {
+    if (_isPausedByDeviation && _isRunning) {
+      // Temporarily stop position monitoring while resuming
+      _positionMonitorTimer?.cancel();
+      
+      _isPausedByDeviation = false;
+      _resumeTimer?.cancel();
+      _resumeTimer = null;
+      print('▶ Auto-resumed: Mouse stable at target');
+      LoggerService.instance.info('Auto-resumed after mouse returned to target');
+      onPauseStatusChanged?.call(false);
+      
+      // Restart position monitoring after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (_isRunning && enableAutoPauseResume) {
+          _startPositionMonitoring();
+        }
+      });
+    }
+  }
 
   void dispose() {
     stopAutoClick();
     _hotkeyCheckTimer?.cancel();
+    _stopPositionMonitoring();
     _bindings.unregisterHotkey(hotkeyIdToggle);
     _bindings.unregisterHotkey(hotkeyIdCapture);
     _bindings.dispose();

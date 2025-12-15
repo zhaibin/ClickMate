@@ -2,6 +2,54 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [Unreleased]
+
+### ✨ New Features
+
+**Smart Auto-Pause/Resume System**
+- Auto-pause when mouse moves away from target area (configurable threshold)
+- Smart auto-resume: automatically returns mouse to target after 5 seconds of stillness
+- Works from any position - no need to manually move mouse back to target area
+- Prevents accidental clicks during multitasking or window switching
+- Visual status indicator: Orange (paused) / Green (active)
+
+**Enhanced Position Monitoring**
+- Configurable deviation threshold (minimum 10px)
+- Real-time distance monitoring with 200ms polling interval
+- Intelligent idle detection (tracks mouse movements > 5px)
+- Race condition prevention: stops monitoring during mouse repositioning
+- Debug logging for troubleshooting
+
+### 🎨 UI Improvements
+
+- New "Auto-Pause/Resume" checkbox in settings
+- Deviation threshold input field with validation
+- Status indicator shows pause/resume state
+- Multi-language support for new features (11 languages)
+
+### 🌍 Internationalization
+
+Updated translations for auto-pause/resume feature:
+- English: "Auto-pause when moved away, resume after 5s stillness anywhere"
+- 简体中文: "偏离时自动暂停，任意位置静止5秒后恢复"
+- 繁體中文: "偏離時自動暫停，任意位置靜止5秒後恢復"
+- Français, Español, Português, Deutsch, Русский, Italiano, 日本語, 한국어
+
+### 🔧 Technical Changes
+
+- Enhanced `MouseControllerService` with position monitoring
+- Added `_startPositionMonitoring()` and `_stopPositionMonitoring()` methods
+- Implemented `_calculateDistance()` for Euclidean distance calculation
+- Added `_resumeFromDeviation()` with timer management
+- Timer-based resume system with cancellation on movement
+- 500ms delay before restarting monitoring after resume
+
+### 🐛 Bug Fixes
+
+- Fixed race condition between mouse move and position detection
+- Proper timer cleanup on resume/stop
+- Accurate idle time tracking with movement threshold
+
 ## [2.1.0] - 2025-12-01
 
 ### ✨ New Features

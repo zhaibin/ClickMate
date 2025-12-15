@@ -162,12 +162,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
   final TextEditingController _intervalController = TextEditingController(text: '1000');
   final TextEditingController _intervalRandomController = TextEditingController(text: '0');
   final TextEditingController _offsetController = TextEditingController(text: '0');
+  final TextEditingController _deviationController = TextEditingController(text: '100');
 
   MouseButton _selectedButton = MouseButton.left;
   bool _isRunning = false;
+  bool _isPaused = false;
   String _currentPosition = '';
   Timer? _uiUpdateTimer;
   bool _autoCapture = true; // Auto-capture mode enabled by default
+  bool _enableAutoPauseResume = true; // Auto-pause/resume enabled by default
   
   // Upgrade state
   bool _isCheckingUpgrade = false;
@@ -215,6 +218,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
       // Set before start callback for auto-saving config
       _service!.onBeforeStart = () async {
         await _autoSaveCurrentConfig();
+      };
+      
+      // Set pause status callback
+      _service!.onPauseStatusChanged = (bool isPaused) {
+        if (mounted) {
+          setState(() {
+            _isPaused = isPaused;
+          });
+        }
       };
       
       _startUiUpdate();
@@ -1793,6 +1805,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
         _showError(l10n.errorInvalidOffset);
         return;
       }
+      
+      // Validate deviation threshold
+      final deviation = int.tryParse(_deviationController.text);
+      if (deviation == null || deviation < 10) {
+        print('× Validation failed: Invalid deviation threshold');
+        _showError(l10n.hintDeviationMin);
+        return;
+      }
 
       print('✓ Parameter validation passed');
       print('Setting parameters to service...');
@@ -1802,6 +1822,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _service!.setRandomInterval(intervalRandom);
       _service!.setRandomOffset(offset);
       _service!.setMouseButton(_selectedButton);
+      _service!.setDeviationThreshold(deviation);
+      _service!.setEnableAutoPauseResume(_enableAutoPauseResume);
 
       print('Triggering toggle operation...');
       _service!.toggleAutoClick();
@@ -1823,6 +1845,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
     _intervalController.dispose();
     _intervalRandomController.dispose();
     _offsetController.dispose();
+    _deviationController.dispose();
     super.dispose();
   }
 
@@ -2193,12 +2216,44 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           ],
                         ),
                       const Spacer(),
-                      Container(
+                      // Status indicator
+                      if (_isPaused)
+                        Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: _isRunning ? const Color(0xFF10B981) : Colors.grey.shade200,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade400,
                             borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                l10n.statusPaused,
+                                style: const TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      if (!_isPaused)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: _isRunning ? const Color(0xFF10B981) : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -2212,7 +2267,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                          '${_service!.clickCount}${l10n.statusClickCount}',
+                                '${_service!.clickCount}${l10n.statusClickCount}',
                                 style: TextStyle(
                                   color: _isRunning ? Colors.white : Colors.grey.shade600, 
                                   fontSize: 11,
@@ -2430,6 +2485,60 @@ class _MouseControlPageState extends State<MouseControlPage> {
                     },
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    
+                    // Auto-pause/resume settings
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: _enableAutoPauseResume,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _enableAutoPauseResume = value ?? true;
+                                  });
+                                },
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  l10n.labelAutoPauseResume,
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          flex: 1,
+                          child: _buildCompactField(
+                            l10n.labelDeviationPx,
+                            _deviationController,
+                            width: double.infinity,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_enableAutoPauseResume) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 12, color: Colors.grey.shade600),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              l10n.hintAutoPauseDesc,
+                              style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
                     ),

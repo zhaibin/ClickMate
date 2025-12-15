@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'version.dart';
@@ -194,8 +193,12 @@ class UpgradeService {
     final parts2 = v2.split('.').map((e) => int.tryParse(e) ?? 0).toList();
 
     // Pad with zeros if needed
-    while (parts1.length < 3) parts1.add(0);
-    while (parts2.length < 3) parts2.add(0);
+    while (parts1.length < 3) {
+      parts1.add(0);
+    }
+    while (parts2.length < 3) {
+      parts2.add(0);
+    }
 
     for (int i = 0; i < 3; i++) {
       if (parts1[i] > parts2[i]) return 1;
