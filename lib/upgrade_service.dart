@@ -383,9 +383,13 @@ if exist "!INSTALL_PATH!\\clickmate.exe" (
     start "" "%LOCALAPPDATA%\\Programs\\ClickMate\\clickmate.exe"
 ) else if exist "%PROGRAMFILES%\\ClickMate\\clickmate.exe" (
     start "" "%PROGRAMFILES%\\ClickMate\\clickmate.exe"
+) else if exist "%PROGRAMFILES(X86)%\\ClickMate\\clickmate.exe" (
+    start "" "%PROGRAMFILES(X86)%\\ClickMate\\clickmate.exe"
+) else if exist "%APPDATA%\\ClickMate\\clickmate.exe" (
+    start "" "%APPDATA%\\ClickMate\\clickmate.exe"
 ) else (
     echo Warning: Could not find ClickMate.exe to restart.
-    echo Please start the application manually.
+    echo Please start the application manually from the Start Menu.
 )
 
 echo ========================================
