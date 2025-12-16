@@ -2,6 +2,21 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [2.2.1] - 2025-12-16
+
+### 🐛 Bug Fixes
+
+- Fixed window height overflow causing Click History to be cut off (640px → 720px)
+- Fixed blurry icons on Windows high-DPI displays (ICO now includes 16-256px layers)
+- Fixed upgrade script not finding app in Program Files (x86) directory
+- Added %PROGRAMFILES(X86)% and %APPDATA% to upgrade search paths
+
+### 🔧 Technical Changes
+
+- Updated `generate_icons.py` to create proper multi-layer ICO file
+- ICO now includes 16, 24, 32, 48, 64, 128, 256px layers
+- Added icon_24.png and icon_512.png for better coverage
+
 ## [2.2.0] - 2025-12-15
 
 ### ✨ New Features
@@ -49,9 +64,6 @@ Updated translations for auto-pause/resume feature:
 - Fixed race condition between mouse move and position detection
 - Proper timer cleanup on resume/stop
 - Accurate idle time tracking with movement threshold
-- Fixed window height overflow causing Click History to be cut off (640px → 720px)
-- Fixed blurry icons on Windows high-DPI displays (ICO now includes 16-256px layers)
-- Fixed upgrade script not finding app in Program Files (x86) directory
 
 ## [2.1.0] - 2025-12-01
 
