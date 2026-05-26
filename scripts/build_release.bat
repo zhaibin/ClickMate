@@ -31,7 +31,7 @@ echo.
 
 :: 2. Flutter Build
 echo [2/5] Building Release version...
-flutter build windows --release
+call flutter build windows --release
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Build failed
     exit /b 1
