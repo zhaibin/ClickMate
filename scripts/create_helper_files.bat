@@ -75,7 +75,7 @@ echo     echo ========================================
 echo     echo   WARNING: Recommend running as admin
 echo     echo ========================================
 echo     echo.
-echo     echo Hotkey functions require administrator privileges.
+echo     echo Hotkeys may fail if another app uses them or permissions are restricted.
 echo     echo.
 echo     echo Run as administrator?
 echo     echo.
@@ -132,7 +132,7 @@ echo.
 echo I. Quick Start
 echo ------------
 echo 1. Double-click "START.bat" to launch
-echo 2. Recommend running as administrator ^(for hotkey functions^)
+echo 2. If hotkeys fail, try running as administrator
 echo 3. Test basic functions first
 echo.
 echo.
@@ -167,7 +167,8 @@ echo Ctrl+Shift+1  Start/Stop auto-clicking
 echo Ctrl+Shift+2  Capture current mouse position
 echo.
 echo WARNING:
-echo - Hotkeys require administrator privileges
+echo - Hotkeys use Ctrl+Shift+1 and Ctrl+Shift+2 by default
+echo - If registration fails, check conflicts or run as administrator
 echo - If not working, right-click "START.bat" and "Run as administrator"
 echo.
 echo.
@@ -175,7 +176,7 @@ echo V. Parameter Description
 echo ------------
 echo [Click Interval]
 echo - Time between two clicks ^(milliseconds^)
-echo - Minimum: 100ms
+echo - Minimum: 10ms
 echo - Recommended: 1000ms
 echo.
 echo [Random Offset +/-]
@@ -192,7 +193,7 @@ echo.
 echo VI. FAQ
 echo ------------
 echo [Q1] Hotkeys not working?
-echo A: Need to run as administrator, right-click "START.bat" -^> "Run as administrator"
+echo A: Check if Ctrl+Shift+1/2 are used by another app. If still failing, right-click "START.bat" -^> "Run as administrator"
 echo.
 echo [Q2] Program won't start?
 echo A: Ensure Visual C++ Redistributable is installed
@@ -252,7 +253,7 @@ echo.
 echo   Symptom: Pressing Ctrl+Shift+1/2 has no effect
 echo.
 echo   Solutions:
-echo   [OK] Must run as administrator
+echo   [OK] Check whether Ctrl+Shift+1/2 are already used by another app
 echo   [OK] Right-click "START.bat" -^> "Run as administrator"
 echo   [OK] Or right-click "clickmate.exe" -^> "Run as administrator"
 echo.
@@ -315,7 +316,7 @@ echo.
 echo   If abnormal:
 echo   1. Stop auto-clicking
 echo   2. Restart program
-echo   3. Check if click interval too small ^(recommend >=100ms^)
+echo   3. Check if click interval too small ^(recommend >=100ms for normal use^)
 echo   4. Check logs for error loops
 echo.
 echo.
@@ -355,7 +356,8 @@ echo.
 echo   Security statement:
 echo   [OK] This is an open-source project
 echo   [OK] Only uses official Windows APIs
-echo   [OK] No internet connection, no data upload
+echo   [OK] Only connects to GitHub Releases for update checks/downloads
+echo   [OK] No personal data upload
 echo   [OK] Doesn't modify system files
 echo   [OK] Doesn't write to registry
 echo   [OK] Source code available for review

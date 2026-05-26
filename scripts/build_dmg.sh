@@ -33,14 +33,14 @@ echo -e "${BLUE}============================================${NC}"
 echo ""
 
 # Step 1: Clean previous build
-echo -e "${YELLOW}[1/5] Cleaning previous build...${NC}"
+echo -e "${YELLOW}[1/6] Cleaning previous build...${NC}"
 cd "$PROJECT_ROOT"
 flutter clean
 echo -e "${GREEN}✓ Clean completed${NC}"
 echo ""
 
 # Step 2: Get dependencies
-echo -e "${YELLOW}[2/5] Getting dependencies...${NC}"
+echo -e "${YELLOW}[2/6] Getting dependencies...${NC}"
 flutter pub get
 echo -e "${GREEN}✓ Dependencies ready${NC}"
 echo ""
@@ -246,4 +246,3 @@ echo -e "${YELLOW}For code signing (optional but recommended):${NC}"
 echo "  codesign --force --deep --sign \"Developer ID Application: YOUR_NAME\" \"$APP_PATH\""
 echo "  codesign --force --sign \"Developer ID Application: YOUR_NAME\" \"$DMG_PATH\""
 echo ""
-

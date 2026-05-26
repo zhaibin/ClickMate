@@ -36,9 +36,10 @@ if %errorlevel% == 0 (
     echo ========================================
     echo.
     echo Watch for these messages:
-    echo - "Hotkey system init: Success" = OK
-    echo - "Hotkey register: Success" = OK
-    echo - Press Ctrl+Shift+S to test
+    echo - "Hotkey system initialization: Success" = OK
+    echo - "Hotkey 1 [Start/Stop] ... Success" = OK
+    echo - Press Ctrl+Shift+1 to start/stop
+    echo - Press Ctrl+Shift+2 to capture position
     echo.
     echo ========================================
     echo.
@@ -56,4 +57,3 @@ if %errorlevel% == 0 (
     echo.
     pause
 )
-

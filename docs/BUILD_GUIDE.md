@@ -245,8 +245,8 @@ ls -la native/src/libmouse_controller.dylib
 #### Q: Hotkeys not working
 
 **Windows:**
-- Run as Administrator
-- Check if another app uses the same hotkey
+- Check if another app uses the same hotkey.
+- If registration still fails, try running as Administrator.
 
 **macOS:**
 - Grant Accessibility permission

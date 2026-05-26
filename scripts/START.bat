@@ -42,9 +42,10 @@ echo.
 echo Starting application...
 echo.
 echo Watch console for:
-echo  - "Hotkey system init: Success"
-echo  - "Hotkey register: Success"
-echo  - Press Ctrl+Shift+S to test
+echo  - "Hotkey system initialization: Success"
+echo  - "Hotkey 1 [Start/Stop] ... Success"
+echo  - Press Ctrl+Shift+1 to start/stop
+echo  - Press Ctrl+Shift+2 to capture position
 echo.
 echo ========================================
 echo.
@@ -53,4 +54,3 @@ flutter run -d windows
 
 echo.
 pause
-

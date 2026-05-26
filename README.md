@@ -13,7 +13,7 @@
 [![Languages](https://img.shields.io/badge/Languages-11-orange.svg)](#-多语言支持)
 [![License](https://img.shields.io/badge/License-Personal%20Use-lightgrey.svg)](#)
 
-[English](#features) | [简体中文](#-主要功能)
+[主要功能](#-主要功能) | [构建指南](docs/BUILD_GUIDE.md) | [打包指南](docs/打包发布指南.md)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 - 🖱️ **自动鼠标点击** - 支持左键/右键/中键
 - 🎯 **双模式切换** - 自动跟踪模式 & 手动输入模式
-- ⌨️ **全局快捷键** - Ctrl+Shift+1/2 快速控制
+- ⌨️ **全局快捷键** - Windows 使用 Ctrl+Shift+1/2，macOS 使用 ⌘+Shift+1/2
 - 📊 **点击历史** - 记录最近10次点击（毫秒精度）
 - 🎲 **智能随机** - 随机间隔和位置偏移
 - 💾 **配置管理** - 保存/加载/管理多个配置
@@ -40,7 +40,7 @@
 | 平台 | 状态 | 最低版本 |
 |------|------|----------|
 | **Windows** | ✅ 完整支持 | Windows 10 1809+ |
-| **macOS** | ✅ 完整支持 | macOS 10.14+ |
+| **macOS** | ✅ 完整支持 | macOS 10.15+ |
 | Linux | 🚧 计划中 | - |
 
 ---
@@ -59,7 +59,7 @@ START.bat
 scripts\run_debug.bat
 ```
 
-**方式3：管理员模式（快捷键需要）**
+**方式3：管理员模式（快捷键注册受限时）**
 ```bash
 scripts\run_as_admin.bat
 ```
@@ -73,9 +73,11 @@ flutter run -d macos
 
 **方式2：编译后运行**
 ```bash
-flutter build macos
+bash scripts/build_dmg.sh
 open build/macos/Build/Products/Release/ClickMate.app
 ```
+
+> `scripts/build_dmg.sh` 会构建 Release app 并把 `libmouse_controller.dylib` 复制到 app bundle。仅执行 `flutter build macos --release` 适合本地构建验证，但发布或直接打开 `.app` 时可能缺少动态库。
 
 > ⚠️ **macOS 权限提示**：首次运行需要在「系统偏好设置 → 安全性与隐私 → 辅助功能」中授权应用程序。
 
@@ -114,7 +116,7 @@ open build/macos/Build/Products/Release/ClickMate.app
 | 开始/停止点击 | `Ctrl+Shift+1` | `⌘+Shift+1` |
 | 捕获鼠标位置 | `Ctrl+Shift+2` | `⌘+Shift+2` |
 
-> 💡 Windows 下快捷键需要管理员权限
+> 💡 Windows 下快捷键通过 `RegisterHotKey` 注册；如果注册失败，通常是快捷键冲突、权限限制或 DLL 未加载。可尝试以管理员身份运行。
 
 ### 点击历史
 
@@ -195,7 +197,7 @@ bash scripts/build_dmg.sh
 
 | 组件 | 技术 |
 |------|------|
-| 框架 | Flutter / Dart SDK 3.10+ |
+| 框架 | Flutter（需包含 Dart SDK 3.10+；`pubspec.yaml` 要求 `^3.10.0`） |
 | Windows 原生 | C++ / Windows API |
 | macOS 原生 | Objective-C++ / CoreGraphics / Carbon |
 | 窗口管理 | window_manager 0.5.1 |
@@ -253,7 +255,7 @@ ClickMate/
 │   └── MULTILINGUAL_GUIDE.md   # 多语言指南
 │
 ├── assets/icons/                # 应用图标
-└── logs/                        # 日志文件
+└── logs/                        # 仓库内示例/旧日志；运行时日志写入用户 Documents/ClickMate/logs
 ```
 
 ---
@@ -284,7 +286,7 @@ scripts\test_hotkey.bat
 ## ⚠️ 注意事项
 
 ### Windows
-1. **管理员权限** - 快捷键功能需要管理员身份运行
+1. **快捷键注册** - 默认使用 `Ctrl+Shift+1/2`；如注册失败，可检查快捷键冲突或尝试管理员身份运行
 2. **DLL 文件** - 确保 `mouse_controller.dll` 在 `native/src/` 目录
 3. **快捷键冲突** - 如有冲突可在应用内更改
 
@@ -304,9 +306,9 @@ scripts\test_hotkey.bat
 ### 快捷键不工作？
 
 **Windows:**
-- 右键以管理员身份运行
 - 运行 `scripts\diagnose.bat` 检查
-- 查看控制台是否显示「热键注册: 成功」
+- 查看控制台是否显示 `Hotkey ... Success`
+- 如果提示快捷键被占用或权限受限，再尝试以管理员身份运行
 
 **macOS:**
 - 检查「系统偏好设置 → 安全性与隐私 → 辅助功能」是否授权
@@ -317,15 +319,14 @@ scripts\test_hotkey.bat
 **Windows:**
 ```bash
 scripts\diagnose.bat
-# 确保 native/src/mouse_controller.dll 存在
+# 确保 native/src/mouse_controller.dll 存在；脚本会复制到项目根目录供 flutter run/test 加载
 ```
 
 **macOS:**
 ```bash
-# 编译原生库
-cd native/src
+# 编译到项目根目录，供 flutter run -d macos 加载
 clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics \
-  -o libmouse_controller.dylib mouse_controller_macos.mm
+  -o libmouse_controller.dylib native/src/mouse_controller_macos.mm
 ```
 
 ### 打包后无法运行？
@@ -342,13 +343,15 @@ clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics
 
 **版本来源**: `VERSION` 与 `lib/version.dart`
 
-**支持系统**: Windows 10/11, macOS 10.14+
+**支持系统**: Windows 10/11, macOS 10.15+
 
 ### v2.2.2 修复
 
-- 🐛 修复点击历史显示区域高度问题
-- 🖼️ 改进 Windows 高 DPI 图标
-- 📦 改进 Windows 升级脚本的安装路径查找
+- 🐛 修复停止自动点击后仍可能执行已排队延迟点击的问题
+- ⌨️ 启动后短暂延迟响应快捷键，避免残留按键状态误触发开始/停止
+- 📁 用户数据路径从旧 `MouseControl` 目录迁移到 `ClickMate` 目录
+- 🧪 补充服务、配置、日志、语言、菜单、快捷键、升级等测试覆盖
+- ✅ 完成 macOS 与 Windows 11 VM 的真实目标窗口自动点击验证
 
 ### v2.2.0 功能
 
