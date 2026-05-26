@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 // Mouse button enum
 enum MouseButton {
@@ -46,6 +47,18 @@ class MouseControllerBindings {
   late final CheckHotkeyPressed checkHotkeyPressed;
   late final InitHotkeySystem initHotkeySystem;
   late final CleanupHotkeySystem cleanupHotkeySystem;
+
+  @visibleForTesting
+  MouseControllerBindings.testing({
+    required this.moveMouse,
+    required this.clickMouse,
+    required this.getMousePosition,
+    required this.registerHotkey,
+    required this.unregisterHotkey,
+    required this.checkHotkeyPressed,
+    required this.initHotkeySystem,
+    required this.cleanupHotkeySystem,
+  });
 
   MouseControllerBindings() {
     // Load dynamic library based on platform

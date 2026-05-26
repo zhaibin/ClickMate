@@ -8,6 +8,8 @@ class LoggerService {
   static LoggerService? _instance;
   static Logger? _logger;
   static File? _logFile;
+  static const String _appDirectoryName = 'ClickMate';
+  static const String _legacyDirectoryName = 'MouseControl';
   
   // 单例模式
   static LoggerService get instance {
@@ -54,10 +56,12 @@ class LoggerService {
     // 尝试使用应用数据目录
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final logDir = Directory('${appDir.path}/MouseControl/logs');
+      final logDir = Directory('${appDir.path}/$_appDirectoryName/logs');
+      final legacyLogDir = Directory('${appDir.path}/$_legacyDirectoryName/logs');
       if (!await logDir.exists()) {
         await logDir.create(recursive: true);
       }
+      await _migrateLegacyLogs(legacyLogDir, logDir);
       return logDir;
     } catch (e) {
       // 如果失败，使用当前目录的logs文件夹
@@ -66,6 +70,27 @@ class LoggerService {
         await logDir.create(recursive: true);
       }
       return logDir;
+    }
+  }
+
+  Future<void> _migrateLegacyLogs(Directory legacyLogDir, Directory logDir) async {
+    if (!await legacyLogDir.exists()) {
+      return;
+    }
+
+    try {
+      await for (final entity in legacyLogDir.list()) {
+        if (entity is! File || !entity.path.endsWith('.log')) {
+          continue;
+        }
+
+        final target = File('${logDir.path}/${entity.uri.pathSegments.last}');
+        if (!await target.exists()) {
+          await entity.copy(target.path);
+        }
+      }
+    } catch (e) {
+      print('Failed to migrate legacy logs: $e');
     }
   }
   
@@ -177,4 +202,3 @@ class _FileOutput extends LogOutput {
     }
   }
 }
-

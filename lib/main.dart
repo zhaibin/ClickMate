@@ -169,6 +169,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
   bool _isPaused = false;
   String _currentPosition = '';
   Timer? _uiUpdateTimer;
+  Timer? _hotkeyStatusTimer;
+  Timer? _startupUpgradeTimer;
   bool _autoCapture = true; // Auto-capture mode enabled by default
   bool _enableAutoPauseResume = true; // Auto-pause/resume enabled by default
   
@@ -232,14 +234,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _startUiUpdate();
       
       // Delayed hotkey status check
-      Future.delayed(const Duration(seconds: 1), () {
+      _hotkeyStatusTimer = Timer(const Duration(seconds: 1), () {
         if (mounted) {
           _checkHotkeyStatus();
         }
       });
       
       // Check for updates on startup (delayed to not block UI)
-      Future.delayed(const Duration(seconds: 3), () {
+      _startupUpgradeTimer = Timer(const Duration(seconds: 3), () {
         if (mounted) {
           _checkForUpdatesOnStartup();
         }
@@ -1839,6 +1841,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
   @override
   void dispose() {
     _uiUpdateTimer?.cancel();
+    _hotkeyStatusTimer?.cancel();
+    _startupUpgradeTimer?.cancel();
     _service?.dispose();
     _xController.dispose();
     _yController.dispose();
@@ -2048,7 +2052,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: const Icon(Icons.save_outlined, size: 16, color: accentColor),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.configSave, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.configSave, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2065,7 +2071,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: Icon(Icons.folder_outlined, size: 16, color: Colors.amber.shade700),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.configManage, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.configManage, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2083,7 +2091,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: Icon(Icons.keyboard_outlined, size: 16, color: Colors.purple.shade600),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.hotkeySettings, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.hotkeySettings, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2100,7 +2110,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: Icon(Icons.translate, size: 16, color: Colors.teal.shade600),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.labelLanguage, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.labelLanguage, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2118,7 +2130,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: Icon(Icons.help_outline, size: 16, color: Colors.grey.shade600),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.helpTitle, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.helpTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2135,7 +2149,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       child: const Icon(Icons.info_outline, size: 16, color: primaryColor),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.aboutTitle, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.aboutTitle, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2159,7 +2175,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           : const Icon(Icons.system_update, size: 16, color: Color(0xFF10B981)),
                     ),
                     const SizedBox(width: 12),
-                    Text(l10n.upgradeCheckNow, style: const TextStyle(fontSize: 13)),
+                    Expanded(
+                      child: Text(l10n.upgradeCheckNow, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                    ),
                   ],
                 ),
               ),
@@ -2184,8 +2202,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
       ),
       body: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: ListView(
+          padding: EdgeInsets.zero,
           children: [
             // Status header card - light style
             Card(
@@ -2589,7 +2607,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
             const SizedBox(height: 8),
 
             // Click history
-          Expanded(
+          SizedBox(
+            height: 150,
               child: Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2939,9 +2958,14 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                                   Icon(Icons.play_arrow_rounded, size: 14,
                                     color: _activeTab == 0 ? greenColor : Colors.white70),
                                   const SizedBox(width: 4),
-                                  Text(l10n.hotkeyStartStop,
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                      color: _activeTab == 0 ? greenColor : Colors.white70)),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.hotkeyStartStop,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                        color: _activeTab == 0 ? greenColor : Colors.white70),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -2962,9 +2986,14 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                                   Icon(Icons.my_location, size: 14,
                                     color: _activeTab == 1 ? accentColor : Colors.white70),
                                   const SizedBox(width: 4),
-                                  Text(l10n.hotkeyCapturePosition,
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                                      color: _activeTab == 1 ? accentColor : Colors.white70)),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.hotkeyCapturePosition,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                        color: _activeTab == 1 ? accentColor : Colors.white70),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -3273,4 +3302,3 @@ class _WindowsControlButtonState extends State<_WindowsControlButton> {
     );
   }
 }
-

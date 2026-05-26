@@ -10,10 +10,11 @@ Complete guide for building ClickMate on Windows and macOS.
 
 ### Common Requirements / 通用要求
 
-1. **Flutter SDK** (3.10+)
+1. **Flutter SDK / Dart SDK**
    - Download: https://flutter.dev/docs/get-started/install
    - Add to system PATH
    - Run `flutter doctor` to verify
+   - `pubspec.yaml` currently requires Dart SDK `^3.10.0`
 
 2. **Git**
    - Download: https://git-scm.com/downloads
@@ -129,6 +130,9 @@ flutter run -d macos
 
 # Or build release
 flutter build macos --release
+
+# For distributable DMG, use the project script instead:
+bash scripts/build_dmg.sh
 ```
 
 #### Method 2: Xcode Build / Xcode 构建
@@ -204,7 +208,7 @@ install_name_tool -id "@executable_path/../Frameworks/libmouse_controller.dylib"
     "$FRAMEWORKS_DIR/libmouse_controller.dylib"
 ```
 
-This is automatically handled by the `scripts/build_dmg.sh` script.
+This is automatically handled by the `scripts/build_dmg.sh` script. Use that script for release DMG builds; a plain `flutter build macos --release` is useful for local build verification but is not enough for distribution.
 
 ---
 
@@ -335,5 +339,5 @@ LoggerService.instance.error('Error message');
 
 ---
 
-**Last Updated**: 2024-11-29  
-**Version**: 2.0.0
+**Last Updated**: 2026-05-25
+**Version**: 2.2.2

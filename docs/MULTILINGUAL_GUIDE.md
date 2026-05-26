@@ -2,9 +2,9 @@
 
 ## Overview / 概述
 
-ClickMate v2.0.0 supports 11 languages with automatic system language detection on both Windows and macOS.
+ClickMate v2.2.2 supports 11 languages with automatic system language detection on both Windows and macOS.
 
-ClickMate v2.0.0 支持11种语言，在 Windows 和 macOS 上均可自动检测系统语言。
+ClickMate v2.2.2 支持11种语言，在 Windows 和 macOS 上均可自动检测系统语言。
 
 ---
 
@@ -295,6 +295,6 @@ This ensures:
 
 ---
 
-**Last Updated**: 2024-11-29  
-**Version**: 2.0.0  
+**Last Updated**: 2026-05-25
+**Version**: 2.2.2
 **Total Languages**: 11

@@ -6,6 +6,7 @@
 .pub-cache/
 .pub/
 build/
+coverage/
 .metadata
 
 # Releases

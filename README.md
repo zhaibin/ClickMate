@@ -9,7 +9,7 @@
 智能鼠标自动点击工具，支持 Windows 和 macOS 双平台
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-blue.svg)](#)
-[![Version](https://img.shields.io/badge/Version-2.2.0-green.svg)](#)
+[![Version](https://img.shields.io/badge/Version-2.2.2-green.svg)](#)
 [![Languages](https://img.shields.io/badge/Languages-11-orange.svg)](#-多语言支持)
 [![License](https://img.shields.io/badge/License-Personal%20Use-lightgrey.svg)](#)
 
@@ -28,6 +28,8 @@
 - 🎲 **智能随机** - 随机间隔和位置偏移
 - 💾 **配置管理** - 保存/加载/管理多个配置
 - 🔄 **智能移动** - 鼠标自动定位到目标位置
+- 🛡️ **智能暂停/恢复** - 偏离目标区域时暂停，静止后自动回到目标继续
+- 📥 **自动更新** - 启动后检查 GitHub Releases，支持下载安装更新
 - 🌍 **多语言支持** - 11种语言，自动检测系统语言
 - 🎨 **现代界面** - 无边框窗口，自定义标题栏
 
@@ -122,6 +124,20 @@ open build/macos/Build/Products/Release/ClickMate.app
 - **位置** - (X, Y)
 - **按键** - 左键(蓝)/右键(橙)/中键(紫)
 
+### 智能暂停/恢复
+
+启用「自动暂停/恢复」后，应用会监控鼠标是否偏离目标区域：
+
+1. 偏离目标超过阈值时自动暂停点击
+2. 鼠标在任意位置静止 5 秒后，自动移动回目标位置
+3. 回到目标后继续点击，减少多任务切换时的误触
+
+偏离阈值可在主界面设置，默认值为 100px。
+
+### 自动更新
+
+应用启动约 3 秒后会检查 GitHub Releases 最新版本，也可以通过标题栏菜单手动「检查更新」。更新逻辑使用 `lib/version.dart` 中的 `appVersion` 与最新 Release tag 比较。
+
 ---
 
 ## 🌍 多语言支持
@@ -157,17 +173,21 @@ scripts\build_release.bat
 自动完成：检查 DLL → 构建 Release → 创建便携版 → 打包 ZIP
 
 输出文件：
-- 便携版: `releases\v2.0.0\ClickMate_v2.0.0_Portable.zip`
-- Windows 安装包: `ClickMate-Installer\Output\ClickMate_v2.0.0_Setup.exe`
-- macOS DMG: `ClickMate_v2.0.0.dmg`
+- 便携版: `releases\v2.2.2\ClickMate_v2.2.2_Portable.zip`
+
+> Windows 安装包需要额外使用 Inno Setup；自动更新会优先选择 Release 中包含 `setup` 或 `installer` 的 `.exe` 资源，其次选择普通 `.exe`，最后回退到 `.zip`。
 
 ### macOS
 
 ```bash
-flutter build macos --release
+bash scripts/build_dmg.sh
 ```
 
-输出：`build/macos/Build/Products/Release/ClickMate.app`
+输出：
+- App: `build/macos/Build/Products/Release/ClickMate.app`
+- DMG: `releases/v2.2.2/ClickMate_v2.2.2_macOS.dmg`
+
+> 仅运行 `flutter build macos --release` 不会自动把 `libmouse_controller.dylib` 放入 app bundle。发布 DMG 请使用 `scripts/build_dmg.sh`。
 
 ---
 
@@ -175,12 +195,14 @@ flutter build macos --release
 
 | 组件 | 技术 |
 |------|------|
-| 框架 | Flutter 3.10+ |
+| 框架 | Flutter / Dart SDK 3.10+ |
 | Windows 原生 | C++ / Windows API |
 | macOS 原生 | Objective-C++ / CoreGraphics / Carbon |
 | 窗口管理 | window_manager 0.5.1 |
 | FFI | dart:ffi |
 | 存储 | SharedPreferences |
+| 文件路径 | path_provider |
+| 网络更新 | http + GitHub Releases API |
 
 ---
 
@@ -201,6 +223,7 @@ ClickMate/
 │   ├── config_management_dialog.dart
 │   ├── language_preference.dart
 │   ├── logger_service.dart
+│   ├── upgrade_service.dart
 │   ├── version.dart
 │   └── l10n/
 │       └── app_localizations.dart  # 多语言翻译
@@ -315,18 +338,37 @@ clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics
 
 ## 📊 版本信息
 
-**当前版本**: v2.0.0  
-**发布日期**: 2025-11-30  
+**当前版本**: v2.2.2
+
+**版本来源**: `VERSION` 与 `lib/version.dart`
+
 **支持系统**: Windows 10/11, macOS 10.14+
 
-### v2.0.0 新功能 🎉
+### v2.2.2 修复
 
-- 🍎 **macOS 支持** - 完整的 macOS 原生集成
-- 🎨 **自定义标题栏** - 无边框窗口，Windows/macOS 原生风格按钮
-- 🔐 **Windows 自签名** - 减少 SmartScreen 警告
-- 📦 **安装包分发** - Windows 使用安装程序，macOS 使用 DMG
-- 🚀 **启动优化** - 修复窗口启动闪烁问题
-- 🌍 **简化语言选择** - 直接选择语言
+- 🐛 修复点击历史显示区域高度问题
+- 🖼️ 改进 Windows 高 DPI 图标
+- 📦 改进 Windows 升级脚本的安装路径查找
+
+### v2.2.0 功能
+
+- 🛡️ 智能自动暂停/恢复系统
+- 📏 可配置偏离阈值
+- 🌍 自动暂停/恢复相关文案覆盖 11 种语言
+
+### v2.1.0 功能
+
+- 📥 自动升级系统
+- 🔎 启动后检查更新，支持手动检查
+- 💾 下载进度展示和一键安装
+- 🍎 修复 macOS DMG 分发时动态库加载问题
+
+### v2.0.0 功能
+
+- 🍎 macOS 支持
+- 🎨 自定义标题栏
+- 📦 Windows/macOS 分发打包
+- 🚀 启动窗口优化
 
 ### v1.1.0 功能
 

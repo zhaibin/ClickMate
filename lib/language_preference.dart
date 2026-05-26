@@ -7,6 +7,8 @@ import 'l10n/app_localizations.dart';
 class LanguagePreference {
   static final LanguagePreference _instance = LanguagePreference._();
   static LanguagePreference get instance => _instance;
+  static const String _appDirectoryName = 'ClickMate';
+  static const String _legacyDirectoryName = 'MouseControl';
   
   LanguagePreference._();
   
@@ -25,13 +27,14 @@ class LanguagePreference {
       if (await _prefsFile!.exists()) {
         // Load saved language preference
         final savedLang = (await _prefsFile!.readAsString()).trim();
-        if (savedLang.isNotEmpty) {
+        if (_isSupportedLocaleString(savedLang)) {
           _currentLocale = _parseLocale(savedLang);
           print('Language preference loaded from file: $_currentLocale');
         } else {
-          // Empty file, detect system language
+          // Empty or invalid file, detect system language
           _currentLocale = _detectSystemLanguage();
-          print('Empty language preference, using system: $_currentLocale');
+          await _savePreference();
+          print('Invalid language preference, using system: $_currentLocale');
         }
       } else {
         // No saved preference, detect system language for first launch
@@ -111,15 +114,48 @@ class LanguagePreference {
   Future<Directory> _getPrefsDirectory() async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final prefsDir = Directory('${appDir.path}/MouseControl');
+      final prefsDir = Directory('${appDir.path}/$_appDirectoryName');
+      final legacyPrefsDir = Directory('${appDir.path}/$_legacyDirectoryName');
       if (!await prefsDir.exists()) {
         await prefsDir.create(recursive: true);
       }
+      await _migrateLegacyPreference(legacyPrefsDir, prefsDir);
       return prefsDir;
     } catch (e) {
       // Fallback to current directory
       final prefsDir = Directory('.');
       return prefsDir;
+    }
+  }
+
+  Future<void> _migrateLegacyPreference(
+    Directory legacyPrefsDir,
+    Directory prefsDir,
+  ) async {
+    final legacyFile = File('${legacyPrefsDir.path}/language.txt');
+    final newFile = File('${prefsDir.path}/language.txt');
+
+    if (!await legacyFile.exists()) {
+      return;
+    }
+
+    try {
+      if (await newFile.exists()) {
+        final currentValue = (await newFile.readAsString()).trim();
+        if (_isSupportedLocaleString(currentValue)) {
+          return;
+        }
+      }
+
+      final legacyValue = (await legacyFile.readAsString()).trim();
+      if (!_isSupportedLocaleString(legacyValue)) {
+        return;
+      }
+
+      await legacyFile.copy(newFile.path);
+      print('Migrated language preference to: ${newFile.path}');
+    } catch (e) {
+      print('Failed to migrate language preference: $e');
     }
   }
   
@@ -135,6 +171,18 @@ class LanguagePreference {
     } else {
       return Locale(parts[0], '');
     }
+  }
+
+  bool _isSupportedLocaleString(String localeString) {
+    if (localeString.isEmpty) {
+      return false;
+    }
+
+    final locale = _parseLocale(localeString);
+    return AppLocalizations.supportedLocales.any((supported) {
+      return supported.languageCode == locale.languageCode &&
+          (supported.countryCode ?? '') == (locale.countryCode ?? '');
+    });
   }
   
   /// Get language name for display
@@ -165,5 +213,3 @@ class LanguagePreference {
     return locale.languageCode;
   }
 }
-
-

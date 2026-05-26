@@ -204,6 +204,5 @@ If you encounter other issues:
 
 ---
 
-**Last Updated**: 2025-12-01  
-**Version**: 2.1.0
-
+**Last Updated**: 2026-05-25
+**Version**: 2.2.2

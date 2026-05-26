@@ -2,6 +2,19 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [2.2.2] - 2026-05-26
+
+### Bug Fixes
+
+- Prevented delayed click events from firing after auto-click has been stopped.
+- Added startup hotkey arming delay to avoid accidental start/stop triggers from residual key state.
+- Migrated user data paths from legacy MouseControl directories to ClickMate directories.
+
+### Tests
+
+- Added service, UI, configuration, logging, language, hotkey, and upgrade coverage.
+- Verified real auto-click delivery on macOS and Windows 11 VM with controlled target windows.
+
 ## [2.2.1] - 2025-12-16
 
 ### 🐛 Bug Fixes

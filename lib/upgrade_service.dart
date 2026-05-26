@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'version.dart';
@@ -186,6 +187,11 @@ class UpgradeService {
     }
   }
 
+  @visibleForTesting
+  UpgradeInfo? debugParseGitHubRelease(Map<String, dynamic> data) {
+    return _parseGitHubRelease(data);
+  }
+
   /// Compare two version strings (e.g., "2.0.0" vs "2.1.0")
   /// Returns: positive if v1 > v2, negative if v1 < v2, 0 if equal
   int _compareVersions(String v1, String v2) {
@@ -205,6 +211,11 @@ class UpgradeService {
       if (parts1[i] < parts2[i]) return -1;
     }
     return 0;
+  }
+
+  @visibleForTesting
+  int debugCompareVersions(String v1, String v2) {
+    return _compareVersions(v1, v2);
   }
 
   /// Download the update file with progress reporting
@@ -595,4 +606,3 @@ sleep 3
     _downloadedFilePath = null;
   }
 }
-
