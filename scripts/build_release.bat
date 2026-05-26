@@ -54,9 +54,8 @@ mkdir "%PORTABLE_DIR%"
 copy "%RELEASE_DIR%\clickmate.exe" "%PORTABLE_DIR%\" >nul
 copy "%RELEASE_DIR%\flutter_windows.dll" "%PORTABLE_DIR%\" >nul
 
-:: Copy plugin DLLs
-copy "%RELEASE_DIR%\window_manager_plugin.dll" "%PORTABLE_DIR%\" >nul
-copy "%RELEASE_DIR%\screen_retriever_windows_plugin.dll" "%PORTABLE_DIR%\" >nul
+:: Copy all Flutter plugin DLLs
+copy "%RELEASE_DIR%\*_plugin.dll" "%PORTABLE_DIR%\" >nul
 
 :: Copy native DLL from source directory
 copy "native\src\mouse_controller.dll" "%PORTABLE_DIR%\" >nul

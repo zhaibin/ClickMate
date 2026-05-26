@@ -54,6 +54,13 @@ echo     pause
 echo     exit /b 1
 echo ^)
 echo.
+echo if not exist "url_launcher_windows_plugin.dll" ^(
+echo     echo [ERROR] url_launcher_windows_plugin.dll not found
+echo     echo Please download the complete package again.
+echo     pause
+echo     exit /b 1
+echo ^)
+echo.
 echo if not exist "mouse_controller.dll" ^(
 echo     echo [ERROR] mouse_controller.dll not found
 echo     echo Please download the complete package again.
@@ -264,7 +271,7 @@ echo   3. Look for "Hotkey registered successfully" message
 echo   4. Check log file for hotkey status
 echo.
 echo.
-echo [3] Cannot find window_manager_plugin.dll?
+echo [3] Cannot find plugin DLLs?
 echo.
 echo   Symptom: Missing DLL error on startup
 echo.
@@ -274,6 +281,7 @@ echo     - clickmate.exe
 echo     - flutter_windows.dll
 echo     - window_manager_plugin.dll
 echo     - screen_retriever_windows_plugin.dll
+echo     - url_launcher_windows_plugin.dll
 echo     - mouse_controller.dll
 echo     - data\ folder
 echo.
