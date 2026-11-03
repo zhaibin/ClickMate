@@ -15,6 +15,7 @@
 - `docs/BUILD_GUIDE.md` - 构建和编译指南
 - `docs/打包发布指南.md` - 打包详细说明
 - `docs/MULTILINGUAL_GUIDE.md` - 多语言支持指南
+- `docs/macOS_INSTALL_GUIDE.md` - macOS 安装与 Gatekeeper 说明
 - `.cursorrules` - 本规则文件
 
 ### 文档编写原则
@@ -31,6 +32,7 @@
 3. 开发流程变化 → 更新 `docs/BUILD_GUIDE.md`
 4. 打包方式变化 → 更新 `docs/打包发布指南.md`
 5. 多语言相关 → 更新 `docs/MULTILINGUAL_GUIDE.md`
+6. macOS 安装/Gatekeeper 变化 → 更新 `docs/macOS_INSTALL_GUIDE.md`
 
 ## 🔧 脚本管理规则
 
@@ -135,7 +137,7 @@ scripts\build_release.bat        # 自动完成所有打包
 - `windows/` - Flutter Windows配置
 - `test/` - 测试代码
 - `scripts/` - 所有批处理脚本（6个）
-- `docs/` - 详细文档（2个）
+- `docs/` - 详细文档（4个）
 - `logs/` - 日志文件（Git忽略内容）
 - `build/` - 构建输出（Git忽略）
 - `releases/` - 发布版本（Git忽略，按版本号分目录）
@@ -291,8 +293,8 @@ String buttonText = '开始';           // 界面文本不能硬编码
 
 ---
 
-**最后更新**: 2024-11-21  
-**当前版本**: v1.4.1  
+**最后更新**: 2026-11-03  
+**当前版本**: v2.2.2  
 **支持语言**: 11种（English/简中/繁中/法/西/葡/德/俄/意/日/韩）
 
 ## 📂 目录结构说明
@@ -312,9 +314,10 @@ ClickMate/
 │   ├── test_hotkey.bat   # 快捷键测试 (Windows)
 │   └── build_dmg.sh      # DMG打包 (macOS)
 ├── docs/                  # 文档
-│   ├── BUILD_GUIDE.md    # 构建指南
-│   ├── 打包发布指南.md    # 打包说明
-│   └── MULTILINGUAL_GUIDE.md  # 多语言指南
+│   ├── BUILD_GUIDE.md         # 构建指南
+│   ├── 打包发布指南.md         # 打包说明
+│   ├── MULTILINGUAL_GUIDE.md  # 多语言指南
+│   └── macOS_INSTALL_GUIDE.md # macOS 安装说明
 ├── logs/                  # 日志文件（Git忽略内容）
 ├── lib/                   # Flutter源码
 │   ├── main.dart         # 主应用（集成多语言）

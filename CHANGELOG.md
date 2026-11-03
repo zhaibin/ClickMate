@@ -17,7 +17,9 @@ All notable changes to ClickMate will be documented in this file.
 
 ### Docs
 
-- Documented user data locations: click configs in AppData (`%APPDATA%\xants\ClickMate\`), logs/language in Documents (`Documents\ClickMate\`).
+- Documented where settings live: click configs and session settings in SharedPreferences; language and logs under `Documents/ClickMate`.
+- Corrected the guides to the current app: macOS 12.0, configurable hotkeys, snake_case translation keys, and dylib packaging via `scripts/build_dmg.sh`.
+- Removed the install and system-requirement appendix from this changelog. Those steps now live only in the README and `docs/`.
 
 ## [2.2.2] - 2026-05-26
 
@@ -361,43 +363,7 @@ ClickMate - A professional mouse auto-clicker for Windows with global hotkey sup
 
 ---
 
-## System Requirements
-
-### Windows
-- Windows 10 version 1809 or higher
-- Windows 11 (all versions)
-- Visual C++ Redistributable 2022
-- Administrator privileges (for hotkey functionality)
-
-### macOS
-- macOS 10.14 (Mojave) or higher
-- Accessibility permission required
-- Apple Silicon (M1/M2) and Intel supported
-
----
-
-## Installation
-
-### Windows
-1. Extract the portable package
-2. Right-click `START.bat` and select "Run as administrator"
-3. Application launches automatically
-
-### macOS
-1. Build from source: `flutter build macos`
-2. Open `ClickMate.app` from build folder
-3. Grant Accessibility permission when prompted
-
----
-
-## Usage
-
-1. **Auto Mode (Default)**: Position follows mouse in real-time
-2. **Manual Mode**: Click X/Y input fields or toggle button
-3. **Start Clicking**: Press `Ctrl+Shift+1` (Win) or `⌘+Shift+1` (Mac)
-4. **Capture Position**: Press `Ctrl+Shift+2` (Win) or `⌘+Shift+2` (Mac)
-
----
+Install steps, system requirements, and usage live in [README.md](README.md).
 
 **License**: For personal and educational use only  
 **Repository**: https://github.com/zhaibin/ClickMate

@@ -1,343 +1,134 @@
-# Build Guide / 构建指南
+# 构建指南
 
-Complete guide for building ClickMate on Windows and macOS.
+在 Windows 或 macOS 上从源码构建 ClickMate。用户安装已发布的包时，请看 [macOS 安装指南](macOS_INSTALL_GUIDE.md)，不必按本文编译。
 
-完整的 ClickMate 构建指南，支持 Windows 和 macOS 平台。
+当前版本：2.2.2。Dart SDK 约束见 `pubspec.yaml` 的 `^3.10.0`。
 
----
+## 环境
 
-## 📋 Prerequisites / 环境准备
+1. 安装 [Flutter](https://flutter.dev/docs/get-started/install)，加入 PATH，并执行 `flutter doctor`。
+2. 安装 [Git](https://git-scm.com/downloads)。
+3. 在仓库根目录执行 `flutter pub get`。
 
-### Common Requirements / 通用要求
+## Windows
 
-1. **Flutter SDK / Dart SDK**
-   - Download: https://flutter.dev/docs/get-started/install
-   - Add to system PATH
-   - Run `flutter doctor` to verify
-   - `pubspec.yaml` currently requires Dart SDK `^3.10.0`
+另外需要：
 
-2. **Git**
-   - Download: https://git-scm.com/downloads
+- CMake 3.14+
+- Visual Studio 2019 或更新版本，勾选「使用 C++ 的桌面开发」。MinGW 可以编译 DLL，但 Flutter Windows 目标以 Visual Studio 为准。
 
----
+### 脚本
 
-## 🪟 Windows Build / Windows 构建
-
-### Requirements / 环境要求
-
-1. **CMake**
-   ```cmd
-   winget install Kitware.CMake
-   ```
-   Or download from: https://cmake.org/download/
-
-2. **C++ Compiler** (choose one)
-
-   **Option A: Visual Studio (Recommended)**
-   - Download Visual Studio 2019 or later
-   - Select "Desktop development with C++" workload
-
-   **Option B: MinGW**
-   ```cmd
-   # Using MSYS2
-   pacman -S mingw-w64-x86_64-gcc
-   pacman -S mingw-w64-x86_64-cmake
-   ```
-
-### Build Steps / 构建步骤
-
-#### Method 1: Auto Script (Recommended) / 自动脚本（推荐）
-
-```cmd
-# Debug build and run
+```bat
 scripts\quick_start.bat
-
-# Release build
 scripts\build_release.bat
 ```
 
-#### Method 2: Manual Build / 手动构建
+`quick_start.bat` 用于调试运行。`build_release.bat` 生成便携版，详见 [打包发布指南](打包发布指南.md)。
 
-```cmd
-# 1. Get dependencies
+### 手动构建
+
+```bat
 flutter pub get
 
-# 2. Build C++ DLL (if needed)
 cd native
-mkdir build && cd build
+mkdir build
+cd build
 cmake .. -G "Visual Studio 17 2022" -A x64
 cmake --build . --config Release
 copy Release\mouse_controller.dll ..\src\
 
-# 3. Build Flutter app
 cd ..\..
 flutter build windows --debug
-# or
 flutter build windows --release
-
-# 4. Run
-build\windows\x64\runner\Debug\clickmate.exe
 ```
 
-### Output Files / 输出文件
+已有 `native\src\mouse_controller.dll` 时，可跳过 CMake，直接 `flutter run -d windows`。
 
-```
-build\windows\x64\runner\
-├── Debug\
-│   ├── clickmate.exe
-│   ├── flutter_windows.dll
-│   ├── mouse_controller.dll
-│   └── data\
-└── Release\
-    └── (same structure)
-```
+调试程序在 `build\windows\x64\runner\Debug\clickmate.exe`，发布程序在同级的 `Release\`。Flutter 构建会带上 `flutter_windows.dll` 和插件 DLL。原生 DLL 以 `native\src\mouse_controller.dll` 为准，发布脚本会把它复制到便携版目录。
 
----
+也可以在 `native\src` 里直接编译 DLL：
 
-## 🍎 macOS Build / macOS 构建
-
-### Requirements / 环境要求
-
-1. **Xcode** (12.0+)
-   ```bash
-   xcode-select --install
-   ```
-
-2. **CocoaPods**
-   ```bash
-   sudo gem install cocoapods
-   ```
-
-3. **Clang** (included with Xcode)
-
-### Build Steps / 构建步骤
-
-#### Method 1: Flutter Command (Recommended) / Flutter 命令（推荐）
-
-```bash
-# 1. Get dependencies
-flutter pub get
-cd macos && pod install && cd ..
-
-# 2. Build native library (if needed)
-cd native/src
-clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics \
-  -o libmouse_controller.dylib mouse_controller_macos.mm
-cd ../..
-
-# 3. Build and run
-flutter run -d macos
-
-# Or build release
-flutter build macos --release
-
-# For distributable DMG, use the project script instead:
-bash scripts/build_dmg.sh
-```
-
-#### Method 2: Xcode Build / Xcode 构建
-
-```bash
-# Open in Xcode
-open macos/Runner.xcworkspace
-
-# Build from Xcode (⌘+B)
-```
-
-### Output Files / 输出文件
-
-```
-build/macos/Build/Products/
-├── Debug/
-│   └── ClickMate.app
-└── Release/
-    └── ClickMate.app
-```
-
-### macOS Permissions / macOS 权限
-
-ClickMate requires **Accessibility** permission for:
-- Global hotkey registration
-- Mouse control
-
-To grant permission:
-1. Open **System Preferences** → **Security & Privacy** → **Privacy**
-2. Select **Accessibility** in the left panel
-3. Click the lock icon and authenticate
-4. Add ClickMate.app to the list
-
----
-
-## 🔧 Native Library Build / 原生库构建
-
-### Windows DLL
-
-```cmd
-cd native/src
-
-# Using cl.exe (MSVC)
+```bat
 cl /LD mouse_controller.cpp /Fe:mouse_controller.dll user32.lib
+```
 
-# Using g++ (MinGW)
+```bat
 g++ -shared -o mouse_controller.dll mouse_controller.cpp -luser32
 ```
 
-### macOS Dynamic Library
+## macOS
+
+另外需要 Xcode 13 或更新版本（部署目标是 macOS 12.0），以及其中的 Clang。首次还需要：
 
 ```bash
-cd native/src
+xcode-select --install
+cd macos && pod install && cd ..
+```
 
+### 开发运行
+
+动态库要放在项目根目录，`flutter run` 才能加载：
+
+```bash
 clang++ -shared -fPIC \
-  -framework Cocoa \
-  -framework Carbon \
-  -framework CoreGraphics \
+  -framework Cocoa -framework Carbon -framework CoreGraphics \
   -o libmouse_controller.dylib \
-  mouse_controller_macos.mm
+  native/src/mouse_controller_macos.mm
+
+flutter run -d macos
 ```
 
-**Important for Distribution:**
-The dylib must be included in the app bundle's Frameworks directory:
-```bash
-# Copy dylib to app bundle
-FRAMEWORKS_DIR="YourApp.app/Contents/Frameworks"
-mkdir -p "$FRAMEWORKS_DIR"
-cp libmouse_controller.dylib "$FRAMEWORKS_DIR/"
+热重载只覆盖 Dart 界面。改了 `.mm` 之后需要重新编译动态库并重启应用。
 
-# Update install name for proper loading
-install_name_tool -id "@executable_path/../Frameworks/libmouse_controller.dylib" \
-    "$FRAMEWORKS_DIR/libmouse_controller.dylib"
-```
-
-This is automatically handled by the `scripts/build_dmg.sh` script. Use that script for release DMG builds; a plain `flutter build macos --release` is useful for local build verification but is not enough for distribution.
-
----
-
-## 🐛 Troubleshooting / 故障排查
-
-### Common Issues / 常见问题
-
-#### Q: Flutter doctor shows issues
-```bash
-flutter doctor -v
-# Follow the suggestions to fix
-```
-
-#### Q: CMake can't find compiler (Windows)
-- Ensure Visual Studio or MinGW is in PATH
-- Restart terminal after installation
-
-#### Q: Pod install fails (macOS)
-```bash
-cd macos
-pod deintegrate
-pod install --repo-update
-```
-
-#### Q: DLL/dylib not found
-```bash
-# Windows - check DLL location
-dir native\src\mouse_controller.dll
-
-# macOS - check dylib location
-ls -la native/src/libmouse_controller.dylib
-```
-
-#### Q: Hotkeys not working
-
-**Windows:**
-- Check if another app uses the same hotkey.
-- If registration still fails, try running as Administrator.
-
-**macOS:**
-- Grant Accessibility permission
-- Restart the app after granting permission
-
-#### Q: App crashes on startup
-
-**Windows:**
-```cmd
-scripts\diagnose.bat
-```
-
-**macOS:**
-```bash
-# Check console for errors
-flutter run -d macos --verbose
-```
-
----
-
-## 📁 Project Structure / 项目结构
-
-```
-ClickMate/
-├── lib/                          # Flutter source code
-│   ├── main.dart                # Main application
-│   ├── mouse_controller_bindings.dart  # FFI bindings
-│   ├── mouse_controller_service.dart   # Business logic
-│   └── l10n/                    # Localization
-│
-├── native/src/                   # Native code
-│   ├── mouse_controller.cpp     # Windows implementation
-│   ├── mouse_controller.h       # Header file
-│   ├── mouse_controller.dll     # Windows binary
-│   ├── mouse_controller_macos.mm  # macOS implementation
-│   └── libmouse_controller.dylib  # macOS binary
-│
-├── windows/                      # Windows platform
-│   ├── CMakeLists.txt
-│   └── runner/
-│       └── main.cpp             # Windows entry point
-│
-├── macos/                        # macOS platform
-│   ├── Podfile
-│   └── Runner/
-│       ├── MainFlutterWindow.swift
-│       └── AppDelegate.swift
-│
-└── scripts/                      # Build scripts (Windows)
-    ├── build_release.bat
-    ├── quick_start.bat
-    └── diagnose.bat
-```
-
----
-
-## 🚀 Development Tips / 开发技巧
-
-### Hot Reload / 热重载
+### 发布构建
 
 ```bash
-# Flutter hot reload works for UI changes
-flutter run -d windows  # or macos
-# Press 'r' for hot reload
-# Press 'R' for hot restart
+bash scripts/build_dmg.sh
 ```
 
-### Debug Logging / 调试日志
+脚本会清理构建、编译动态库、执行 `flutter build macos --release`，再把库复制到：
 
-```dart
-// In Dart code
-print('Debug message');
-LoggerService.instance.info('Info message');
-LoggerService.instance.error('Error message');
+`ClickMate.app/Contents/Frameworks/libmouse_controller.dylib`
+
+并把 install name 设为 `@executable_path/../Frameworks/libmouse_controller.dylib`。
+
+只运行 `flutter build macos --release` 适合确认工程能编过，打给别人用的包必须走 `build_dmg.sh`。否则启动时报无法加载 `libmouse_controller.dylib`。
+
+用 Xcode 打开 `macos/Runner.xcworkspace` 也可以编译，同样不会自动完成动态库打包。
+
+产物：
+
+```
+build/macos/Build/Products/Release/ClickMate.app
+releases/v<VERSION>/ClickMate_v<VERSION>_macOS.dmg
 ```
 
-### Native Code Debugging / 原生代码调试
+### 辅助功能
 
-**Windows:** Use Visual Studio debugger
-**macOS:** Use Xcode debugger or lldb
+点击、移动鼠标和注册全局快捷键都需要辅助功能权限。
 
----
+- macOS 13 及以上：系统设置 → 隐私与安全性 → 辅助功能
+- macOS 12：系统偏好设置 → 安全性与隐私 → 隐私 → 辅助功能
 
-## 📚 Resources / 相关资源
+加入 ClickMate 并勾选，然后重启应用。
 
-- [Flutter Documentation](https://docs.flutter.dev/)
-- [Flutter Desktop](https://docs.flutter.dev/desktop)
-- [Dart FFI](https://dart.dev/guides/libraries/c-interop)
-- [window_manager](https://pub.dev/packages/window_manager)
+## 故障排查
 
----
+| 现象 | 处理 |
+|------|------|
+| `flutter doctor` 报错 | 执行 `flutter doctor -v`，按提示安装缺失组件 |
+| Windows 上 CMake 找不到编译器 | 安装带 C++ 工作负载的 Visual Studio，重开终端 |
+| `pod install` 失败 | 在 `macos/` 执行 `pod deintegrate`，再执行 `pod install --repo-update` |
+| 找不到 DLL / dylib | Windows 看 `native\src\mouse_controller.dll`；开发态 macOS 看项目根目录的 `libmouse_controller.dylib` |
+| 快捷键无效 | Windows 检查占用，必要时管理员运行。macOS 授予辅助功能后重启 |
+| 启动即崩溃 | Windows 运行 `scripts\diagnose.bat`。macOS 用 `flutter run -d macos --verbose` 看日志 |
 
-**Last Updated**: 2026-05-25
-**Version**: 2.2.2
+运行时日志在 `Documents/ClickMate/logs/`，文件日志只保留警告和错误。
+
+## 相关文档
+
+- [打包发布指南](打包发布指南.md)
+- [多语言指南](MULTILINGUAL_GUIDE.md)
+- [Flutter 桌面](https://docs.flutter.dev/desktop)
+- [Dart FFI](https://dart.dev/interop/c-interop)

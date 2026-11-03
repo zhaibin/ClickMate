@@ -6,415 +6,251 @@
 
 **Cross-Platform Mouse Auto Clicker**
 
-智能鼠标自动点击工具，支持 Windows 和 macOS 双平台
+智能鼠标自动点击工具，支持 Windows 和 macOS。
 
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-blue.svg)](#)
-[![Version](https://img.shields.io/badge/Version-2.2.2-green.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-blue.svg)](#-平台支持)
+[![Version](https://img.shields.io/badge/Version-2.2.2-green.svg)](#-版本)
 [![Languages](https://img.shields.io/badge/Languages-11-orange.svg)](#-多语言支持)
-[![License](https://img.shields.io/badge/License-Personal%20Use-lightgrey.svg)](#)
+[![License](https://img.shields.io/badge/License-Personal%20Use-lightgrey.svg)](#-许可证)
 
-[主要功能](#-主要功能) | [构建指南](docs/BUILD_GUIDE.md) | [打包指南](docs/打包发布指南.md)
+[使用说明](#-使用说明) · [构建](docs/BUILD_GUIDE.md) · [打包](docs/打包发布指南.md) · [多语言](docs/MULTILINGUAL_GUIDE.md) · [macOS 安装](docs/macOS_INSTALL_GUIDE.md)
 
 </div>
 
 ---
 
-## ✨ 主要功能
+## 主要功能
 
-- 🖱️ **自动鼠标点击** - 支持左键/右键/中键
-- 🎯 **双模式切换** - 自动跟踪模式 & 手动输入模式
-- ⌨️ **全局快捷键** - Windows 使用 Ctrl+Shift+1/2，macOS 使用 ⌘+Shift+1/2
-- 📊 **点击历史** - 记录最近10次点击（毫秒精度）
-- 🎲 **智能随机** - 随机间隔和位置偏移
-- 💾 **配置管理** - 保存/加载/管理多个配置
-- 🔄 **智能移动** - 鼠标自动定位到目标位置
-- 🛡️ **智能暂停/恢复** - 偏离目标区域时暂停，静止后自动回到目标继续
-- 📥 **自动更新** - 启动后检查 GitHub Releases，支持下载安装更新
-- 🌍 **多语言支持** - 11种语言，自动检测系统语言
-- 🎨 **现代界面** - 无边框窗口，自定义标题栏
+- 自动点击左键、右键或中键，间隔至少 10 毫秒
+- 自动跟踪鼠标，或锁定手动输入的坐标
+- 全局快捷键。默认 Windows 为 `Ctrl+Shift+1/2`，macOS 为 `⌘+Shift+1/2`；可改为 Ctrl、Alt、Shift 或无修饰键，也支持 F1–F12
+- 最近 10 次点击记录，时间精确到毫秒
+- 随机间隔和随机位置偏移
+- 多份命名配置，重启后恢复上次界面
+- 鼠标自动移到目标位置
+- 偏离目标区域时暂停，静止约 5 秒后回到目标并继续
+- 启动后检查 GitHub Releases，可下载并安装更新
+- 11 种界面语言，首次启动跟随系统语言
 
----
-
-## 🖥️ 平台支持
+## 平台支持
 
 | 平台 | 状态 | 最低版本 |
 |------|------|----------|
-| **Windows** | ✅ 完整支持 | Windows 10 1809+ |
-| **macOS** | ✅ 完整支持 | macOS 10.15+ |
-| Linux | 🚧 计划中 | - |
+| Windows | 完整支持 | Windows 10 1809+ |
+| macOS | 完整支持 | macOS 12.0+ |
+| Linux | 未支持 | — |
 
----
+macOS 最低版本以工程配置为准：`macos/Podfile` 与 `MACOSX_DEPLOYMENT_TARGET` 均为 12.0。
 
-## 🚀 快速开始
+## 快速开始
 
 ### Windows
 
-**方式1：直接启动（推荐）**
-```bash
+```bat
 START.bat
 ```
 
-**方式2：调试模式**
-```bash
-scripts\run_debug.bat
-```
-
-**方式3：管理员模式（快捷键注册受限时）**
-```bash
-scripts\run_as_admin.bat
-```
+调试输出用 `scripts\run_debug.bat`。快捷键注册失败时，再用 `scripts\run_as_admin.bat`。
 
 ### macOS
 
-**方式1：命令行启动**
+开发运行：
+
 ```bash
+flutter pub get
+clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics \
+  -o libmouse_controller.dylib native/src/mouse_controller_macos.mm
 flutter run -d macos
 ```
 
-**方式2：编译后运行**
-```bash
-bash scripts/build_dmg.sh
-open build/macos/Build/Products/Release/ClickMate.app
-```
+可分发的应用和 DMG 用 `bash scripts/build_dmg.sh`。只执行 `flutter build macos --release` 不会把 `libmouse_controller.dylib` 放进 app bundle。
 
-> `scripts/build_dmg.sh` 会构建 Release app 并把 `libmouse_controller.dylib` 复制到 app bundle。仅执行 `flutter build macos --release` 适合本地构建验证，但发布或直接打开 `.app` 时可能缺少动态库。
+首次运行需要在辅助功能中授权 ClickMate。从网络下载的未签名包若提示已损坏，按 [macOS 安装指南](docs/macOS_INSTALL_GUIDE.md) 处理。
 
-> ⚠️ **macOS 权限提示**：首次运行需要在「系统偏好设置 → 安全性与隐私 → 辅助功能」中授权应用程序。
+## 使用说明
 
-> 📥 **下载安装包后显示"已损坏"？** 查看 [macOS 安装指南](docs/macOS_INSTALL_GUIDE.md) 了解解决方案。
+### 自动跟踪（默认）
 
----
+启动后跟随当前鼠标位置。按开始/停止快捷键开始点击，再按一次停止。启动后会短暂忽略快捷键，避免残留按键误触发。
 
-## 📖 使用说明
+### 手动坐标
 
-### 自动跟踪模式（默认）
+点击 X 或 Y 输入框进入手动模式，填写坐标后可用「移动」按钮核对位置。加载命名配置时会切到手动模式。
 
-1. 启动应用后自动开启
-2. 实时跟随鼠标位置
-3. 按 `Ctrl+Shift+1` (Windows) 或 `⌘+Shift+1` (macOS) 开始点击
-4. 再次按下停止
+### 配置
 
-### 手动输入模式
-
-1. 点击 X 或 Y 输入框切换到手动模式
-2. 输入固定坐标
-3. 点击「移动」按钮测试位置
-4. 或点击 🔄 按钮切换模式
-
-### 配置管理
-
-1. 点击标题栏菜单 → 「管理配置」
-2. 保存当前配置（自动或手动）
-3. 加载配置时自动恢复所有参数
-4. 支持重命名和删除配置
-5. 重启应用自动加载上次配置
+标题栏菜单 →「管理配置」可保存、加载、重命名和删除配置。参数修改会写入会话设置，下次启动恢复。
 
 ### 快捷键
 
-| 功能 | Windows | macOS |
-|------|---------|-------|
-| 开始/停止点击 | `Ctrl+Shift+1` | `⌘+Shift+1` |
-| 捕获鼠标位置 | `Ctrl+Shift+2` | `⌘+Shift+2` |
+| 功能 | 默认 Windows | 默认 macOS |
+|------|----------------|------------|
+| 开始/停止 | `Ctrl+Shift+1` | `⌘+Shift+1` |
+| 捕获坐标 | `Ctrl+Shift+2` | `⌘+Shift+2` |
 
-> 💡 Windows 下快捷键通过 `RegisterHotKey` 注册；如果注册失败，通常是快捷键冲突、权限限制或 DLL 未加载。可尝试以管理员身份运行。
+在「快捷键设置」中可改主键和修饰键。macOS 上界面里的 Ctrl 对应 Command。注册失败时，先检查是否被其他软件占用，以及原生库是否加载成功。
 
 ### 点击历史
 
-窗口底部显示最近10次点击：
-- **序号** - 1-10
-- **时间** - HH:MM:SS.mmm（毫秒精度）
-- **位置** - (X, Y)
-- **按键** - 左键(蓝)/右键(橙)/中键(紫)
+窗口底部保留最近 10 次：序号、`HH:MM:SS.mmm`、坐标、按键（左键蓝、右键橙、中键紫）。
 
-### 智能暂停/恢复
+### 自动暂停 / 恢复
 
-启用「自动暂停/恢复」后，应用会监控鼠标是否偏离目标区域：
-
-1. 偏离目标超过阈值时自动暂停点击
-2. 鼠标在任意位置静止 5 秒后，自动移动回目标位置
-3. 回到目标后继续点击，减少多任务切换时的误触
-
-偏离阈值可在主界面设置，默认值为 100px。
+勾选后，鼠标偏离目标超过阈值会暂停。默认阈值 100 像素，最小 10 像素。鼠标在任意位置静止约 5 秒后，会移回目标并继续点击。
 
 ### 自动更新
 
-应用启动约 3 秒后会检查 GitHub Releases 最新版本，也可以通过标题栏菜单手动「检查更新」。更新逻辑使用 `lib/version.dart` 中的 `appVersion` 与最新 Release tag 比较。
+启动约 3 秒后对照 GitHub Releases。也可以从标题栏菜单手动检查。比较的是 `lib/version.dart` 里的 `appVersion` 和最新 Release tag。Windows 优先下载文件名含 `setup` 或 `installer` 的 `.exe`，否则用其他 `.exe`，再退回 `.zip`。macOS 下载 `.dmg`。
 
----
+## 多语言支持
 
-## 🌍 多语言支持
+首次启动读取系统语言。简体与繁体按地区区分：`TW`、`HK`、`MO` 为繁体，其余中文为简体。不支持的语言使用英语。
 
-支持11种语言，首次启动自动检测系统语言：
+| 语言 | 代码 |
+|------|------|
+| English | `en` |
+| 简体中文 | `zh_CN` |
+| 繁體中文 | `zh_TW` |
+| Français | `fr` |
+| Español | `es` |
+| Português | `pt` |
+| Deutsch | `de` |
+| Русский | `ru` |
+| Italiano | `it` |
+| 日本語 | `ja` |
+| 한국어 | `ko` |
 
-| 语言 | Language |
-|------|----------|
-| 🇺🇸 English | 英语 |
-| 🇨🇳 简体中文 | Simplified Chinese |
-| 🇹🇼 繁體中文 | Traditional Chinese |
-| 🇫🇷 Français | 法语 |
-| 🇪🇸 Español | 西班牙语 |
-| 🇵🇹 Português | 葡萄牙语 |
-| 🇩🇪 Deutsch | 德语 |
-| 🇷🇺 Русский | 俄语 |
-| 🇮🇹 Italiano | 意大利语 |
-| 🇯🇵 日本語 | 日语 |
-| 🇰🇷 한국어 | 韩语 |
+在标题栏菜单中切换，选择会立刻保存。翻译维护见 [多语言指南](docs/MULTILINGUAL_GUIDE.md)。
 
-点击标题栏菜单切换语言，选择自动保存。
+## 打包发布
 
----
+版本号以根目录 `VERSION` 为准，并与 `lib/version.dart`、`pubspec.yaml` 保持一致。当前为 **2.2.2**。
 
-## 📦 打包发布
-
-### Windows
-
-```bash
+```bat
 scripts\build_release.bat
 ```
-
-自动完成：检查 DLL → 构建 Release → 创建便携版 → 打包 ZIP
-
-输出文件：
-- 便携版: `releases\v2.2.2\ClickMate_v2.2.2_Portable.zip`
-
-> Windows 安装包需要额外使用 Inno Setup；自动更新会优先选择 Release 中包含 `setup` 或 `installer` 的 `.exe` 资源，其次选择普通 `.exe`，最后回退到 `.zip`。
-
-### macOS
 
 ```bash
 bash scripts/build_dmg.sh
 ```
 
 输出：
-- App: `build/macos/Build/Products/Release/ClickMate.app`
-- DMG: `releases/v2.2.2/ClickMate_v2.2.2_macOS.dmg`
 
-> 仅运行 `flutter build macos --release` 不会自动把 `libmouse_controller.dylib` 放入 app bundle。发布 DMG 请使用 `scripts/build_dmg.sh`。
+- `releases/v2.2.2/ClickMate_v2.2.2_Portable.zip`
+- `releases/v2.2.2/ClickMate_v2.2.2_macOS.dmg`
 
----
+Windows 安装包需另用 Inno Setup，自动更新会优先选择安装程序。步骤见 [打包发布指南](docs/打包发布指南.md)。
 
-## 🔧 技术栈
+## 技术栈
 
 | 组件 | 技术 |
 |------|------|
-| 框架 | Flutter（需包含 Dart SDK 3.10+；`pubspec.yaml` 要求 `^3.10.0`） |
-| Windows 原生 | C++ / Windows API |
+| 框架 | Flutter，Dart SDK `^3.10.0` |
+| Windows 原生 | C++ / Win32 |
 | macOS 原生 | Objective-C++ / CoreGraphics / Carbon |
-| 窗口管理 | window_manager 0.5.1 |
-| FFI | dart:ffi |
-| 存储 | SharedPreferences |
-| 文件路径 | path_provider |
-| 网络更新 | http + GitHub Releases API |
+| 窗口 | window_manager 0.5.1，固定 400×720 |
+| 原生调用 | dart:ffi |
+| 点击配置 | shared_preferences |
+| 更新 | http + GitHub Releases API |
 
----
-
-## 📁 项目结构
+## 项目结构
 
 ```
 ClickMate/
-├── START.bat                    # Windows 快捷启动
-├── README.md                    # 项目说明
-├── CHANGELOG.md                 # 更新日志
-├── VERSION                      # 版本号
-│
+├── START.bat
+├── VERSION
+├── README.md
+├── CHANGELOG.md
 ├── lib/                         # Flutter 源码
-│   ├── main.dart               # 主应用
+│   ├── main.dart
+│   ├── version.dart
 │   ├── mouse_controller_service.dart
 │   ├── mouse_controller_bindings.dart
-│   ├── click_config.dart       # 配置模型
-│   ├── config_management_dialog.dart
-│   ├── language_preference.dart
-│   ├── logger_service.dart
+│   ├── click_config.dart
 │   ├── upgrade_service.dart
-│   ├── version.dart
-│   └── l10n/
-│       └── app_localizations.dart  # 多语言翻译
-│
-├── native/src/                  # 原生代码
-│   ├── mouse_controller.cpp    # Windows 实现
-│   ├── mouse_controller.h
-│   ├── mouse_controller.dll    # Windows DLL
-│   ├── mouse_controller_macos.mm  # macOS 实现
-│   └── libmouse_controller.dylib  # macOS 动态库
-│
-├── windows/                     # Windows 平台配置
-├── macos/                       # macOS 平台配置
-│
-├── scripts/                     # 构建脚本
-│   ├── START.bat               # 主启动脚本
-│   ├── quick_start.bat         # 智能启动
-│   ├── run_debug.bat           # 调试模式
-│   ├── run_as_admin.bat        # 管理员模式
-│   ├── build_release.bat       # 发布打包
-│   ├── diagnose.bat            # 诊断工具
-│   └── test_hotkey.bat         # 快捷键测试
-│
-├── docs/                        # 文档
-│   ├── BUILD_GUIDE.md          # 构建指南
-│   ├── 打包发布指南.md          # 打包说明
-│   └── MULTILINGUAL_GUIDE.md   # 多语言指南
-│
-├── assets/icons/                # 应用图标
-└── logs/                        # 仓库内示例/旧日志；运行时日志写入用户 Documents/ClickMate/logs
+│   ├── logger_service.dart
+│   ├── language_preference.dart
+│   └── l10n/app_localizations.dart
+├── native/src/                  # mouse_controller.dll / .dylib / 源码
+├── windows/
+├── macos/
+├── scripts/
+│   ├── build_release.bat        # Windows 便携版
+│   ├── build_dmg.sh             # macOS DMG
+│   ├── START.bat
+│   ├── quick_start.bat
+│   ├── run_debug.bat
+│   ├── run_as_admin.bat
+│   ├── diagnose.bat
+│   ├── test_hotkey.bat
+│   ├── sign_release.bat
+│   └── generate_icons.py
+├── docs/
+│   ├── BUILD_GUIDE.md
+│   ├── 打包发布指南.md
+│   ├── MULTILINGUAL_GUIDE.md
+│   └── macOS_INSTALL_GUIDE.md
+└── assets/icons/
 ```
 
----
+仓库里的 `logs/` 不是运行时日志目录。
 
-## 🛠️ 开发调试
+## 开发与数据位置
 
-### 诊断工具 (Windows)
-```bash
+```bat
 scripts\diagnose.bat
-```
-检查：DLL 文件、Flutter 环境、Windows 版本、管理员权限
-
-### 快捷键测试 (Windows)
-```bash
 scripts\test_hotkey.bat
 ```
-专门测试快捷键功能
 
-### 用户数据位置
-
-便携版不会在 exe 旁创建用户数据目录。配置与日志写入系统用户目录：
-
-| 内容 | Windows | macOS |
+| 数据 | Windows | macOS |
 |------|---------|-------|
-| 点击配置 / 会话 / 快捷键 | `%APPDATA%\xants\ClickMate\` | `~/Library/Application Support/xants/ClickMate/` |
-| 日志 / 语言偏好 | `%USERPROFILE%\Documents\ClickMate\` | `~/Documents/ClickMate/` |
+| 命名配置、会话、快捷键 | `%APPDATA%\xants\ClickMate\shared_preferences.json` | 应用 UserDefaults（`com.xants.clickmate`） |
+| 语言 | `%USERPROFILE%\Documents\ClickMate\language.txt` | `~/Documents/ClickMate/language.txt` |
+| 日志 | `%USERPROFILE%\Documents\ClickMate\logs\` | `~/Documents/ClickMate/logs/` |
 
-> 参数修改后会自动保存；重启后应恢复上次界面设置。也可在「配置管理」中保存命名配置。
+日志文件按日期命名（`app_YYYYMMDD.log`），文件日志只记录警告和错误，并保留约 7 天。旧的 `Documents\MouseControl` 会在启动时迁移到 `ClickMate`。
 
-### 日志位置
+## 注意事项
 
-| 平台 | 路径 |
-|------|------|
-| Windows | `%USERPROFILE%\Documents\ClickMate\logs\` |
-| macOS | `~/Documents/ClickMate/logs/` |
+**Windows**
 
----
+1. 默认快捷键不强制管理员权限。注册失败时再尝试管理员身份运行，并检查快捷键冲突和 `mouse_controller.dll`。
+2. 开发时 DLL 位于 `native/src/`。便携版中 DLL 与 `clickmate.exe` 同目录。
+3. 目标系统需要 Visual C++ 2022 运行库。
 
-## ⚠️ 注意事项
+**macOS**
 
-### Windows
-1. **快捷键注册** - 默认使用 `Ctrl+Shift+1/2`；可在设置中改为单键（如 F9）。如注册失败，检查冲突或尝试管理员身份运行
-2. **DLL 文件** - 确保 `mouse_controller.dll` 在应用目录（发布包）或 `native/src/`（开发）
-3. **快捷键冲突** - 如有冲突可在应用内更改修饰键或主键
+1. 需要辅助功能权限，授权后重启应用。
+2. 分发必须使用 `scripts/build_dmg.sh`，以便把动态库放进 `Contents/Frameworks/`。
+3. 未签名包会被 Gatekeeper 拦截。见 [macOS 安装指南](docs/macOS_INSTALL_GUIDE.md)。
 
-### macOS
-1. **辅助功能权限** - 首次运行需授权「辅助功能」权限
-2. **动态库** - 确保 `libmouse_controller.dylib` 已编译
-3. **代码签名** - 发布版本需要签名才能正常运行
+请勿在禁止自动化操作的游戏或应用中使用。本工具仅供学习和个人使用。
 
-### 通用
-- 请勿在禁止脚本的游戏或应用中使用
-- 本工具仅供学习和个人使用
+## 常见问题
 
----
+**快捷键没有反应**
 
-## 🐛 常见问题
+- Windows：运行 `scripts\diagnose.bat`，查看是否出现热键注册成功的日志。排除占用后再试管理员运行。
+- macOS：确认辅助功能已勾选 ClickMate，然后重启应用。
+- 刚启动的一瞬间快捷键会被忽略，这是为了丢掉残留按键。
 
-### 快捷键不工作？
+**找不到原生库**
 
-**Windows:**
-- 运行 `scripts\diagnose.bat` 检查
-- 查看控制台是否显示 `Hotkey ... Success`
-- 如果提示快捷键被占用或权限受限，再尝试以管理员身份运行
+Windows 确认 `native/src/mouse_controller.dll` 存在。macOS 按上面的 `clang++` 命令编译到项目根目录，供 `flutter run -d macos` 加载；发布包则依赖 `build_dmg.sh`。
 
-**macOS:**
-- 检查「系统偏好设置 → 安全性与隐私 → 辅助功能」是否授权
-- 重启应用后重试
+**停止后仍点了一下**
 
-### 找不到原生库？
+2.2.2 已阻止停止之后仍执行已排队的延迟点击。若仍出现，请确认运行的是该版本或更新的构建。
 
-**Windows:**
-```bash
-scripts\diagnose.bat
-# 确保 native/src/mouse_controller.dll 存在；脚本会复制到项目根目录供 flutter run/test 加载
-```
+## 版本
 
-**macOS:**
-```bash
-# 编译到项目根目录，供 flutter run -d macos 加载
-clang++ -shared -fPIC -framework Cocoa -framework Carbon -framework CoreGraphics \
-  -o libmouse_controller.dylib native/src/mouse_controller_macos.mm
-```
+当前版本 **v2.2.2**。版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-### 打包后无法运行？
+发版时同时更新 `VERSION`、`lib/version.dart`、`pubspec.yaml`、`CHANGELOG.md` 和本文件的版本标记。
 
-- 使用官方打包脚本
-- 确保所有依赖文件在同一目录
-- Windows 检查 VC++ 运行时
+## 许可证
 
----
+仅供学习和个人使用。
 
-## 📊 版本信息
-
-**当前版本**: v2.2.2
-
-**版本来源**: `VERSION` 与 `lib/version.dart`
-
-**支持系统**: Windows 10/11, macOS 10.15+
-
-### v2.2.2 修复
-
-- 🐛 修复停止自动点击后仍可能执行已排队延迟点击的问题
-- ⌨️ 启动后短暂延迟响应快捷键，避免残留按键状态误触发开始/停止
-- 📁 用户数据路径从旧 `MouseControl` 目录迁移到 `ClickMate` 目录
-- 🧪 补充服务、配置、日志、语言、菜单、快捷键、升级等测试覆盖
-- ✅ 完成 macOS 与 Windows 11 VM 的真实目标窗口自动点击验证
-
-### v2.2.0 功能
-
-- 🛡️ 智能自动暂停/恢复系统
-- 📏 可配置偏离阈值
-- 🌍 自动暂停/恢复相关文案覆盖 11 种语言
-
-### v2.1.0 功能
-
-- 📥 自动升级系统
-- 🔎 启动后检查更新，支持手动检查
-- 💾 下载进度展示和一键安装
-- 🍎 修复 macOS DMG 分发时动态库加载问题
-
-### v2.0.0 功能
-
-- 🍎 macOS 支持
-- 🎨 自定义标题栏
-- 📦 Windows/macOS 分发打包
-- 🚀 启动窗口优化
-
-### v1.1.0 功能
-
-- 💾 配置管理系统（保存/加载/管理多个配置）
-- 🔄 智能鼠标移动
-- ⚡ 恢复默认设置按钮
-- 🎨 统一菜单设计
-
-### v1.0.0 功能
-
-- 🖱️ 自动鼠标点击
-- 🎯 双模式切换
-- ⌨️ 全局快捷键
-- 📊 点击历史记录
-- 🌍 11种语言支持
-
----
-
-## 📄 许可证
-
-本项目仅供学习和个人使用。
-
----
-
-<div align="center">
-
-**🎉 开始使用**
-
-Windows: `START.bat` | macOS: `flutter run -d macos`
-
-📖 [构建指南](docs/BUILD_GUIDE.md) | 📦 [打包指南](docs/打包发布指南.md) | 🌍 [多语言指南](docs/MULTILINGUAL_GUIDE.md)
-
-**Repository**: https://github.com/zhaibin/ClickMate
-
-</div>
+仓库：https://github.com/zhaibin/ClickMate  
+网站：https://clickmate.xants.net
