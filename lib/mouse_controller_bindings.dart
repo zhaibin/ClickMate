@@ -22,8 +22,8 @@ typedef ClickMouse = void Function(int button);
 typedef GetMousePositionNative = Void Function(Pointer<Int32> x, Pointer<Int32> y);
 typedef GetMousePosition = void Function(Pointer<Int32> x, Pointer<Int32> y);
 
-typedef RegisterHotkeyNative = Bool Function(Int32 id, Uint32 vkCode);
-typedef RegisterHotkey = bool Function(int id, int vkCode);
+typedef RegisterHotkeyNative = Bool Function(Int32 id, Uint32 vkCode, Uint32 modifiers);
+typedef RegisterHotkey = bool Function(int id, int vkCode, int modifiers);
 
 typedef UnregisterHotkeyNative = Void Function(Int32 id);
 typedef UnregisterHotkey = void Function(int id);

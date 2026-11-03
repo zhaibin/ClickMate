@@ -75,6 +75,13 @@ Language preference is stored in:
 | Windows | `%USERPROFILE%\Documents\ClickMate\language.txt` |
 | macOS | `~/Documents/ClickMate/language.txt` |
 
+Click session settings / named configs / hotkeys (SharedPreferences):
+
+| Platform | Path |
+|----------|------|
+| Windows | `%APPDATA%\xants\ClickMate\shared_preferences.json` |
+| macOS | `~/Library/Application Support/xants/ClickMate/shared_preferences.json` |
+
 Supported values: `en`, `zh_CN`, `zh_TW`, `fr`, `es`, `pt`, `de`, `ru`, `it`, `ja`, `ko`
 
 ---

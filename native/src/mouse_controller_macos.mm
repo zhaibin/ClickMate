@@ -160,6 +160,10 @@ static UInt32 convertVKCodeToMacKeyCode(unsigned int vkCode) {
         {0x53, kVK_ANSI_S}, {0x54, kVK_ANSI_T}, {0x55, kVK_ANSI_U},
         {0x56, kVK_ANSI_V}, {0x57, kVK_ANSI_W}, {0x58, kVK_ANSI_X},
         {0x59, kVK_ANSI_Y}, {0x5A, kVK_ANSI_Z},
+        // Function keys (Windows VK_F1..F12)
+        {0x70, kVK_F1}, {0x71, kVK_F2}, {0x72, kVK_F3}, {0x73, kVK_F4},
+        {0x74, kVK_F5}, {0x75, kVK_F6}, {0x76, kVK_F7}, {0x77, kVK_F8},
+        {0x78, kVK_F9}, {0x79, kVK_F10}, {0x7A, kVK_F11}, {0x7B, kVK_F12},
     };
     
     auto it = keyMap.find(vkCode);
@@ -169,9 +173,29 @@ static UInt32 convertVKCodeToMacKeyCode(unsigned int vkCode) {
     return vkCode; // Return as-is if not found
 }
 
-// Register global hotkey (Ctrl + Shift + key)
-// On macOS, we use Cmd + Shift instead of Ctrl + Shift for better compatibility
-bool registerHotkey(int id, unsigned int vkCode) {
+// Windows-style modifier flags (must match Dart HotkeyModifiers.flags)
+static const unsigned int kModAlt = 0x0001;
+static const unsigned int kModControl = 0x0002;
+static const unsigned int kModShift = 0x0004;
+
+// Map Windows-style modifiers to Carbon Event modifiers.
+// Control maps to Cmd on macOS for better compatibility with the previous default.
+static UInt32 convertModifiersToMac(unsigned int modifiers) {
+    UInt32 macModifiers = 0;
+    if (modifiers & kModAlt) {
+        macModifiers |= optionKey;
+    }
+    if (modifiers & kModControl) {
+        macModifiers |= cmdKey;
+    }
+    if (modifiers & kModShift) {
+        macModifiers |= shiftKey;
+    }
+    return macModifiers;
+}
+
+// Register global hotkey with explicit modifiers.
+bool registerHotkey(int id, unsigned int vkCode, unsigned int modifiers) {
     if (!isInitialized) {
         NSLog(@"Hotkey system not initialized");
         return false;
@@ -193,14 +217,14 @@ bool registerHotkey(int id, unsigned int vkCode) {
     
     EventHotKeyRef hotKeyRef;
     
-    // Use Cmd + Shift modifiers (more standard on macOS)
-    UInt32 modifiers = cmdKey | shiftKey;
+    UInt32 macModifiers = convertModifiersToMac(modifiers);
     UInt32 macKeyCode = convertVKCodeToMacKeyCode(vkCode);
     
-    OSStatus status = RegisterEventHotKey(macKeyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef);
+    OSStatus status = RegisterEventHotKey(macKeyCode, macModifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef);
     
     if (status != noErr) {
-        NSLog(@"Failed to register hotkey id=%d, vkCode=0x%X, macKeyCode=0x%X, status=%d", id, vkCode, macKeyCode, (int)status);
+        NSLog(@"Failed to register hotkey id=%d, vkCode=0x%X, macKeyCode=0x%X, modifiers=0x%X, status=%d",
+              id, vkCode, macKeyCode, modifiers, (int)status);
         return false;
     }
     
@@ -208,7 +232,8 @@ bool registerHotkey(int id, unsigned int vkCode) {
     hotkeyRefs[id] = hotKeyRef;
     hotkeyStates[id] = false;
     
-    NSLog(@"Registered hotkey id=%d, vkCode=0x%X, macKeyCode=0x%X (Cmd+Shift+Key)", id, vkCode, macKeyCode);
+    NSLog(@"Registered hotkey id=%d, vkCode=0x%X, macKeyCode=0x%X, modifiers=0x%X",
+          id, vkCode, macKeyCode, modifiers);
     return true;
 }
 

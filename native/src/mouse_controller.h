@@ -28,8 +28,10 @@ extern "C" {
     // 获取当前鼠标位置
     DLL_EXPORT void getMousePosition(int* x, int* y);
 
-    // 注册全局热键 (Ctrl + Shift + key)
-    DLL_EXPORT bool registerHotkey(int id, unsigned int vkCode);
+    // Register global hotkey.
+    // modifiers: Windows-style flags (MOD_ALT=1, MOD_CONTROL=2, MOD_SHIFT=4).
+    // Pass 0 for a single key with no modifiers.
+    DLL_EXPORT bool registerHotkey(int id, unsigned int vkCode, unsigned int modifiers);
 
     // 取消注册热键
     DLL_EXPORT void unregisterHotkey(int id);

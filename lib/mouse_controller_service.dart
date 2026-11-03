@@ -3,11 +3,24 @@ import 'dart:ffi';
 import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:ffi/ffi.dart';
+import 'click_config.dart';
 import 'mouse_controller_bindings.dart';
 import 'logger_service.dart';
 
-// Get modifier key display string based on platform
-String get _modifierDisplay => Platform.isMacOS ? '⌘+⇧' : 'Ctrl+Shift';
+String _modifierDisplayFor(HotkeyModifiers modifiers) {
+  switch (modifiers) {
+    case HotkeyModifiers.none:
+      return '';
+    case HotkeyModifiers.alt:
+      return Platform.isMacOS ? '⌥+' : 'Alt+';
+    case HotkeyModifiers.control:
+      return Platform.isMacOS ? '⌘+' : 'Ctrl+';
+    case HotkeyModifiers.shift:
+      return Platform.isMacOS ? '⇧+' : 'Shift+';
+    case HotkeyModifiers.controlShift:
+      return Platform.isMacOS ? '⌘+⇧+' : 'Ctrl+Shift+';
+  }
+}
 
 class MousePosition {
   final int x;
@@ -73,8 +86,9 @@ class MouseControllerService {
   // Hotkey IDs and virtual key codes
   static const int hotkeyIdToggle = 1; // Start/Stop hotkey ID
   static const int hotkeyIdCapture = 2; // Capture position hotkey ID
-  int currentToggleHotkeyCode = 0x31; // Default: 1 key (Ctrl+Shift+1)
-  int currentCaptureHotkeyCode = 0x32; // Default: 2 key (Ctrl+Shift+2)
+  int currentToggleHotkeyCode = 0x31; // Default: 1 key
+  int currentCaptureHotkeyCode = 0x32; // Default: 2 key
+  HotkeyModifiers currentHotkeyModifiers = HotkeyModifiers.controlShift;
 
   // Capture callback function
   Function(int, int)? onPositionCaptured;
@@ -92,10 +106,25 @@ class MouseControllerService {
   // Status callback for UI updates
   Function(bool isPaused)? onPauseStatusChanged;
 
+  String get modifierDisplay => _modifierDisplayFor(currentHotkeyModifiers);
+
   MouseControllerService(
     this._bindings, {
     Duration hotkeyArmDelay = const Duration(seconds: 1),
+    int? toggleHotkeyCode,
+    int? captureHotkeyCode,
+    HotkeyModifiers? hotkeyModifiers,
   }) {
+    if (toggleHotkeyCode != null) {
+      currentToggleHotkeyCode = toggleHotkeyCode;
+    }
+    if (captureHotkeyCode != null) {
+      currentCaptureHotkeyCode = captureHotkeyCode;
+    }
+    if (hotkeyModifiers != null) {
+      currentHotkeyModifiers = hotkeyModifiers;
+    }
+
     _hotkeysReadyAt = DateTime.now().add(hotkeyArmDelay);
     print('========================================');
     print('Mouse Control Service initializing...');
@@ -109,22 +138,25 @@ class MouseControllerService {
       );
 
       if (initSuccess) {
+        final prefix = modifierDisplay;
         // Register hotkey 1: Start/Stop
         bool regToggle = _bindings.registerHotkey(
           hotkeyIdToggle,
           currentToggleHotkeyCode,
+          currentHotkeyModifiers.flags,
         );
         print(
-          '${regToggle ? "✓" : "×"} Hotkey 1 [Start/Stop] $_modifierDisplay+1 (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "Success" : "Failed"}',
+          '${regToggle ? "✓" : "×"} Hotkey 1 [Start/Stop] $prefix${_getKeyName(currentToggleHotkeyCode)} (VK:0x${currentToggleHotkeyCode.toRadixString(16).toUpperCase()}): ${regToggle ? "Success" : "Failed"}',
         );
 
         // Register hotkey 2: Capture position
         bool regCapture = _bindings.registerHotkey(
           hotkeyIdCapture,
           currentCaptureHotkeyCode,
+          currentHotkeyModifiers.flags,
         );
         print(
-          '${regCapture ? "✓" : "×"} Hotkey 2 [Capture] $_modifierDisplay+2 (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "Success" : "Failed"}',
+          '${regCapture ? "✓" : "×"} Hotkey 2 [Capture] $prefix${_getKeyName(currentCaptureHotkeyCode)} (VK:0x${currentCaptureHotkeyCode.toRadixString(16).toUpperCase()}): ${regCapture ? "Success" : "Failed"}',
         );
 
         if (regToggle || regCapture) {
@@ -159,7 +191,7 @@ class MouseControllerService {
     print('========================================');
   }
 
-  bool setToggleHotkey(int vkCode) {
+  bool setToggleHotkey(int vkCode, {HotkeyModifiers? modifiers}) {
     print('========================================');
     print('Changing hotkey [Start/Stop]...');
 
@@ -173,12 +205,19 @@ class MouseControllerService {
 
     // Register new hotkey
     currentToggleHotkeyCode = vkCode;
+    if (modifiers != null) {
+      currentHotkeyModifiers = modifiers;
+    }
     bool success = false;
 
     try {
-      success = _bindings.registerHotkey(hotkeyIdToggle, vkCode);
+      success = _bindings.registerHotkey(
+        hotkeyIdToggle,
+        vkCode,
+        currentHotkeyModifiers.flags,
+      );
       print(
-        '${success ? "✓" : "×"} New hotkey register $_modifierDisplay+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}',
+        '${success ? "✓" : "×"} New hotkey register $modifierDisplay${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}',
       );
 
       if (!success) {
@@ -195,7 +234,7 @@ class MouseControllerService {
     return success;
   }
 
-  bool setCaptureHotkey(int vkCode) {
+  bool setCaptureHotkey(int vkCode, {HotkeyModifiers? modifiers}) {
     print('========================================');
     print('Changing hotkey [Capture Position]...');
 
@@ -209,12 +248,19 @@ class MouseControllerService {
 
     // Register new hotkey
     currentCaptureHotkeyCode = vkCode;
+    if (modifiers != null) {
+      currentHotkeyModifiers = modifiers;
+    }
     bool success = false;
 
     try {
-      success = _bindings.registerHotkey(hotkeyIdCapture, vkCode);
+      success = _bindings.registerHotkey(
+        hotkeyIdCapture,
+        vkCode,
+        currentHotkeyModifiers.flags,
+      );
       print(
-        '${success ? "✓" : "×"} New hotkey register $_modifierDisplay+${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}',
+        '${success ? "✓" : "×"} New hotkey register $modifierDisplay${_getKeyName(vkCode)} (VK:0x${vkCode.toRadixString(16).toUpperCase()}): ${success ? "Success" : "Failed"}',
       );
 
       if (!success) {
@@ -229,6 +275,14 @@ class MouseControllerService {
 
     print('========================================');
     return success;
+  }
+
+  /// Apply modifiers to both hotkeys and re-register.
+  bool setHotkeyModifiers(HotkeyModifiers modifiers) {
+    currentHotkeyModifiers = modifiers;
+    final toggleOk = setToggleHotkey(currentToggleHotkeyCode);
+    final captureOk = setCaptureHotkey(currentCaptureHotkeyCode);
+    return toggleOk && captureOk;
   }
 
   String _getKeyName(int vkCode) {
@@ -269,6 +323,18 @@ class MouseControllerService {
       0x37: '7',
       0x38: '8',
       0x39: '9',
+      0x70: 'F1',
+      0x71: 'F2',
+      0x72: 'F3',
+      0x73: 'F4',
+      0x74: 'F5',
+      0x75: 'F6',
+      0x76: 'F7',
+      0x77: 'F8',
+      0x78: 'F9',
+      0x79: 'F10',
+      0x7A: 'F11',
+      0x7B: 'F12',
     };
     return keyMap[vkCode] ?? '?';
   }

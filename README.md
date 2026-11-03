@@ -274,6 +274,17 @@ scripts\test_hotkey.bat
 ```
 专门测试快捷键功能
 
+### 用户数据位置
+
+便携版不会在 exe 旁创建用户数据目录。配置与日志写入系统用户目录：
+
+| 内容 | Windows | macOS |
+|------|---------|-------|
+| 点击配置 / 会话 / 快捷键 | `%APPDATA%\xants\ClickMate\` | `~/Library/Application Support/xants/ClickMate/` |
+| 日志 / 语言偏好 | `%USERPROFILE%\Documents\ClickMate\` | `~/Documents/ClickMate/` |
+
+> 参数修改后会自动保存；重启后应恢复上次界面设置。也可在「配置管理」中保存命名配置。
+
 ### 日志位置
 
 | 平台 | 路径 |
@@ -286,9 +297,9 @@ scripts\test_hotkey.bat
 ## ⚠️ 注意事项
 
 ### Windows
-1. **快捷键注册** - 默认使用 `Ctrl+Shift+1/2`；如注册失败，可检查快捷键冲突或尝试管理员身份运行
-2. **DLL 文件** - 确保 `mouse_controller.dll` 在 `native/src/` 目录
-3. **快捷键冲突** - 如有冲突可在应用内更改
+1. **快捷键注册** - 默认使用 `Ctrl+Shift+1/2`；可在设置中改为单键（如 F9）。如注册失败，检查冲突或尝试管理员身份运行
+2. **DLL 文件** - 确保 `mouse_controller.dll` 在应用目录（发布包）或 `native/src/`（开发）
+3. **快捷键冲突** - 如有冲突可在应用内更改修饰键或主键
 
 ### macOS
 1. **辅助功能权限** - 首次运行需授权「辅助功能」权限

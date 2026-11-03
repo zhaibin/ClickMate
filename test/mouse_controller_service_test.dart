@@ -36,7 +36,7 @@ class FakeMouseBindings {
         xPtr.value = x;
         yPtr.value = y;
       },
-      registerHotkey: (id, vkCode) {
+      registerHotkey: (id, vkCode, modifiers) {
         registeredIds.add(id);
         return registerHotkeyResult;
       },

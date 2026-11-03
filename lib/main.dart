@@ -180,16 +180,31 @@ class _MouseControlPageState extends State<MouseControlPage> {
   double _downloadProgress = 0.0;
   UpgradeInfo? _upgradeInfo;
 
+  Timer? _sessionSaveTimer;
+
   @override
   void initState() {
     super.initState();
     try {
+      final session = ClickConfigService.instance.loadSessionSettings();
       final bindings = MouseControllerBindings();
-      _service = MouseControllerService(bindings);
+      _service = MouseControllerService(
+        bindings,
+        toggleHotkeyCode: session?.toggleHotkeyCode,
+        captureHotkeyCode: session?.captureHotkeyCode,
+        hotkeyModifiers: session?.hotkeyModifiers,
+      );
       _serviceInitialized = true;
-      
-      // Load last used configuration
-      _loadLastUsedConfig();
+
+      // Restore UI session first (survives restart without named config save)
+      if (session != null) {
+        _applySessionSettings(session);
+      } else {
+        // Fallback: load last used named configuration
+        _loadLastUsedConfig();
+      }
+
+      _attachSessionPersistenceListeners();
       
       // Set position capture callback
       _service!.onPositionCaptured = (x, y) {
@@ -198,6 +213,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
             _xController.text = x.toString();
             _yController.text = y.toString();
           });
+          _scheduleSessionSave();
           // Show notification
           final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -219,6 +235,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       
       // Set before start callback for auto-saving config
       _service!.onBeforeStart = () async {
+        await _persistSessionSettings();
         await _autoSaveCurrentConfig();
       };
       
@@ -851,6 +868,76 @@ class _MouseControlPageState extends State<MouseControlPage> {
     }
   }
 
+  void _applySessionSettings(SessionSettings session) {
+    if (session.x != null) {
+      _xController.text = session.x.toString();
+    }
+    if (session.y != null) {
+      _yController.text = session.y.toString();
+    }
+    _intervalController.text = session.interval.toString();
+    _intervalRandomController.text = session.randomInterval.toString();
+    _offsetController.text = session.offset.toString();
+    _deviationController.text = session.deviationThreshold.toString();
+    _selectedButton = MouseButton.values[
+        session.mouseButton.clamp(0, MouseButton.values.length - 1)];
+    _autoCapture = session.autoCapture;
+    _enableAutoPauseResume = session.enableAutoPauseResume;
+    _service?.setDeviationThreshold(session.deviationThreshold);
+    _service?.enableAutoPauseResume = session.enableAutoPauseResume;
+    if (!_autoCapture && session.x != null && session.y != null) {
+      _service?.setTargetPosition(session.x!, session.y!);
+    }
+    print(
+      'Restored session settings: pos=(${session.x},${session.y}), '
+      'interval=${session.interval}ms, hotkey=${session.hotkeyModifiers.name}+'
+      '0x${session.toggleHotkeyCode.toRadixString(16)}',
+    );
+  }
+
+  void _attachSessionPersistenceListeners() {
+    void onChanged() => _scheduleSessionSave();
+    _xController.addListener(onChanged);
+    _yController.addListener(onChanged);
+    _intervalController.addListener(onChanged);
+    _intervalRandomController.addListener(onChanged);
+    _offsetController.addListener(onChanged);
+    _deviationController.addListener(onChanged);
+  }
+
+  void _scheduleSessionSave() {
+    _sessionSaveTimer?.cancel();
+    _sessionSaveTimer = Timer(const Duration(milliseconds: 400), () {
+      _persistSessionSettings();
+    });
+  }
+
+  Future<void> _persistSessionSettings() async {
+    if (_service == null) return;
+    try {
+      final settings = SessionSettings(
+        x: int.tryParse(_xController.text),
+        y: int.tryParse(_yController.text),
+        interval: int.tryParse(_intervalController.text) ?? 1000,
+        randomInterval: int.tryParse(_intervalRandomController.text) ?? 0,
+        offset: int.tryParse(_offsetController.text) ?? 0,
+        mouseButton: _selectedButton.value,
+        deviationThreshold: int.tryParse(_deviationController.text) ?? 100,
+        autoCapture: _autoCapture,
+        enableAutoPauseResume: _enableAutoPauseResume,
+        toggleHotkeyCode: _service!.currentToggleHotkeyCode,
+        captureHotkeyCode: _service!.currentCaptureHotkeyCode,
+        hotkeyModifiers: _service!.currentHotkeyModifiers,
+      );
+      final ok = await ClickConfigService.instance.saveSessionSettings(settings);
+      if (!ok) {
+        print('Warning: Failed to persist session settings');
+      }
+    } catch (e) {
+      print('Warning: Failed to persist session settings: $e');
+    }
+  }
+
   void _loadConfig(ClickConfig config, {bool showNotification = true}) {
     setState(() {
       _xController.text = config.x.toString();
@@ -863,6 +950,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _autoCapture = false;
     });
     print('Config loaded: ${config.name} - Position:(${config.x},${config.y}), Interval:${config.interval}ms, Mode: Manual');
+    _scheduleSessionSave();
     
     // Auto-move mouse to config position
     _moveMouseToTarget(showNotification: showNotification);
@@ -914,6 +1002,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
       _offsetController.text = '0';
       _selectedButton = MouseButton.left;
     });
+    _scheduleSessionSave();
     print('Reset click settings to defaults: Interval=1000ms, Random=0ms, Offset=0px, Button=Left');
     
     // Show notification
@@ -1056,21 +1145,29 @@ class _MouseControlPageState extends State<MouseControlPage> {
       builder: (context) => HotkeySettingsDialog(
         currentToggleHotkeyCode: _service!.currentToggleHotkeyCode,
         currentCaptureHotkeyCode: _service!.currentCaptureHotkeyCode,
-        onToggleHotkeyChanged: (vkCode) {
-          bool success = _service!.setToggleHotkey(vkCode);
+        currentModifiers: _service!.currentHotkeyModifiers,
+        onToggleHotkeyChanged: (vkCode, modifiers) {
+          // Apply modifiers to both hotkeys, then update the selected key.
+          bool success = _service!.setToggleHotkey(vkCode, modifiers: modifiers);
+          success = _service!.setCaptureHotkey(_service!.currentCaptureHotkeyCode) &&
+              success;
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
           } else {
+            _persistSessionSettings();
             setState(() {}); // Refresh display
           }
         },
-        onCaptureHotkeyChanged: (vkCode) {
-          bool success = _service!.setCaptureHotkey(vkCode);
+        onCaptureHotkeyChanged: (vkCode, modifiers) {
+          bool success = _service!.setCaptureHotkey(vkCode, modifiers: modifiers);
+          success = _service!.setToggleHotkey(_service!.currentToggleHotkeyCode) &&
+              success;
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
           } else {
+            _persistSessionSettings();
             setState(() {}); // Refresh display
           }
         },
@@ -1840,6 +1937,9 @@ class _MouseControlPageState extends State<MouseControlPage> {
 
   @override
   void dispose() {
+    _sessionSaveTimer?.cancel();
+    // Best-effort sync save before teardown (fire-and-forget async is OK here)
+    _persistSessionSettings();
     _uiUpdateTimer?.cancel();
     _hotkeyStatusTimer?.cancel();
     _startupUpgradeTimer?.cancel();
@@ -2314,11 +2414,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               children: [
                                 Icon(Icons.play_arrow, size: 12, color: const Color(0xFF10B981)),
                                 const SizedBox(width: 4),
-                                _buildHotkeyBadgeLight(_modifierKey),
-                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
-                                _buildHotkeyBadgeLight('⇧'),
-                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
-                                _buildHotkeyBadgeLight(_getKeyName(_service!.currentToggleHotkeyCode)),
+                                ..._buildHotkeyBadgeParts(
+                                  _service!.currentToggleHotkeyCode,
+                                  _service!.currentHotkeyModifiers,
+                                ),
                               ],
                             ),
                           ),
@@ -2331,11 +2430,10 @@ class _MouseControlPageState extends State<MouseControlPage> {
                               children: [
                                 Icon(Icons.my_location, size: 12, color: accentColor),
                                 const SizedBox(width: 4),
-                                _buildHotkeyBadgeLight(_modifierKey),
-                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
-                                _buildHotkeyBadgeLight('⇧'),
-                                Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)),
-                                _buildHotkeyBadgeLight(_getKeyName(_service!.currentCaptureHotkeyCode)),
+                                ..._buildHotkeyBadgeParts(
+                                  _service!.currentCaptureHotkeyCode,
+                                  _service!.currentHotkeyModifiers,
+                                ),
                               ],
                           ),
                         ),
@@ -2375,6 +2473,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                             setState(() {
                               _autoCapture = !_autoCapture;
                             });
+                            _scheduleSessionSave();
                             print('Toggle mode: ${_autoCapture ? "Auto-track" : "Manual input"}');
                           },
                           child: Container(
@@ -2500,6 +2599,7 @@ class _MouseControlPageState extends State<MouseControlPage> {
                       setState(() {
                         _selectedButton = newSelection.first;
                       });
+                      _scheduleSessionSave();
                     },
                       ),
                     ),
@@ -2518,6 +2618,8 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                   setState(() {
                                     _enableAutoPauseResume = value ?? true;
                                   });
+                                  _service?.enableAutoPauseResume = _enableAutoPauseResume;
+                                  _scheduleSessionSave();
                                 },
                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 visualDensity: VisualDensity.compact,
@@ -2790,12 +2892,47 @@ class _MouseControlPageState extends State<MouseControlPage> {
       0x5A: 'Z',
       0x30: '0', 0x31: '1', 0x32: '2', 0x33: '3', 0x34: '4',
       0x35: '5', 0x36: '6', 0x37: '7', 0x38: '8', 0x39: '9',
+      0x70: 'F1', 0x71: 'F2', 0x72: 'F3', 0x73: 'F4',
+      0x74: 'F5', 0x75: 'F6', 0x76: 'F7', 0x77: 'F8',
+      0x78: 'F9', 0x79: 'F10', 0x7A: 'F11', 0x7B: 'F12',
     };
     return keyMap[vkCode] ?? '?';
   }
 
-  // Get modifier key name based on platform (Cmd for macOS, Ctrl for Windows)
-  String get _modifierKey => Platform.isMacOS ? '⌘' : 'Ctrl';
+  List<Widget> _buildHotkeyBadgeParts(int vkCode, HotkeyModifiers modifiers) {
+    final parts = <Widget>[];
+    void addPlus() {
+      if (parts.isNotEmpty) {
+        parts.add(Text('+', style: TextStyle(fontSize: 9, color: Colors.grey.shade400)));
+      }
+    }
+
+    switch (modifiers) {
+      case HotkeyModifiers.none:
+        break;
+      case HotkeyModifiers.alt:
+        addPlus();
+        parts.add(_buildHotkeyBadgeLight(Platform.isMacOS ? '⌥' : 'Alt'));
+        break;
+      case HotkeyModifiers.control:
+        addPlus();
+        parts.add(_buildHotkeyBadgeLight(Platform.isMacOS ? '⌘' : 'Ctrl'));
+        break;
+      case HotkeyModifiers.shift:
+        addPlus();
+        parts.add(_buildHotkeyBadgeLight('⇧'));
+        break;
+      case HotkeyModifiers.controlShift:
+        addPlus();
+        parts.add(_buildHotkeyBadgeLight(Platform.isMacOS ? '⌘' : 'Ctrl'));
+        addPlus();
+        parts.add(_buildHotkeyBadgeLight('⇧'));
+        break;
+    }
+    addPlus();
+    parts.add(_buildHotkeyBadgeLight(_getKeyName(vkCode)));
+    return parts;
+  }
 
   Color _getButtonColor(MouseButton button) {
     switch (button) {
@@ -2840,13 +2977,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
 class HotkeySettingsDialog extends StatefulWidget {
   final int currentToggleHotkeyCode;
   final int currentCaptureHotkeyCode;
-  final Function(int) onToggleHotkeyChanged;
-  final Function(int) onCaptureHotkeyChanged;
+  final HotkeyModifiers currentModifiers;
+  final void Function(int vkCode, HotkeyModifiers modifiers) onToggleHotkeyChanged;
+  final void Function(int vkCode, HotkeyModifiers modifiers) onCaptureHotkeyChanged;
 
   const HotkeySettingsDialog({
     super.key,
     required this.currentToggleHotkeyCode,
     required this.currentCaptureHotkeyCode,
+    required this.currentModifiers,
     required this.onToggleHotkeyChanged,
     required this.onCaptureHotkeyChanged,
   });
@@ -2858,9 +2997,10 @@ class HotkeySettingsDialog extends StatefulWidget {
 class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   late int _selectedToggleKey;
   late int _selectedCaptureKey;
+  late HotkeyModifiers _selectedModifiers;
   int _activeTab = 0; // 0=Start/Stop, 1=Capture
 
-  // Common key virtual key code mapping
+  // Common key virtual key code mapping (includes F-keys for single-key mode)
   static const Map<String, int> keyMap = {
     'A': 0x41, 'B': 0x42, 'C': 0x43, 'D': 0x44, 'E': 0x45,
     'F': 0x46, 'G': 0x47, 'H': 0x48, 'I': 0x49, 'J': 0x4A,
@@ -2870,6 +3010,9 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
     'Z': 0x5A,
     '0': 0x30, '1': 0x31, '2': 0x32, '3': 0x33, '4': 0x34,
     '5': 0x35, '6': 0x36, '7': 0x37, '8': 0x38, '9': 0x39,
+    'F1': 0x70, 'F2': 0x71, 'F3': 0x72, 'F4': 0x73,
+    'F5': 0x74, 'F6': 0x75, 'F7': 0x76, 'F8': 0x77,
+    'F9': 0x78, 'F10': 0x79, 'F11': 0x7A, 'F12': 0x7B,
   };
 
   @override
@@ -2877,6 +3020,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
     super.initState();
     _selectedToggleKey = widget.currentToggleHotkeyCode;
     _selectedCaptureKey = widget.currentCaptureHotkeyCode;
+    _selectedModifiers = widget.currentModifiers;
   }
 
   String _getKeyName(int vkCode) {
@@ -2886,6 +3030,21 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
       }
     }
     return '?';
+  }
+
+  String _previewLabel(String keyName) {
+    switch (_selectedModifiers) {
+      case HotkeyModifiers.none:
+        return keyName;
+      case HotkeyModifiers.alt:
+        return '${Platform.isMacOS ? '⌥' : 'Alt'}+$keyName';
+      case HotkeyModifiers.control:
+        return '${Platform.isMacOS ? '⌘' : 'Ctrl'}+$keyName';
+      case HotkeyModifiers.shift:
+        return 'Shift+$keyName';
+      case HotkeyModifiers.controlShift:
+        return '${Platform.isMacOS ? '⌘+⇧' : 'Ctrl+Shift'}+$keyName';
+    }
   }
 
   @override
@@ -2903,7 +3062,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
     return AlertDialog(
       contentPadding: EdgeInsets.zero,
       content: Container(
-        width: 300,
+        width: 340,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -3005,6 +3164,60 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 ],
               ),
             ),
+            // Modifier selector
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.hotkeyModifiers,
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 5,
+                    children: HotkeyModifiers.values.map((mod) {
+                      final selected = _selectedModifiers == mod;
+                      final label = switch (mod) {
+                        HotkeyModifiers.none => l10n.hotkeyModNone,
+                        HotkeyModifiers.controlShift =>
+                          Platform.isMacOS ? '⌘+⇧' : 'Ctrl+Shift',
+                        HotkeyModifiers.control =>
+                          Platform.isMacOS ? '⌘' : 'Ctrl',
+                        HotkeyModifiers.alt =>
+                          Platform.isMacOS ? '⌥' : 'Alt',
+                        HotkeyModifiers.shift => 'Shift',
+                      };
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() => _selectedModifiers = mod);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: selected ? activeColor : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                            border: selected
+                                ? null
+                                : Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: selected ? Colors.white : Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
             // Key grid
             Padding(
               padding: const EdgeInsets.all(12),
@@ -3013,6 +3226,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                 runSpacing: 5,
                 children: keyMap.entries.map((entry) {
                   final isSelected = currentKey == entry.value;
+                  final isFunctionKey = entry.key.startsWith('F');
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -3024,7 +3238,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                       });
                     },
                     child: Container(
-                      width: 30,
+                      width: isFunctionKey ? 36 : 30,
                       height: 30,
                       decoration: BoxDecoration(
                         color: isSelected ? activeColor : Colors.grey.shade100,
@@ -3035,7 +3249,7 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                       child: Text(
                         entry.key,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: isFunctionKey ? 10 : 12,
                           fontWeight: FontWeight.bold,
                           color: isSelected ? Colors.white : Colors.grey.shade700,
                         ),
@@ -3061,11 +3275,14 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildKeyChip(Platform.isMacOS ? '⌘' : 'Ctrl', activeColor),
-                        Text(' + ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
-                        _buildKeyChip(Platform.isMacOS ? '⇧' : 'Shift', activeColor),
-                        Text(' + ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade400)),
-                        _buildKeyChip(keyName, activeColor),
+                        Text(
+                          _previewLabel(keyName),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: activeColor,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -3084,14 +3301,20 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_activeTab == 0) {
-                              widget.onToggleHotkeyChanged(_selectedToggleKey);
+                              widget.onToggleHotkeyChanged(
+                                _selectedToggleKey,
+                                _selectedModifiers,
+                              );
                             } else {
-                              widget.onCaptureHotkeyChanged(_selectedCaptureKey);
+                              widget.onCaptureHotkeyChanged(
+                                _selectedCaptureKey,
+                                _selectedModifiers,
+                              );
                             }
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${Platform.isMacOS ? "⌘+⇧" : "Ctrl+Shift"}+$keyName'),
+                                content: Text(_previewLabel(keyName)),
                                 backgroundColor: activeColor,
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,

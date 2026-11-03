@@ -1,3 +1,4 @@
+import 'package:clickmate/click_config.dart';
 import 'package:clickmate/l10n/app_localizations.dart';
 import 'package:clickmate/main.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget buildDialog({
-    required ValueChanged<int> onToggleChanged,
-    required ValueChanged<int> onCaptureChanged,
+    required void Function(int, HotkeyModifiers) onToggleChanged,
+    required void Function(int, HotkeyModifiers) onCaptureChanged,
     int toggleCode = 0x31,
     int captureCode = 0x32,
+    HotkeyModifiers modifiers = HotkeyModifiers.controlShift,
   }) {
     return MaterialApp(
       localizationsDelegates: const [
@@ -23,6 +25,7 @@ void main() {
         body: HotkeySettingsDialog(
           currentToggleHotkeyCode: toggleCode,
           currentCaptureHotkeyCode: captureCode,
+          currentModifiers: modifiers,
           onToggleHotkeyChanged: onToggleChanged,
           onCaptureHotkeyChanged: onCaptureChanged,
         ),
@@ -34,11 +37,15 @@ void main() {
       (tester) async {
     int? toggleCode;
     int? captureCode;
+    HotkeyModifiers? toggleMods;
 
     await tester.pumpWidget(
       buildDialog(
-        onToggleChanged: (value) => toggleCode = value,
-        onCaptureChanged: (value) => captureCode = value,
+        onToggleChanged: (value, mods) {
+          toggleCode = value;
+          toggleMods = mods;
+        },
+        onCaptureChanged: (value, mods) => captureCode = value,
       ),
     );
     await tester.pumpAndSettle();
@@ -48,6 +55,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(toggleCode, 0x41);
+    expect(toggleMods, HotkeyModifiers.controlShift);
     expect(captureCode, isNull);
     expect(find.byType(HotkeySettingsDialog), findsNothing);
   });
@@ -59,8 +67,8 @@ void main() {
 
     await tester.pumpWidget(
       buildDialog(
-        onToggleChanged: (value) => toggleCode = value,
-        onCaptureChanged: (value) => captureCode = value,
+        onToggleChanged: (value, mods) => toggleCode = value,
+        onCaptureChanged: (value, mods) => captureCode = value,
       ),
     );
     await tester.pumpAndSettle();
@@ -75,13 +83,38 @@ void main() {
     expect(captureCode, 0x42);
   });
 
+  testWidgets('none modifier allows single-key preview like F9', (tester) async {
+    int? toggleCode;
+    HotkeyModifiers? mods;
+
+    await tester.pumpWidget(
+      buildDialog(
+        onToggleChanged: (value, m) {
+          toggleCode = value;
+          mods = m;
+        },
+        onCaptureChanged: (_, __) {},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('None'));
+    await tester.pump();
+    await tester.tap(find.text('F9'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(toggleCode, 0x78);
+    expect(mods, HotkeyModifiers.none);
+  });
+
   testWidgets('cancel closes without invoking callbacks', (tester) async {
     var called = false;
 
     await tester.pumpWidget(
       buildDialog(
-        onToggleChanged: (_) => called = true,
-        onCaptureChanged: (_) => called = true,
+        onToggleChanged: (_, __) => called = true,
+        onCaptureChanged: (_, __) => called = true,
       ),
     );
     await tester.pumpAndSettle();

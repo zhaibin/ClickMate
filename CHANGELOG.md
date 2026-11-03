@@ -2,6 +2,23 @@
 
 All notable changes to ClickMate will be documented in this file.
 
+## [Unreleased]
+
+### Bug Fixes
+
+- Fixed portable build configuration not surviving restart: UI session settings (coordinates, interval, offsets, mode, hotkeys) now persist automatically via SharedPreferences.
+- `saveConfigs()` now returns success/failure instead of silently ignoring persistence errors.
+
+### Features
+
+- Hotkey modifiers are configurable (Ctrl+Shift / Ctrl / Alt / Shift / None) so a single key such as F9 can start/stop clicking.
+- Function keys F1–F12 can be selected in Hotkey Settings.
+- Chosen hotkeys and modifiers are restored on next launch.
+
+### Docs
+
+- Documented user data locations: click configs in AppData (`%APPDATA%\xants\ClickMate\`), logs/language in Documents (`Documents\ClickMate\`).
+
 ## [2.2.2] - 2026-05-26
 
 ### Bug Fixes

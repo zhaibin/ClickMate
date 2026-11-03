@@ -116,6 +116,7 @@ echo echo - Default hotkey: Ctrl+Shift+1 ^(Start/Stop^)
 echo echo - Capture position: Ctrl+Shift+2
 echo echo - If hotkeys don't work, run as administrator
 echo echo - Log location: %%USERPROFILE%%\Documents\ClickMate\logs
+echo echo - Config location: %%APPDATA%%\xants\ClickMate
 echo echo.
 echo echo If program window doesn't appear, possible reasons:
 echo echo 1. Missing Visual C++ Runtime ^(install VC++ Redistributable^)
@@ -342,10 +343,11 @@ echo.
 echo   Uninstall steps:
 echo   1. Close program
 echo   2. Delete entire program folder
-echo   3. ^(Optional^) Delete log folder:
+echo   3. ^(Optional^) Delete user data:
 echo      %%USERPROFILE%%\Documents\ClickMate\
+echo      %%APPDATA%%\xants\ClickMate\
 echo.
-echo   Note: Program doesn't write to registry, no other residue.
+echo   Note: Program doesn't write to registry. Configs live under AppData.
 echo.
 echo.
 echo [9] Which Windows versions are supported?

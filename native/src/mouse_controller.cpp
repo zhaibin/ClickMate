@@ -118,14 +118,15 @@ void getMousePosition(int* x, int* y) {
     }
 }
 
-// 注册全局热键
-bool registerHotkey(int id, unsigned int vkCode) {
+// Register global hotkey with explicit modifiers (Windows MOD_* flags).
+bool registerHotkey(int id, unsigned int vkCode, unsigned int modifiers) {
     if (!isInitialized || !messageWindow) {
         return false;
     }
 
-    // MOD_CONTROL | MOD_SHIFT
-    BOOL result = RegisterHotKey(messageWindow, id, MOD_CONTROL | MOD_SHIFT | MOD_NOREPEAT, vkCode);
+    // Always suppress key-repeat for more predictable toggle behavior.
+    UINT winModifiers = (modifiers & (MOD_ALT | MOD_CONTROL | MOD_SHIFT | MOD_WIN)) | MOD_NOREPEAT;
+    BOOL result = RegisterHotKey(messageWindow, id, winModifiers, vkCode);
 
     if (result) {
         std::lock_guard<std::mutex> lock(hotkeyMutex);

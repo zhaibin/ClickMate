@@ -166,4 +166,51 @@ void main() {
 
     expect(service.generateDefaultName(), 'Config 3');
   });
+
+  test('saveSessionSettings persists and restores UI session state', () async {
+    final settings = SessionSettings(
+      x: 640,
+      y: 480,
+      interval: 250,
+      randomInterval: 10,
+      offset: 3,
+      mouseButton: 1,
+      deviationThreshold: 80,
+      autoCapture: false,
+      enableAutoPauseResume: false,
+      toggleHotkeyCode: 0x46, // F
+      captureHotkeyCode: 0x47, // G
+      hotkeyModifiers: HotkeyModifiers.none,
+    );
+
+    final saved = await service.saveSessionSettings(settings);
+    expect(saved, isTrue);
+
+    await service.initialize();
+    final restored = service.loadSessionSettings();
+
+    expect(restored, isNotNull);
+    expect(restored!.x, 640);
+    expect(restored.y, 480);
+    expect(restored.interval, 250);
+    expect(restored.randomInterval, 10);
+    expect(restored.offset, 3);
+    expect(restored.mouseButton, 1);
+    expect(restored.deviationThreshold, 80);
+    expect(restored.autoCapture, isFalse);
+    expect(restored.enableAutoPauseResume, isFalse);
+    expect(restored.toggleHotkeyCode, 0x46);
+    expect(restored.captureHotkeyCode, 0x47);
+    expect(restored.hotkeyModifiers, HotkeyModifiers.none);
+  });
+
+  test('loadSessionSettings returns null when nothing was saved', () async {
+    expect(service.loadSessionSettings(), isNull);
+  });
+
+  test('saveConfigs returns true after successful write', () async {
+    await service.addConfig(sampleConfig());
+    final ok = await service.saveConfigs();
+    expect(ok, isTrue);
+  });
 }

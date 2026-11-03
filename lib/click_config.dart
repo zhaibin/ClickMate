@@ -1,6 +1,123 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Hotkey modifier combination (Windows-style flags for native layer).
+enum HotkeyModifiers {
+  /// Default: Ctrl+Shift (Cmd+Shift on macOS)
+  controlShift,
+  /// Single key without modifiers (e.g. F9)
+  none,
+  control,
+  alt,
+  shift;
+
+  /// Windows RegisterHotKey modifier flags (macOS maps these natively).
+  int get flags {
+    const alt = 0x0001;
+    const control = 0x0002;
+    const shift = 0x0004;
+    switch (this) {
+      case HotkeyModifiers.none:
+        return 0;
+      case HotkeyModifiers.alt:
+        return alt;
+      case HotkeyModifiers.control:
+        return control;
+      case HotkeyModifiers.shift:
+        return shift;
+      case HotkeyModifiers.controlShift:
+        return control | shift;
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case HotkeyModifiers.none:
+        return 'None';
+      case HotkeyModifiers.alt:
+        return 'Alt';
+      case HotkeyModifiers.control:
+        return 'Ctrl';
+      case HotkeyModifiers.shift:
+        return 'Shift';
+      case HotkeyModifiers.controlShift:
+        return 'Ctrl+Shift';
+    }
+  }
+
+  static HotkeyModifiers fromName(String? name) {
+    return HotkeyModifiers.values.firstWhere(
+      (m) => m.name == name,
+      orElse: () => HotkeyModifiers.controlShift,
+    );
+  }
+}
+
+/// Last-used UI session settings (persisted across restarts).
+class SessionSettings {
+  final int? x;
+  final int? y;
+  final int interval;
+  final int randomInterval;
+  final int offset;
+  final int mouseButton;
+  final int deviationThreshold;
+  final bool autoCapture;
+  final bool enableAutoPauseResume;
+  final int toggleHotkeyCode;
+  final int captureHotkeyCode;
+  final HotkeyModifiers hotkeyModifiers;
+
+  const SessionSettings({
+    this.x,
+    this.y,
+    this.interval = 1000,
+    this.randomInterval = 0,
+    this.offset = 0,
+    this.mouseButton = 0,
+    this.deviationThreshold = 100,
+    this.autoCapture = true,
+    this.enableAutoPauseResume = true,
+    this.toggleHotkeyCode = 0x31,
+    this.captureHotkeyCode = 0x32,
+    this.hotkeyModifiers = HotkeyModifiers.controlShift,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'x': x,
+      'y': y,
+      'interval': interval,
+      'randomInterval': randomInterval,
+      'offset': offset,
+      'mouseButton': mouseButton,
+      'deviationThreshold': deviationThreshold,
+      'autoCapture': autoCapture,
+      'enableAutoPauseResume': enableAutoPauseResume,
+      'toggleHotkeyCode': toggleHotkeyCode,
+      'captureHotkeyCode': captureHotkeyCode,
+      'hotkeyModifiers': hotkeyModifiers.name,
+    };
+  }
+
+  factory SessionSettings.fromJson(Map<String, dynamic> json) {
+    return SessionSettings(
+      x: json['x'] as int?,
+      y: json['y'] as int?,
+      interval: (json['interval'] as int?) ?? 1000,
+      randomInterval: (json['randomInterval'] as int?) ?? 0,
+      offset: (json['offset'] as int?) ?? 0,
+      mouseButton: (json['mouseButton'] as int?) ?? 0,
+      deviationThreshold: (json['deviationThreshold'] as int?) ?? 100,
+      autoCapture: (json['autoCapture'] as bool?) ?? true,
+      enableAutoPauseResume: (json['enableAutoPauseResume'] as bool?) ?? true,
+      toggleHotkeyCode: (json['toggleHotkeyCode'] as int?) ?? 0x31,
+      captureHotkeyCode: (json['captureHotkeyCode'] as int?) ?? 0x32,
+      hotkeyModifiers: HotkeyModifiers.fromName(json['hotkeyModifiers'] as String?),
+    );
+  }
+}
+
 /// Click configuration data model
 class ClickConfig {
   String id;
@@ -96,6 +213,7 @@ class ClickConfig {
 class ClickConfigService {
   static const String _storageKey = 'click_configs';
   static const String _lastUsedConfigKey = 'last_used_config_id';
+  static const String _sessionSettingsKey = 'session_settings';
   
   static final ClickConfigService instance = ClickConfigService._internal();
   
@@ -108,6 +226,7 @@ class ClickConfigService {
   SharedPreferences? _prefs;
   List<ClickConfig> _configs = [];
   String? _lastUsedConfigId;
+  SessionSettings? _sessionSettings;
 
   /// Initialize service
   Future<void> initialize() async {
@@ -115,6 +234,7 @@ class ClickConfigService {
       print('Initializing ClickConfigService...');
       _prefs = await SharedPreferences.getInstance();
       await loadConfigs();
+      _loadSessionSettingsFromPrefs();
       print('ClickConfigService initialized. Loaded ${_configs.length} configs');
     } catch (e) {
       print('Warning: ClickConfigService initialization failed: $e');
@@ -146,16 +266,69 @@ class ClickConfigService {
     }
   }
 
-  /// Save all configurations
-  Future<void> saveConfigs() async {
+  /// Save all configurations. Returns false if persistence failed.
+  Future<bool> saveConfigs() async {
     try {
+      if (_prefs == null) {
+        print('Error saving configurations: SharedPreferences not initialized');
+        return false;
+      }
       final List<Map<String, dynamic>> jsonList = 
           _configs.map((config) => config.toJson()).toList();
       final String configsJson = json.encode(jsonList);
-      await _prefs?.setString(_storageKey, configsJson);
-      print('Saved ${_configs.length} configurations to storage');
+      final ok = await _prefs!.setString(_storageKey, configsJson);
+      if (ok) {
+        print('Saved ${_configs.length} configurations to storage');
+      } else {
+        print('Error saving configurations: SharedPreferences.setString returned false');
+      }
+      return ok;
     } catch (e) {
       print('Error saving configurations: $e');
+      return false;
+    }
+  }
+
+  void _loadSessionSettingsFromPrefs() {
+    try {
+      final String? jsonStr = _prefs?.getString(_sessionSettingsKey);
+      if (jsonStr == null || jsonStr.isEmpty) {
+        _sessionSettings = null;
+        return;
+      }
+      final Map<String, dynamic> map = json.decode(jsonStr) as Map<String, dynamic>;
+      _sessionSettings = SessionSettings.fromJson(map);
+      print('Loaded session settings from storage');
+    } catch (e) {
+      print('Error loading session settings: $e');
+      _sessionSettings = null;
+    }
+  }
+
+  /// Return cached session settings (call after [initialize]).
+  SessionSettings? loadSessionSettings() => _sessionSettings;
+
+  /// Persist current UI session so settings survive restart.
+  Future<bool> saveSessionSettings(SessionSettings settings) async {
+    try {
+      if (_prefs == null) {
+        print('Error saving session settings: SharedPreferences not initialized');
+        return false;
+      }
+      final ok = await _prefs!.setString(
+        _sessionSettingsKey,
+        json.encode(settings.toJson()),
+      );
+      if (ok) {
+        _sessionSettings = settings;
+        print('Saved session settings to storage');
+      } else {
+        print('Error saving session settings: setString returned false');
+      }
+      return ok;
+    } catch (e) {
+      print('Error saving session settings: $e');
+      return false;
     }
   }
 
