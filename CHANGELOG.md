@@ -25,6 +25,16 @@ All notable changes to ClickMate will be documented in this file.
 
 - Without modifiers, hotkeys are limited to F1–F12. Letters and digits are hidden in the picker, rejected by the service, and coerced on load so existing `None+2` sessions no longer steal typing keys.
 
+### Bug Fixes
+
+- Fixed narrow-window (400px) Row overflows on the target-position header, click-settings header, and click-history rows so long locale strings no longer spill.
+
+### Tests
+
+- Added Linux-friendly device simulation coverage with injectable fake mouse/hotkey bindings (`test/device_simulation_test.dart`).
+- Main menu widget tests now inject fake bindings so they run without Windows/macOS native libraries.
+- Verified full suite: `flutter test` → 66 passed (boot UI, capture/toggle hotkeys, Start/Stop clicks, session restart persistence, none+F9 service path).
+
 ## [2.2.2] - 2026-05-26
 
 ### Bug Fixes

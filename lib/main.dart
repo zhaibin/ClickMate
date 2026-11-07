@@ -146,8 +146,17 @@ class _MyAppState extends State<MyApp> {
 
 class MouseControlPage extends StatefulWidget {
   final Function(Locale) onLanguageChanged;
-  
-  const MouseControlPage({super.key, required this.onLanguageChanged});
+  /// Optional bindings for tests / device simulation without native libraries.
+  final MouseControllerBindings? bindings;
+  /// Optional hotkey arm delay override (tests use [Duration.zero]).
+  final Duration? hotkeyArmDelay;
+
+  const MouseControlPage({
+    super.key,
+    required this.onLanguageChanged,
+    this.bindings,
+    this.hotkeyArmDelay,
+  });
 
   @override
   State<MouseControlPage> createState() => _MouseControlPageState();
@@ -187,12 +196,13 @@ class _MouseControlPageState extends State<MouseControlPage> {
     super.initState();
     try {
       final session = ClickConfigService.instance.loadSessionSettings();
-      final bindings = MouseControllerBindings();
+      final bindings = widget.bindings ?? MouseControllerBindings();
       _service = MouseControllerService(
         bindings,
         toggleHotkeyCode: session?.toggleHotkeyCode,
         captureHotkeyCode: session?.captureHotkeyCode,
         hotkeyModifiers: session?.hotkeyModifiers,
+        hotkeyArmDelay: widget.hotkeyArmDelay ?? const Duration(seconds: 1),
       );
       _serviceInitialized = true;
 
@@ -2476,9 +2486,14 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           child: const Icon(Icons.location_on, size: 14, color: accentColor),
                         ),
                         const SizedBox(width: 8),
-                        Text(l10n.labelTargetPosition, 
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        const Spacer(),
+                        Flexible(
+                          child: Text(
+                            l10n.labelTargetPosition,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         // Mode toggle
                         GestureDetector(
                           onTap: () {
@@ -2558,17 +2573,30 @@ class _MouseControlPageState extends State<MouseControlPage> {
                           child: Icon(Icons.settings, size: 14, color: Colors.purple.shade600),
                         ),
                         const SizedBox(width: 8),
-                        Text(l10n.labelClickSettings, 
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        const Spacer(),
-                        TextButton.icon(
-                          onPressed: _resetToDefaults,
-                          icon: Icon(Icons.refresh, size: 14, color: Colors.grey.shade600),
-                          label: Text(l10n.btnResetDefaults, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        Flexible(
+                          child: Text(
+                            l10n.labelClickSettings,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Flexible(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: _resetToDefaults,
+                              icon: Icon(Icons.refresh, size: 14, color: Colors.grey.shade600),
+                              label: Text(
+                                l10n.btnResetDefaults,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -2813,12 +2841,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                 children: [
                                             Icon(Icons.schedule, size: 12, color: Colors.grey.shade500),
                                             const SizedBox(width: 4),
-                                  Text(
+                                  Flexible(
+                                    child: Text(
                                     record.timeString,
+                                    overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
                                                 color: Colors.grey.shade700,
+                                  ),
                                   ),
                                   ),
                                 ],
@@ -2831,13 +2862,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
                                           children: [
                                             Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
                                             const SizedBox(width: 4),
-                              Text(
+                              Flexible(
+                                child: Text(
                                 '(${record.position.x}, ${record.position.y})',
+                                overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: Colors.grey.shade600,
                                               ),
                                             ),
+                              ),
                                           ],
                                         ),
                                       ),
