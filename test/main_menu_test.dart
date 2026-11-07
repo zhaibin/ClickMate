@@ -6,8 +6,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fake_mouse_bindings.dart';
+
 void main() {
-  Widget buildPage({ValueChanged<Locale>? onLanguageChanged}) {
+  Widget buildPage({
+    ValueChanged<Locale>? onLanguageChanged,
+    FakeMouseBindings? fake,
+  }) {
+    final bindings = (fake ?? FakeMouseBindings()).asBindings();
     return MaterialApp(
       locale: const Locale('en', ''),
       localizationsDelegates: const [
@@ -19,6 +25,8 @@ void main() {
       supportedLocales: AppLocalizations.supportedLocales,
       home: MouseControlPage(
         onLanguageChanged: onLanguageChanged ?? (_) {},
+        bindings: bindings,
+        hotkeyArmDelay: Duration.zero,
       ),
     );
   }
@@ -40,6 +48,9 @@ void main() {
   });
 
   testWidgets('help menu opens platform help content', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(buildPage());
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -51,6 +62,9 @@ void main() {
   });
 
   testWidgets('about menu opens app and library information', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(buildPage());
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -62,6 +76,9 @@ void main() {
   });
 
   testWidgets('language menu reports selected language', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     Locale? selectedLocale;
     await tester.pumpWidget(buildPage(onLanguageChanged: (value) {
       selectedLocale = value;
@@ -76,6 +93,9 @@ void main() {
   });
 
   testWidgets('hotkey menu opens settings from the main page', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(buildPage());
     await tester.pump(const Duration(milliseconds: 500));
 
