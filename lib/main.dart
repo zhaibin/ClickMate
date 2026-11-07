@@ -1147,10 +1147,16 @@ class _MouseControlPageState extends State<MouseControlPage> {
         currentCaptureHotkeyCode: _service!.currentCaptureHotkeyCode,
         currentModifiers: _service!.currentHotkeyModifiers,
         onToggleHotkeyChanged: (vkCode, modifiers) {
-          // Apply modifiers to both hotkeys, then update the selected key.
-          bool success = _service!.setToggleHotkey(vkCode, modifiers: modifiers);
-          success = _service!.setCaptureHotkey(_service!.currentCaptureHotkeyCode) &&
-              success;
+          // Shared modifiers: coerce the other key when switching to None.
+          final pair = HotkeyKeyPolicy.coercePair(
+            toggle: vkCode,
+            capture: _service!.currentCaptureHotkeyCode,
+            modifiers: modifiers,
+          );
+          bool success =
+              _service!.setToggleHotkey(pair.toggle, modifiers: modifiers);
+          success =
+              _service!.setCaptureHotkey(pair.capture) && success;
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
@@ -1160,9 +1166,15 @@ class _MouseControlPageState extends State<MouseControlPage> {
           }
         },
         onCaptureHotkeyChanged: (vkCode, modifiers) {
-          bool success = _service!.setCaptureHotkey(vkCode, modifiers: modifiers);
-          success = _service!.setToggleHotkey(_service!.currentToggleHotkeyCode) &&
-              success;
+          final pair = HotkeyKeyPolicy.coercePair(
+            toggle: _service!.currentToggleHotkeyCode,
+            capture: vkCode,
+            modifiers: modifiers,
+          );
+          bool success =
+              _service!.setCaptureHotkey(pair.capture, modifiers: modifiers);
+          success =
+              _service!.setToggleHotkey(pair.toggle) && success;
           if (!success) {
             final l10n = AppLocalizations.of(context);
             _showError('${l10n.errorHotkeyFailed}\n${l10n.errorHotkeyFailedReasons}');
@@ -3018,9 +3030,14 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedToggleKey = widget.currentToggleHotkeyCode;
-    _selectedCaptureKey = widget.currentCaptureHotkeyCode;
     _selectedModifiers = widget.currentModifiers;
+    final pair = HotkeyKeyPolicy.coercePair(
+      toggle: widget.currentToggleHotkeyCode,
+      capture: widget.currentCaptureHotkeyCode,
+      modifiers: _selectedModifiers,
+    );
+    _selectedToggleKey = pair.toggle;
+    _selectedCaptureKey = pair.capture;
   }
 
   String _getKeyName(int vkCode) {
@@ -3192,7 +3209,18 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                       };
                       return GestureDetector(
                         onTap: () {
-                          setState(() => _selectedModifiers = mod);
+                          setState(() {
+                            _selectedModifiers = mod;
+                            if (mod == HotkeyModifiers.none) {
+                              final pair = HotkeyKeyPolicy.coercePair(
+                                toggle: _selectedToggleKey,
+                                capture: _selectedCaptureKey,
+                                modifiers: mod,
+                              );
+                              _selectedToggleKey = pair.toggle;
+                              _selectedCaptureKey = pair.capture;
+                            }
+                          });
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -3215,6 +3243,13 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
                       );
                     }).toList(),
                   ),
+                  if (_selectedModifiers == HotkeyModifiers.none) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.hotkeyNoneFkeysOnly,
+                      style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -3224,9 +3259,15 @@ class _HotkeySettingsDialogState extends State<HotkeySettingsDialog> {
               child: Wrap(
                 spacing: 5,
                 runSpacing: 5,
-                children: keyMap.entries.map((entry) {
+                children: keyMap.entries
+                    .where(
+                      (entry) =>
+                          _selectedModifiers != HotkeyModifiers.none ||
+                          HotkeyKeyPolicy.isFunctionKey(entry.value),
+                    )
+                    .map((entry) {
                   final isSelected = currentKey == entry.value;
-                  final isFunctionKey = entry.key.startsWith('F');
+                  final isFunctionKey = HotkeyKeyPolicy.isFunctionKey(entry.value);
                   return GestureDetector(
                     onTap: () {
                       setState(() {

@@ -167,6 +167,36 @@ void main() {
     expect(service.generateDefaultName(), 'Config 3');
   });
 
+  test('HotkeyKeyPolicy allows letters only when modifiers are present', () {
+    expect(HotkeyKeyPolicy.isFunctionKey(0x78), isTrue); // F9
+    expect(HotkeyKeyPolicy.isFunctionKey(0x32), isFalse); // 2
+    expect(
+      HotkeyKeyPolicy.isAllowed(0x32, HotkeyModifiers.controlShift),
+      isTrue,
+    );
+    expect(HotkeyKeyPolicy.isAllowed(0x32, HotkeyModifiers.none), isFalse);
+    expect(HotkeyKeyPolicy.isAllowed(0x41, HotkeyModifiers.none), isFalse);
+    expect(HotkeyKeyPolicy.isAllowed(0x78, HotkeyModifiers.none), isTrue);
+  });
+
+  test('HotkeyKeyPolicy coerces none-modifier digit/letter keys to F9/F10', () {
+    final pair = HotkeyKeyPolicy.coercePair(
+      toggle: 0x31,
+      capture: 0x32,
+      modifiers: HotkeyModifiers.none,
+    );
+    expect(pair.toggle, HotkeyKeyPolicy.defaultNoneToggle);
+    expect(pair.capture, HotkeyKeyPolicy.defaultNoneCapture);
+
+    final kept = HotkeyKeyPolicy.coercePair(
+      toggle: 0x78,
+      capture: 0x7A,
+      modifiers: HotkeyModifiers.none,
+    );
+    expect(kept.toggle, 0x78);
+    expect(kept.capture, 0x7A);
+  });
+
   test('saveSessionSettings persists and restores UI session state', () async {
     final settings = SessionSettings(
       x: 640,
@@ -178,8 +208,8 @@ void main() {
       deviationThreshold: 80,
       autoCapture: false,
       enableAutoPauseResume: false,
-      toggleHotkeyCode: 0x46, // F
-      captureHotkeyCode: 0x47, // G
+      toggleHotkeyCode: 0x78, // F9
+      captureHotkeyCode: 0x79, // F10
       hotkeyModifiers: HotkeyModifiers.none,
     );
 
@@ -199,9 +229,21 @@ void main() {
     expect(restored.deviationThreshold, 80);
     expect(restored.autoCapture, isFalse);
     expect(restored.enableAutoPauseResume, isFalse);
-    expect(restored.toggleHotkeyCode, 0x46);
-    expect(restored.captureHotkeyCode, 0x47);
+    expect(restored.toggleHotkeyCode, 0x78);
+    expect(restored.captureHotkeyCode, 0x79);
     expect(restored.hotkeyModifiers, HotkeyModifiers.none);
+  });
+
+  test('SessionSettings.fromJson coerces illegal none-modifier keys', () {
+    final restored = SessionSettings.fromJson({
+      'toggleHotkeyCode': 0x32,
+      'captureHotkeyCode': 0x41,
+      'hotkeyModifiers': 'none',
+    });
+
+    expect(restored.hotkeyModifiers, HotkeyModifiers.none);
+    expect(restored.toggleHotkeyCode, HotkeyKeyPolicy.defaultNoneToggle);
+    expect(restored.captureHotkeyCode, HotkeyKeyPolicy.defaultNoneCapture);
   });
 
   test('loadSessionSettings returns null when nothing was saved', () async {

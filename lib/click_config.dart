@@ -53,6 +53,59 @@ enum HotkeyModifiers {
   }
 }
 
+/// Rules for primary hotkeys. Without modifiers, only F1–F12 are allowed so
+/// letter/digit keys are not stolen system-wide.
+class HotkeyKeyPolicy {
+  static const int vkF1 = 0x70;
+  static const int vkF12 = 0x7B;
+  static const int defaultNoneToggle = 0x78; // F9
+  static const int defaultNoneCapture = 0x79; // F10
+
+  static bool isFunctionKey(int vkCode) =>
+      vkCode >= vkF1 && vkCode <= vkF12;
+
+  static bool isAllowed(int vkCode, HotkeyModifiers modifiers) {
+    if (modifiers == HotkeyModifiers.none) {
+      return isFunctionKey(vkCode);
+    }
+    return true;
+  }
+
+  static int coercePrimaryKey(
+    int vkCode,
+    HotkeyModifiers modifiers, {
+    required int fallback,
+  }) {
+    return isAllowed(vkCode, modifiers) ? vkCode : fallback;
+  }
+
+  static ({int toggle, int capture}) coercePair({
+    required int toggle,
+    required int capture,
+    required HotkeyModifiers modifiers,
+  }) {
+    if (modifiers != HotkeyModifiers.none) {
+      return (toggle: toggle, capture: capture);
+    }
+
+    final coercedToggle = coercePrimaryKey(
+      toggle,
+      modifiers,
+      fallback: defaultNoneToggle,
+    );
+    var coercedCapture = coercePrimaryKey(
+      capture,
+      modifiers,
+      fallback: defaultNoneCapture,
+    );
+    if (coercedCapture == coercedToggle) {
+      coercedCapture =
+          coercedToggle == defaultNoneCapture ? 0x7A : defaultNoneCapture;
+    }
+    return (toggle: coercedToggle, capture: coercedCapture);
+  }
+}
+
 /// Last-used UI session settings (persisted across restarts).
 class SessionSettings {
   final int? x;
@@ -101,6 +154,13 @@ class SessionSettings {
   }
 
   factory SessionSettings.fromJson(Map<String, dynamic> json) {
+    final modifiers =
+        HotkeyModifiers.fromName(json['hotkeyModifiers'] as String?);
+    final pair = HotkeyKeyPolicy.coercePair(
+      toggle: (json['toggleHotkeyCode'] as int?) ?? 0x31,
+      capture: (json['captureHotkeyCode'] as int?) ?? 0x32,
+      modifiers: modifiers,
+    );
     return SessionSettings(
       x: json['x'] as int?,
       y: json['y'] as int?,
@@ -111,9 +171,9 @@ class SessionSettings {
       deviationThreshold: (json['deviationThreshold'] as int?) ?? 100,
       autoCapture: (json['autoCapture'] as bool?) ?? true,
       enableAutoPauseResume: (json['enableAutoPauseResume'] as bool?) ?? true,
-      toggleHotkeyCode: (json['toggleHotkeyCode'] as int?) ?? 0x31,
-      captureHotkeyCode: (json['captureHotkeyCode'] as int?) ?? 0x32,
-      hotkeyModifiers: HotkeyModifiers.fromName(json['hotkeyModifiers'] as String?),
+      toggleHotkeyCode: pair.toggle,
+      captureHotkeyCode: pair.capture,
+      hotkeyModifiers: modifiers,
     );
   }
 }

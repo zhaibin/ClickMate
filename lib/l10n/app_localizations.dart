@@ -109,6 +109,7 @@ class AppLocalizations {
   String get hotkeyCapturePosition => get('hotkey_capture_position');
   String get hotkeyModifiers => get('hotkey_modifiers');
   String get hotkeyModNone => get('hotkey_mod_none');
+  String get hotkeyNoneFkeysOnly => get('hotkey_none_fkeys_only');
 
   // Messages
   String get msgPositionCaptured => get('msg_position_captured');
@@ -324,6 +325,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Capture Position',
     'hotkey_modifiers': 'Modifiers',
     'hotkey_mod_none': 'None',
+    'hotkey_none_fkeys_only': 'Without modifiers, only F1–F12 are allowed',
     'msg_position_captured': 'Position captured',
     'msg_hotkey_saved': 'Hotkey saved as',
     'msg_no_click_history': 'No click history',
@@ -497,6 +499,7 @@ class AppLocalizations {
     'hotkey_capture_position': '捕获位置',
     'hotkey_modifiers': '修饰键',
     'hotkey_mod_none': '无',
+    'hotkey_none_fkeys_only': '无修饰键时仅可使用 F1–F12',
     'msg_position_captured': '已捕获位置',
     'msg_hotkey_saved': '快捷键已设置为',
     'msg_no_click_history': '暂无点击记录',
@@ -670,6 +673,7 @@ class AppLocalizations {
     'hotkey_capture_position': '捕獲位置',
     'hotkey_modifiers': '修飾鍵',
     'hotkey_mod_none': '無',
+    'hotkey_none_fkeys_only': '無修飾鍵時僅可使用 F1–F12',
     'msg_position_captured': '已捕獲位置',
     'msg_hotkey_saved': '快捷鍵已設置為',
     'msg_no_click_history': '暫無點擊記錄',
@@ -841,6 +845,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Capturer Position',
     'hotkey_modifiers': 'Modificateurs',
     'hotkey_mod_none': 'Aucun',
+    'hotkey_none_fkeys_only': 'Sans modificateur, seuls F1–F12 sont autorisés',
     'msg_position_captured': 'Position capturée',
     'msg_hotkey_saved': 'Raccourci enregistré comme',
     'msg_no_click_history': 'Aucun historique de clic',
@@ -1012,6 +1017,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Capturar Posición',
     'hotkey_modifiers': 'Modificadores',
     'hotkey_mod_none': 'Ninguno',
+    'hotkey_none_fkeys_only': 'Sin modificadores, solo se permiten F1–F12',
     'msg_position_captured': 'Posición capturada',
     'msg_hotkey_saved': 'Atajo guardado como',
     'msg_no_click_history': 'Sin historial de clics',
@@ -1183,6 +1189,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Capturar Posição',
     'hotkey_modifiers': 'Modificadores',
     'hotkey_mod_none': 'Nenhum',
+    'hotkey_none_fkeys_only': 'Sem modificadores, apenas F1–F12 são permitidos',
     'msg_position_captured': 'Posição capturada',
     'msg_hotkey_saved': 'Atalho salvo como',
     'msg_no_click_history': 'Sem histórico de cliques',
@@ -1354,6 +1361,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Position Erfassen',
     'hotkey_modifiers': 'Modifikatortasten',
     'hotkey_mod_none': 'Keine',
+    'hotkey_none_fkeys_only': 'Ohne Modifikator nur F1–F12 erlaubt',
     'msg_position_captured': 'Position erfasst',
     'msg_hotkey_saved': 'Tastenkürzel gespeichert als',
     'msg_no_click_history': 'Kein Klick-Verlauf',
@@ -1525,6 +1533,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Захват Позиции',
     'hotkey_modifiers': 'Модификаторы',
     'hotkey_mod_none': 'Нет',
+    'hotkey_none_fkeys_only': 'Без модификаторов разрешены только F1–F12',
     'msg_position_captured': 'Позиция захвачена',
     'msg_hotkey_saved': 'Горячая клавиша сохранена как',
     'msg_no_click_history': 'Нет истории кликов',
@@ -1696,6 +1705,7 @@ class AppLocalizations {
     'hotkey_capture_position': 'Cattura Posizione',
     'hotkey_modifiers': 'Modificatori',
     'hotkey_mod_none': 'Nessuno',
+    'hotkey_none_fkeys_only': 'Senza modificatori sono consentiti solo F1–F12',
     'msg_position_captured': 'Posizione catturata',
     'msg_hotkey_saved': 'Scorciatoia salvata come',
     'msg_no_click_history': 'Nessuna cronologia clic',
@@ -1867,6 +1877,7 @@ class AppLocalizations {
     'hotkey_capture_position': '位置キャプチャ',
     'hotkey_modifiers': '修飾キー',
     'hotkey_mod_none': 'なし',
+    'hotkey_none_fkeys_only': '修飾キーなしの場合は F1–F12 のみ使用できます',
     'msg_position_captured': '位置をキャプチャしました',
     'msg_hotkey_saved': 'ホットキーを設定しました',
     'msg_no_click_history': 'クリック履歴なし',
@@ -2038,6 +2049,7 @@ class AppLocalizations {
     'hotkey_capture_position': '위치 캡처',
     'hotkey_modifiers': '수정 키',
     'hotkey_mod_none': '없음',
+    'hotkey_none_fkeys_only': '수정 키 없을 때는 F1–F12만 사용할 수 있습니다',
     'msg_position_captured': '위치가 캡처되었습니다',
     'msg_hotkey_saved': '단축키가 저장되었습니다',
     'msg_no_click_history': '클릭 기록 없음',

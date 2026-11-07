@@ -21,6 +21,10 @@ All notable changes to ClickMate will be documented in this file.
 - Corrected the guides to the current app: macOS 12.0, configurable hotkeys, snake_case translation keys, and dylib packaging via `scripts/build_dmg.sh`.
 - Removed the install and system-requirement appendix from this changelog. Those steps now live only in the README and `docs/`.
 
+### Changes
+
+- Without modifiers, hotkeys are limited to F1–F12. Letters and digits are hidden in the picker, rejected by the service, and coerced on load so existing `None+2` sessions no longer steal typing keys.
+
 ## [2.2.2] - 2026-05-26
 
 ### Bug Fixes

@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:clickmate/click_config.dart';
 import 'package:clickmate/mouse_controller_bindings.dart';
 import 'package:clickmate/mouse_controller_service.dart';
 import 'package:ffi/ffi.dart';
@@ -112,6 +113,41 @@ void main() {
         MouseControllerService.hotkeyIdCapture,
       ]),
     );
+
+    service.dispose();
+  });
+
+  test('none modifier rejects digit/letter keys and keeps previous codes', () {
+    final fake = FakeMouseBindings();
+    final service = MouseControllerService(
+      fake.asBindings(),
+      hotkeyArmDelay: Duration.zero,
+      toggleHotkeyCode: 0x78,
+      captureHotkeyCode: 0x79,
+      hotkeyModifiers: HotkeyModifiers.none,
+    );
+
+    expect(service.setToggleHotkey(0x32, modifiers: HotkeyModifiers.none), isFalse);
+    expect(service.currentToggleHotkeyCode, 0x78);
+    expect(service.setCaptureHotkey(0x41, modifiers: HotkeyModifiers.none), isFalse);
+    expect(service.currentCaptureHotkeyCode, 0x79);
+
+    service.dispose();
+  });
+
+  test('constructor coerces illegal none-modifier session keys', () {
+    final fake = FakeMouseBindings();
+    final service = MouseControllerService(
+      fake.asBindings(),
+      hotkeyArmDelay: Duration.zero,
+      toggleHotkeyCode: 0x31,
+      captureHotkeyCode: 0x32,
+      hotkeyModifiers: HotkeyModifiers.none,
+    );
+
+    expect(service.currentToggleHotkeyCode, HotkeyKeyPolicy.defaultNoneToggle);
+    expect(service.currentCaptureHotkeyCode, HotkeyKeyPolicy.defaultNoneCapture);
+    expect(service.currentHotkeyModifiers, HotkeyModifiers.none);
 
     service.dispose();
   });

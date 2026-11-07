@@ -100,12 +100,60 @@ void main() {
 
     await tester.tap(find.text('None'));
     await tester.pump();
-    await tester.tap(find.text('F9'));
+    // Digit defaults are coerced to F9/F10; saving keeps the coerced toggle key.
     await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
     await tester.pumpAndSettle();
 
-    expect(toggleCode, 0x78);
+    expect(toggleCode, HotkeyKeyPolicy.defaultNoneToggle);
     expect(mods, HotkeyModifiers.none);
+  });
+
+  testWidgets('none modifier hides letters and digits', (tester) async {
+    await tester.pumpWidget(
+      buildDialog(
+        onToggleChanged: (_, __) {},
+        onCaptureChanged: (_, __) {},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+
+    await tester.tap(find.text('None'));
+    await tester.pump();
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('F9'), findsWidgets);
+    expect(find.text('F12'), findsOneWidget);
+  });
+
+  testWidgets('switching to none coerces digit keys before save',
+      (tester) async {
+    int? toggleCode;
+    HotkeyModifiers? mods;
+
+    await tester.pumpWidget(
+      buildDialog(
+        toggleCode: 0x31,
+        captureCode: 0x32,
+        onToggleChanged: (value, m) {
+          toggleCode = value;
+          mods = m;
+        },
+        onCaptureChanged: (_, __) {},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('None'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(mods, HotkeyModifiers.none);
+    expect(toggleCode, HotkeyKeyPolicy.defaultNoneToggle);
   });
 
   testWidgets('cancel closes without invoking callbacks', (tester) async {

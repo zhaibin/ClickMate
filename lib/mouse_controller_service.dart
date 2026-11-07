@@ -115,15 +115,16 @@ class MouseControllerService {
     int? captureHotkeyCode,
     HotkeyModifiers? hotkeyModifiers,
   }) {
-    if (toggleHotkeyCode != null) {
-      currentToggleHotkeyCode = toggleHotkeyCode;
-    }
-    if (captureHotkeyCode != null) {
-      currentCaptureHotkeyCode = captureHotkeyCode;
-    }
     if (hotkeyModifiers != null) {
       currentHotkeyModifiers = hotkeyModifiers;
     }
+    final pair = HotkeyKeyPolicy.coercePair(
+      toggle: toggleHotkeyCode ?? currentToggleHotkeyCode,
+      capture: captureHotkeyCode ?? currentCaptureHotkeyCode,
+      modifiers: currentHotkeyModifiers,
+    );
+    currentToggleHotkeyCode = pair.toggle;
+    currentCaptureHotkeyCode = pair.capture;
 
     _hotkeysReadyAt = DateTime.now().add(hotkeyArmDelay);
     print('========================================');
@@ -195,6 +196,13 @@ class MouseControllerService {
     print('========================================');
     print('Changing hotkey [Start/Stop]...');
 
+    final nextModifiers = modifiers ?? currentHotkeyModifiers;
+    if (!HotkeyKeyPolicy.isAllowed(vkCode, nextModifiers)) {
+      print('× Rejected: without modifiers only F1-F12 are allowed');
+      print('========================================');
+      return false;
+    }
+
     // Unregister old hotkey
     try {
       _bindings.unregisterHotkey(hotkeyIdToggle);
@@ -205,9 +213,7 @@ class MouseControllerService {
 
     // Register new hotkey
     currentToggleHotkeyCode = vkCode;
-    if (modifiers != null) {
-      currentHotkeyModifiers = modifiers;
-    }
+    currentHotkeyModifiers = nextModifiers;
     bool success = false;
 
     try {
@@ -238,6 +244,13 @@ class MouseControllerService {
     print('========================================');
     print('Changing hotkey [Capture Position]...');
 
+    final nextModifiers = modifiers ?? currentHotkeyModifiers;
+    if (!HotkeyKeyPolicy.isAllowed(vkCode, nextModifiers)) {
+      print('× Rejected: without modifiers only F1-F12 are allowed');
+      print('========================================');
+      return false;
+    }
+
     // Unregister old hotkey
     try {
       _bindings.unregisterHotkey(hotkeyIdCapture);
@@ -248,9 +261,7 @@ class MouseControllerService {
 
     // Register new hotkey
     currentCaptureHotkeyCode = vkCode;
-    if (modifiers != null) {
-      currentHotkeyModifiers = modifiers;
-    }
+    currentHotkeyModifiers = nextModifiers;
     bool success = false;
 
     try {
@@ -279,7 +290,14 @@ class MouseControllerService {
 
   /// Apply modifiers to both hotkeys and re-register.
   bool setHotkeyModifiers(HotkeyModifiers modifiers) {
+    final pair = HotkeyKeyPolicy.coercePair(
+      toggle: currentToggleHotkeyCode,
+      capture: currentCaptureHotkeyCode,
+      modifiers: modifiers,
+    );
     currentHotkeyModifiers = modifiers;
+    currentToggleHotkeyCode = pair.toggle;
+    currentCaptureHotkeyCode = pair.capture;
     final toggleOk = setToggleHotkey(currentToggleHotkeyCode);
     final captureOk = setCaptureHotkey(currentCaptureHotkeyCode);
     return toggleOk && captureOk;
